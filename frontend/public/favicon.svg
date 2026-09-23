@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a3e635" />
+      <stop offset="100%" stop-color="#65a30d" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+  
+  <!-- Outer Rounded Badge -->
+  <rect width="100" height="100" rx="28" fill="#111827" />
+  
+  <!-- Chat Bubble Background -->
+  <path d="M26 32C26 27.5817 29.5817 24 34 24H66C70.4183 24 74 27.5817 74 32V56C74 60.4183 70.4183 64 66 64H44L30 74V64H34C29.5817 64 26 60.4183 26 56V32Z" fill="url(#grad)" filter="url(#shadow)"/>
+  
+  <!-- Inner Chat Dots / Pulse Details -->
+  <circle cx="42" cy="44" r="4.5" fill="#111827" />
+  <circle cx="53" cy="44" r="4.5" fill="#111827" />
+  <circle cx="64" cy="44" r="4.5" fill="#111827" />
+</svg>
