@@ -56,8 +56,14 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Static uploads folder
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Static uploads folder with CORS enabled
+app.use(
+  '/uploads',
+  cors(),
+  express.static(path.join(__dirname, '../uploads'), {
+    maxAge: '1d',
+  })
+);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

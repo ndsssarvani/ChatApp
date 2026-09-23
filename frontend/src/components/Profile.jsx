@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import userService from "../services/userService";
+import { getMediaUrl } from "../utils/mediaUrl";
 import "./Profile.css";
 
 const Profile = () => {
@@ -18,7 +19,7 @@ const Profile = () => {
 
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
-    avatar: user?.avatar || "",
+    avatar: user?.avatar ? getMediaUrl(user.avatar) : "",
     fullName: user?.fullName || user?.name || "",
     nickname: user?.nickname || "",
     country: user?.country || "",
@@ -33,7 +34,7 @@ const Profile = () => {
     if (user) {
       setProfileData({
         name: user.name || "",
-        avatar: user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`,
+        avatar: user.avatar ? getMediaUrl(user.avatar) : `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`,
         fullName: user.fullName || user.name || "",
         nickname: user.nickname || "",
         country: user.country || "",

@@ -6,6 +6,7 @@ import { useSocket } from "../context/SocketContext";
 import conversationService from "../services/conversationService";
 import messageService from "../services/messageService";
 import userService from "../services/userService";
+import { getMediaUrl } from "../utils/mediaUrl";
 import "./ChatDashboard.css";
 
 const ChatDashboard = () => {
@@ -1244,27 +1245,30 @@ const ChatDashboard = () => {
 
                         {/* Attachments */}
                         {msg.attachments &&
-                          msg.attachments.map((att, idx) => (
-                            <div key={idx}>
-                              {att.type.startsWith("image/") ? (
-                                <img
-                                  src={att.url}
-                                  alt={att.name || "Attachment"}
-                                  className="message-attachment-image"
-                                  onClick={() => window.open(att.url, "_blank")}
-                                />
-                              ) : (
-                                <a
-                                  href={att.url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="message-attachment-file"
-                                >
-                                  📄 {att.name || "Download file"}
-                                </a>
-                              )}
-                            </div>
-                          ))}
+                          msg.attachments.map((att, idx) => {
+                            const fullUrl = getMediaUrl(att.url);
+                            return (
+                              <div key={idx}>
+                                {att.type && att.type.startsWith("image/") ? (
+                                  <img
+                                    src={fullUrl}
+                                    alt={att.name || "Attachment"}
+                                    className="message-attachment-image"
+                                    onClick={() => window.open(fullUrl, "_blank")}
+                                  />
+                                ) : (
+                                  <a
+                                    href={fullUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="message-attachment-file"
+                                  >
+                                    📄 {att.name || "Download file"}
+                                  </a>
+                                )}
+                              </div>
+                            );
+                          })}
 
                         {/* Text bubble */}
                         <div className="message-bubble">
@@ -1582,16 +1586,19 @@ const ChatDashboard = () => {
                     <div className="media-grid">
                       {chatMediaAttachments.length > 0 ? (
                         chatMediaAttachments
-                          .filter((att) => att.type.startsWith("image/"))
-                          .map((item, index) => (
-                            <div key={index} className="media-item">
-                              <img
-                                src={item.url}
-                                alt={`media-${index}`}
-                                onClick={() => window.open(item.url, "_blank")}
-                              />
-                            </div>
-                          ))
+                          .filter((att) => att.type && att.type.startsWith("image/"))
+                          .map((item, index) => {
+                            const fullUrl = getMediaUrl(item.url);
+                            return (
+                              <div key={index} className="media-item">
+                                <img
+                                  src={fullUrl}
+                                  alt={`media-${index}`}
+                                  onClick={() => window.open(fullUrl, "_blank")}
+                                />
+                              </div>
+                            );
+                          })
                       ) : (
                         <div style={{ color: "var(--text-tertiary)", fontSize: "12px", gridColumn: "1 / -1", textAlign: "center", padding: "12px" }}>
                           No media shared in this chat
@@ -1601,20 +1608,23 @@ const ChatDashboard = () => {
                   )}
                   {activeTab === "docs" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                      {chatMediaAttachments.filter((att) => !att.type.startsWith("image/")).length > 0 ? (
+                      {chatMediaAttachments.filter((att) => !att.type || !att.type.startsWith("image/")).length > 0 ? (
                         chatMediaAttachments
-                          .filter((att) => !att.type.startsWith("image/"))
-                          .map((item, index) => (
-                            <a
-                              key={index}
-                              href={item.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              style={{ textDecoration: "none", color: "var(--text-primary)", fontSize: "13px", padding: "6px 8px", background: "var(--bg-tertiary)", borderRadius: "6px" }}
-                            >
-                              📄 {item.name || "Document"}
-                            </a>
-                          ))
+                          .filter((att) => !att.type || !att.type.startsWith("image/"))
+                          .map((item, index) => {
+                            const fullUrl = getMediaUrl(item.url);
+                            return (
+                              <a
+                                key={index}
+                                href={fullUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ textDecoration: "none", color: "var(--text-primary)", fontSize: "13px", padding: "6px 8px", background: "var(--bg-tertiary)", borderRadius: "6px" }}
+                              >
+                                📄 {item.name || "Document"}
+                              </a>
+                            );
+                          })
                       ) : (
                         <div style={{ color: "var(--text-tertiary)", fontSize: "12px", textAlign: "center", padding: "12px" }}>
                           No documents shared
