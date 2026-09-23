@@ -1,0 +1,425 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #f1f3f5;
+  --bg-hover: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-tertiary: #adb5bd;
+  --border-color: #dee2e6;
+  --accent-teal: #b3f5e1;
+  --accent-green: #4ade80;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1a1d29;
+  --bg-secondary: #252936;
+  --bg-tertiary: #2f3349;
+  --bg-hover: #383d57;
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --text-tertiary: #6c757d;
+  --border-color: #383d57;
+  --accent-teal: #b0f8e2;
+  --accent-green: #4ade80;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Privacy Container */
+.privacy-container {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  transition: all 0.3s ease;
+}
+
+/* Header with Gradient */
+.privacy-header {
+  background: linear-gradient(135deg, #75a0e0 0%, #310889 100%);
+  padding: 20px 24px 40px;
+  position: relative;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.back-button {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.privacy-header h1 {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  flex: 1;
+  margin: 0;
+}
+
+/* Content Area */
+.privacy-content {
+  max-width: 600px;
+  margin: -20px auto 0;
+  padding: 0 20px 40px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Privacy Card */
+.privacy-card {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Privacy Section */
+.privacy-section {
+  margin-bottom: 32px;
+}
+
+.privacy-section:first-child {
+  padding-top: 0;
+}
+
+.privacy-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+
+.section-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Privacy Item */
+.privacy-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s;
+}
+
+.privacy-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.privacy-item:first-child {
+  padding-top: 0;
+}
+
+.privacy-item.clickable {
+  cursor: pointer;
+  padding: 16px;
+  margin: 0 -16px;
+  border-radius: 12px;
+  border-bottom: none;
+}
+
+.privacy-item.clickable:hover {
+  background-color: var(--bg-hover);
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info h3 {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.item-info p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Toggle Switch - Matching Notification style */
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--border-color);
+  border-radius: 28px;
+  transition: all 0.3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background: var(--accent-green);
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.2);
+}
+
+/* Select Dropdown */
+.privacy-select {
+  padding: 8px 32px 8px 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background-color: var(--bg-primary);
+  background-image: url('data:image/svg+xml;utf8,<svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L6 6L11 1" stroke="%236c757d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  transition: all 0.2s;
+  min-width: 140px;
+  font-weight: 500;
+}
+
+.privacy-select:hover {
+  border-color: var(--text-tertiary);
+  background-color: var(--bg-hover);
+}
+
+.privacy-select:focus {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 24px 0;
+}
+
+/* Information Banner */
+.privacy-info-banner {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(179, 245, 225, 0.15) 100%);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  margin-top: 24px;
+}
+
+.privacy-info-banner svg {
+  flex-shrink: 0;
+  color: var(--accent-green);
+  margin-top: 2px;
+}
+
+.privacy-info-banner p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Arrow Icon for clickable items */
+.privacy-item.clickable svg {
+  color: var(--text-tertiary);
+  transition: all 0.2s;
+}
+
+.privacy-item.clickable:hover svg {
+  color: var(--text-secondary);
+  transform: translateX(3px);
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33, 37, 41, 0.95);
+  color: white;
+  padding: 14px 24px;
+  border-radius: 50px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.toast-icon {
+  width: 18px;
+  height: 18px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .privacy-header {
+    padding: 16px 20px 32px;
+  }
+
+  .privacy-header h1 {
+    font-size: 20px;
+  }
+
+  .privacy-content {
+    margin-top: -16px;
+    padding: 0 16px 32px;
+  }
+
+  .privacy-card {
+    padding: 20px;
+  }
+
+  .section-header h2 {
+    font-size: 16px;
+  }
+
+  .item-info h3 {
+    font-size: 14px;
+  }
+
+  .item-info p {
+    font-size: 12px;
+  }
+}
+
+/* Accessibility */
+.toggle-switch:focus-within .slider {
+  outline: 2px solid var(--accent-green);
+  outline-offset: 2px;
+}
+
+.privacy-select:focus-visible {
+  outline: 2px solid var(--accent-green);
+  outline-offset: 2px;
+}
+
+.back-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.privacy-item.clickable:focus {
+  outline: 2px solid var(--accent-green);
+  outline-offset: -2px;
+  border-radius: 12px;
+}

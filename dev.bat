@@ -1,0 +1,3 @@
+@echo off
+echo Starting ChatApp Backend and Frontend concurrently...
+npm run dev
