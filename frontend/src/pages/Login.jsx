@@ -616,14 +616,17 @@ const Login = () => {
 
             <form className="login-form" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label className="form-label">Email Address</label>
+                <label htmlFor="email" className="form-label">Email Address</label>
                 <div className="input-wrapper">
                   <input
+                    id="email"
+                    name="email"
                     type="email"
                     className="form-input"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
                     required
                   />
                   <span className="input-icon">📧</span>
@@ -631,14 +634,17 @@ const Login = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Password</label>
+                <label htmlFor="password" className="form-label">Password</label>
                 <div className="input-wrapper">
                   <input
+                    id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     className="form-input"
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
                     required
                   />
                   <span 
