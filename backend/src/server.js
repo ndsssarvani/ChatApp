@@ -20,13 +20,18 @@ const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (origin.endsWith('.vercel.app')) return callback(null, true);
+      if (origin.includes('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
       const allowed = [
         'http://localhost:5173',
         'http://localhost:5174',
+        'http://localhost:3000',
         process.env.CLIENT_URL,
       ].filter(Boolean);
-      if (allowed.includes(origin)) return callback(null, true);
+      if (allowed.some((a) => origin.startsWith(a) || a.startsWith(origin))) {
+        return callback(null, true);
+      }
       callback(new Error(`Socket CORS: Origin ${origin} not allowed`));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],

@@ -22,18 +22,27 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
+  'http://localhost:3000',
   process.env.CLIENT_URL,
 ].filter(Boolean);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  if (origin.includes('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    return true;
+  }
+  if (allowedOrigins.some((allowed) => origin.startsWith(allowed) || allowed.startsWith(origin))) {
+    return true;
+  }
+  return false;
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman)
-      if (!origin) return callback(null, true);
-      // Allow any vercel.app domain (for preview deployments)
-      if (origin.endsWith('.vercel.app')) return callback(null, true);
-      // Allow explicitly listed origins
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
+      }
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     },
     credentials: true,
@@ -54,8 +63,11 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
-// Mount Routes
+// Mount Routes (both with /api and without /api to prevent any path mismatch)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/conversations', conversationRoutes);
@@ -63,6 +75,14 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/support', supportRoutes);
+
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/conversations', conversationRoutes);
+app.use('/messages', messageRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/analytics', analyticsRoutes);
+app.use('/support', supportRoutes);
 
 // Error Middlewares
 app.use(notFound);

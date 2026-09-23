@@ -12,8 +12,13 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && user?._id) {
-      // Connect socket to backend (using proxy or port 5000)
-      const newSocket = io('http://localhost:5000', {
+      // Connect socket to backend (using environment URL or fallback to localhost:5000)
+      let socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      socketUrl = socketUrl.trim().replace(/\/+$/, '');
+      if (socketUrl.endsWith('/api')) {
+        socketUrl = socketUrl.substring(0, socketUrl.length - 4);
+      }
+      const newSocket = io(socketUrl, {
         transports: ['websocket', 'polling'],
       });
 
