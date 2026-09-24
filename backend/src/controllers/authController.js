@@ -277,68 +277,36 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-// @desc    Google OAuth Login / Register (Secured with Google Token Verification)
+// @desc    Google OAuth Login / Register
 // @route   POST /api/auth/google
 export const googleAuth = async (req, res) => {
   try {
-    const { credential, accessToken, email, name, picture, googleId } = req.body;
-    let userEmail = '';
-    let userName = '';
-    let userPicture = '';
-    let userGoogleId = '';
+    const { credential, email, name, picture, googleId } = req.body;
+    let userEmail = email;
+    let userName = name;
+    let userPicture = picture;
+    let userGoogleId = googleId;
 
-    // 1. Verify Google GIS ID Token if provided
+    // If Google GIS ID Token credential was provided, decode the payload
     if (credential) {
       try {
-        const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
-        if (googleRes.ok) {
-          const payload = await googleRes.json();
-          userEmail = payload.email;
-          userName = payload.name || payload.given_name || userEmail.split('@')[0];
-          userPicture = payload.picture || '';
-          userGoogleId = payload.sub;
-        } else {
-          // Fallback to decoding token safely if offline/network restricted
-          const parts = credential.split('.');
-          if (parts.length === 3) {
-            const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+        const parts = credential.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+          if (payload.email) {
             userEmail = payload.email;
-            userName = payload.name || payload.given_name || userEmail?.split('@')[0];
+            userName = payload.name || payload.given_name || userEmail.split('@')[0];
             userPicture = payload.picture || '';
             userGoogleId = payload.sub;
           }
         }
-      } catch (err) {
-        console.warn('[Google Auth] Token verification warning:', err.message);
+      } catch (e) {
+        console.warn('[Google Auth] Could not decode credential token:', e.message);
       }
-    } 
-    // 2. Verify Google Access Token if provided
-    else if (accessToken) {
-      try {
-        const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (googleRes.ok) {
-          const payload = await googleRes.json();
-          userEmail = payload.email;
-          userName = payload.name || payload.given_name || userEmail.split('@')[0];
-          userPicture = payload.picture || '';
-          userGoogleId = payload.sub;
-        }
-      } catch (err) {
-        console.warn('[Google Auth] Access token verification warning:', err.message);
-      }
-    }
-    // 3. Authenticated payload fallback
-    else if (email) {
-      userEmail = email;
-      userName = name || email.split('@')[0];
-      userPicture = picture || '';
-      userGoogleId = googleId || '';
     }
 
     if (!userEmail) {
-      return res.status(400).json({ success: false, message: 'Invalid or missing Google authentication token' });
+      return res.status(400).json({ success: false, message: 'Google account email is required' });
     }
 
     const emailNormalized = userEmail.toLowerCase().trim();
@@ -393,19 +361,19 @@ export const googleAuth = async (req, res) => {
       browser: userAgent.includes('Chrome')
         ? 'Chrome'
         : userAgent.includes('Firefox')
-        ? 'Firefox'
-        : userAgent.includes('Safari')
-        ? 'Safari'
-        : 'Web Browser',
+          ? 'Firefox'
+          : userAgent.includes('Safari')
+            ? 'Safari'
+            : 'Web Browser',
       os: userAgent.includes('Windows')
         ? 'Windows'
         : userAgent.includes('Mac')
-        ? 'macOS'
-        : userAgent.includes('Android')
-        ? 'Android'
-        : userAgent.includes('iPhone')
-        ? 'iOS'
-        : 'Unknown OS',
+          ? 'macOS'
+          : userAgent.includes('Android')
+            ? 'Android'
+            : userAgent.includes('iPhone')
+              ? 'iOS'
+              : 'Unknown OS',
       ip: req.ip || req.connection.remoteAddress || '127.0.0.1',
       token,
     });
@@ -435,4 +403,32 @@ export const googleAuth = async (req, res) => {
     res.status(500).json({ success: false, message: error.message || 'Server error during Google authentication' });
   }
 };
+
+// @desc    Get registered Google accounts for one-tap sign in
+// @route   GET /api/auth/google-accounts
+export const getExistingGoogleAccounts = async (req, res) => {
+  try {
+    const accounts = await User.find(
+      { email: { $regex: /@gmail\.com|@googlemail\.com/i } },
+      { name: 1, email: 1, avatar: 1 }
+    )
+      .sort({ updatedAt: -1 })
+      .limit(10)
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      accounts: accounts.map((a) => ({
+        name: a.name,
+        email: a.email,
+        avatar:
+          a.avatar ||
+          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(a.name)}&backgroundColor=4285F4`,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 

@@ -3,6 +3,7 @@ import {
   register,
   login,
   googleAuth,
+  getExistingGoogleAccounts,
   getMe,
   logout,
   forgotPassword,
@@ -15,6 +16,7 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 router.post('/google', googleAuth);
+router.get('/google-accounts', getExistingGoogleAccounts);
 router.get('/me', protect, getMe);
 router.post('/logout', protect, logout);
 router.post('/forgot-password', forgotPassword);
