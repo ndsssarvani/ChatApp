@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import GoogleAuthButton from '../components/GoogleAuthButton';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -709,16 +708,6 @@ const Login = () => {
                 </button>
               </div>
             </form>
-
-            <div className="divider">
-              <div className="divider-line"></div>
-              <span className="divider-text">or continue with</span>
-              <div className="divider-line"></div>
-            </div>
-
-            <div className="social-login">
-              <GoogleAuthButton mode="login" onError={(msg) => setError(msg)} />
-            </div>
 
             <p className="signup-prompt" style={{ marginTop: '24px' }}>
               Don't have an account? <span className="signup-link" onClick={() => navigate('/register')}>Sign up</span>

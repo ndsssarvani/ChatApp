@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import GoogleAuthButton from '../components/GoogleAuthButton';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -926,19 +925,6 @@ const Register = () => {
                 </button>
               </div>
             </form>
-
-            <div className="divider">
-              <div className="divider-line"></div>
-              <span className="divider-text">or sign up with</span>
-              <div className="divider-line"></div>
-            </div>
-
-            <div className="social-login">
-              <GoogleAuthButton
-                mode="register"
-                onError={(msg) => setErrors((prev) => ({ ...prev, api: msg }))}
-              />
-            </div>
 
             <p className="login-prompt">
               Already have an account? <span className="login-link" onClick={() => navigate('/login')}>Sign in</span>
