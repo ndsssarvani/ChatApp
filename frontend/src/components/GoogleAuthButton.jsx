@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -6,136 +6,192 @@ export const GoogleAuthButton = ({ mode = 'login', onError, fullWidth = true }) 
   const navigate = useNavigate();
   const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [googleEmail, setGoogleEmail] = useState('');
-  const [googleName, setGoogleName] = useState('');
-  const [modalError, setModalError] = useState('');
+  const [authError, setAuthError] = useState('');
+  const googleBtnRef = useRef(null);
 
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  // Client ID from environment variable or standard Google Web Client configuration
+  const clientId =
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+    '1084203112108-kgh126l7n42u85oamgh8rvi6n27h1o9r.apps.googleusercontent.com';
 
-  // Initialize Google Identity Services if client ID is configured
   useEffect(() => {
-    if (!clientId) return;
-
-    const loadGsiScript = () => {
-      if (window.google?.accounts?.id) {
-        initGsi();
+    // Load Google Identity Services script
+    const loadScript = () => {
+      if (document.getElementById('google-gis-sdk')) {
+        initGoogleServices();
         return;
       }
-
       const script = document.createElement('script');
+      script.id = 'google-gis-sdk';
       script.src = 'https://accounts.google.com/gsi/client';
       script.async = true;
       script.defer = true;
-      script.onload = () => initGsi();
+      script.onload = () => initGoogleServices();
       document.body.appendChild(script);
     };
 
-    const initGsi = () => {
+    const initGoogleServices = () => {
+      if (!window.google?.accounts?.id) return;
+
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: handleGsiCallback,
+          callback: handleCredentialResponse,
           auto_select: false,
           cancel_on_tap_outside: true,
         });
+
+        // If reference div is available, render Google's real official button
+        if (googleBtnRef.current) {
+          window.google.accounts.id.renderButton(googleBtnRef.current, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: mode === 'register' ? 'signup_with' : 'signin_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+            width: fullWidth ? 380 : 280,
+          });
+        }
       } catch (err) {
-        console.warn('[GSI Init Warning]', err);
+        console.warn('[Google Identity Services] Initialization info:', err.message);
       }
     };
 
-    loadGsiScript();
-  }, [clientId]);
+    loadScript();
+  }, [clientId, mode, fullWidth]);
 
-  const handleGsiCallback = async (response) => {
+  // Handle Google GIS ID Token response
+  const handleCredentialResponse = async (response) => {
     if (!response?.credential) return;
     setLoading(true);
+    setAuthError('');
     try {
       const result = await loginWithGoogle({ credential: response.credential });
       if (result.success) {
         navigate('/dashboard');
       } else {
-        if (onError) onError(result.message);
+        const msg = result.message || 'Google authentication failed';
+        setAuthError(msg);
+        if (onError) onError(msg);
       }
     } catch (err) {
-      if (onError) onError(err.message || 'Google authentication failed');
+      const msg = err.response?.data?.message || err.message || 'Google authentication failed';
+      setAuthError(msg);
+      if (onError) onError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClick = () => {
-    if (clientId && window.google?.accounts?.id) {
-      try {
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            setShowModal(true);
-          }
-        });
-        return;
-      } catch (e) {
-        console.log('[Google Auth] Falling back to account dialog');
-      }
-    }
-    setShowModal(true);
-  };
-
-  const handleCustomGoogleSubmit = async (e) => {
-    if (e) e.preventDefault();
-    setModalError('');
-
-    const email = googleEmail.trim().toLowerCase();
-    if (!email || !email.includes('@')) {
-      setModalError('Please enter a valid Google email address');
-      return;
-    }
-
-    const name = googleName.trim() || email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ');
-    const picture = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
-      name
-    )}&backgroundColor=4285F4,34A853,FBBC05,EA4335`;
-
+  // Trigger Google Real Account Chooser Popup (OAuth2 flow)
+  const handleGoogleClick = () => {
     setLoading(true);
-    try {
-      const res = await loginWithGoogle({
-        email,
-        name,
-        picture,
-      });
+    setAuthError('');
 
-      if (res.success) {
-        setShowModal(false);
-        navigate('/dashboard');
-      } else {
-        setModalError(res.message || 'Google sign-in failed');
-        if (onError) onError(res.message);
+    if (window.google?.accounts?.oauth2) {
+      try {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'email profile openid',
+          callback: async (tokenResponse) => {
+            if (tokenResponse?.access_token) {
+              try {
+                // Fetch real Google user profile from Google OAuth2 API
+                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const googleProfile = await userInfoRes.json();
+
+                if (googleProfile?.email) {
+                  const result = await loginWithGoogle({
+                    email: googleProfile.email,
+                    name: googleProfile.name || googleProfile.given_name || googleProfile.email.split('@')[0],
+                    picture: googleProfile.picture || '',
+                    googleId: googleProfile.sub,
+                  });
+
+                  if (result.success) {
+                    navigate('/dashboard');
+                    return;
+                  } else {
+                    const msg = result.message || 'Failed to sign in with Google account';
+                    setAuthError(msg);
+                    if (onError) onError(msg);
+                  }
+                } else {
+                  const msg = 'Unable to retrieve profile from Google';
+                  setAuthError(msg);
+                  if (onError) onError(msg);
+                }
+              } catch (err) {
+                const msg = err.message || 'Error communicating with Google services';
+                setAuthError(msg);
+                if (onError) onError(msg);
+              } finally {
+                setLoading(false);
+              }
+            } else {
+              setLoading(false);
+            }
+          },
+          error_callback: (err) => {
+            setLoading(false);
+            console.warn('[Google OAuth Popup Closed/Cancelled]', err);
+          },
+        });
+
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+        return;
+      } catch (err) {
+        console.warn('[Google TokenClient error, fallback to prompt]', err);
       }
-    } catch (err) {
-      setModalError(err.message || 'Google sign-in failed');
-      if (onError) onError(err.message);
-    } finally {
+    }
+
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.prompt((notification) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          setLoading(false);
+        }
+      });
+    } else {
       setLoading(false);
+      const msg = 'Google authentication services are loading. Please try again in a moment.';
+      setAuthError(msg);
+      if (onError) onError(msg);
     }
   };
-
-  const quickGoogleAccounts = [
-    { name: 'Alex Johnson', email: 'alex.johnson@gmail.com' },
-    { name: 'Sarah Miller', email: 'sarah.m@gmail.com' },
-  ];
 
   return (
-    <>
+    <div style={{ width: fullWidth ? '100%' : 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {authError && (
+        <div
+          style={{
+            padding: '8px 12px',
+            backgroundColor: '#fee2e2',
+            border: '1px solid #fecaca',
+            borderRadius: '8px',
+            color: '#dc2626',
+            fontSize: '0.85rem',
+            textAlign: 'center',
+          }}
+        >
+          {authError}
+        </div>
+      )}
+
+      {/* Styled Interactive Google Button with official Google Branding */}
       <button
         type="button"
         className="google-auth-btn"
-        onClick={handleClick}
+        onClick={handleGoogleClick}
         disabled={loading}
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '12px',
-          width: fullWidth ? '100%' : 'auto',
+          width: '100%',
           padding: '0.85rem 1.25rem',
           backgroundColor: '#ffffff',
           color: '#3c4043',
@@ -144,7 +200,7 @@ export const GoogleAuthButton = ({ mode = 'login', onError, fullWidth = true }) 
           fontSize: '0.95rem',
           fontWeight: '600',
           cursor: loading ? 'not-allowed' : 'pointer',
-          transition: 'all 0.25s ease',
+          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           fontFamily: 'inherit',
           outline: 'none',
@@ -152,7 +208,7 @@ export const GoogleAuthButton = ({ mode = 'login', onError, fullWidth = true }) 
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#f8fafc';
           e.currentTarget.style.borderColor = '#4285F4';
-          e.currentTarget.style.boxShadow = '0 3px 8px rgba(66, 133, 244, 0.15)';
+          e.currentTarget.style.boxShadow = '0 3px 10px rgba(66, 133, 244, 0.18)';
           e.currentTarget.style.transform = 'translateY(-1px)';
         }}
         onMouseLeave={(e) => {
@@ -171,235 +227,16 @@ export const GoogleAuthButton = ({ mode = 'login', onError, fullWidth = true }) 
         </svg>
         <span>
           {loading
-            ? 'Connecting with Google...'
+            ? 'Signing in with Google...'
             : mode === 'register'
             ? 'Sign up with Google'
             : 'Sign in with Google'}
         </span>
       </button>
 
-      {/* Google Account Picker Modal */}
-      {showModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 99999,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            animation: 'fadeIn 0.2s ease-out',
-          }}
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '20px',
-              maxWidth: '440px',
-              width: '100%',
-              padding: '28px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-              position: 'relative',
-              textAlign: 'left',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <svg width="24" height="24" viewBox="0 0 48 48">
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                  <path fill="none" d="M0 0h48v48H0z"/>
-                </svg>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#1f2937' }}>
-                  Sign in with Google
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  fontSize: '1.4rem',
-                  cursor: 'pointer',
-                  color: '#9ca3af',
-                  lineHeight: 1,
-                  padding: '4px 8px',
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <p style={{ margin: '0 0 20px 0', fontSize: '0.9rem', color: '#6b7280' }}>
-              Choose a Google account or enter your Google email to continue to Chatify.
-            </p>
-
-            {modalError && (
-              <div
-                style={{
-                  padding: '10px 14px',
-                  backgroundColor: '#fee2e2',
-                  border: '1px solid #fecaca',
-                  borderRadius: '10px',
-                  color: '#dc2626',
-                  fontSize: '0.85rem',
-                  marginBottom: '16px',
-                }}
-              >
-                {modalError}
-              </div>
-            )}
-
-            {/* Quick Account Suggestions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
-              {quickGoogleAccounts.map((acc, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => {
-                    setGoogleEmail(acc.email);
-                    setGoogleName(acc.name);
-                    loginWithGoogle({
-                      email: acc.email,
-                      name: acc.name,
-                      picture: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(acc.name)}&backgroundColor=4285F4`,
-                    }).then((res) => {
-                      if (res.success) {
-                        setShowModal(false);
-                        navigate('/dashboard');
-                      } else {
-                        setModalError(res.message);
-                      }
-                    });
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '10px 14px',
-                    borderRadius: '12px',
-                    border: '1px solid #e5e7eb',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  <img
-                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(acc.name)}&backgroundColor=4285F4`}
-                    alt={acc.name}
-                    style={{ width: '36px', height: '36px', borderRadius: '50%' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#1f2937' }}>{acc.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{acc.email}</div>
-                  </div>
-                  <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 600 }}>Use</span>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '16px 0' }}>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }} />
-              <span style={{ fontSize: '0.8rem', color: '#9ca3af', textTransform: 'uppercase' }}>Or enter account</span>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }} />
-            </div>
-
-            {/* Custom Google Email Form */}
-            <form onSubmit={handleCustomGoogleSubmit}>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
-                  Google Email Address
-                </label>
-                <input
-                  type="email"
-                  value={googleEmail}
-                  onChange={(e) => setGoogleEmail(e.target.value)}
-                  placeholder="yourname@gmail.com"
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1.5px solid #d1d5db',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
-                  Full Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={googleName}
-                  onChange={(e) => setGoogleName(e.target.value)}
-                  placeholder="Your Full Name"
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1.5px solid #d1d5db',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  style={{
-                    flex: 1,
-                    padding: '10px 16px',
-                    backgroundColor: '#f3f4f6',
-                    border: 'none',
-                    borderRadius: '10px',
-                    fontSize: '0.95rem',
-                    fontWeight: 600,
-                    color: '#4b5563',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{
-                    flex: 2,
-                    padding: '10px 16px',
-                    backgroundColor: '#4285F4',
-                    border: 'none',
-                    borderRadius: '10px',
-                    fontSize: '0.95rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 2px 6px rgba(66, 133, 244, 0.4)',
-                  }}
-                >
-                  {loading ? 'Signing in...' : 'Continue with Google'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
+      {/* Hidden container for rendering native GIS iframe button if preferred */}
+      <div ref={googleBtnRef} style={{ display: 'none' }} />
+    </div>
   );
 };
 
