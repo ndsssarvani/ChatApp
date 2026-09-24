@@ -1,8 +1,9 @@
 import api from './api';
 
 export const notificationService = {
-  async getNotifications() {
-    const res = await api.get('/notifications');
+  async getNotifications(category) {
+    const params = category && category !== 'all' ? { category } : {};
+    const res = await api.get('/notifications', { params });
     return res.data;
   },
 
@@ -13,6 +14,16 @@ export const notificationService = {
 
   async markAllAsRead() {
     const res = await api.put('/notifications/read-all');
+    return res.data;
+  },
+
+  async deleteNotification(id) {
+    const res = await api.delete(`/notifications/${id}`);
+    return res.data;
+  },
+
+  async clearAllNotifications() {
+    const res = await api.delete('/notifications');
     return res.data;
   },
 };

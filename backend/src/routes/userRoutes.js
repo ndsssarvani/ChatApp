@@ -4,6 +4,7 @@ import {
   getUserById,
   updateProfile,
   uploadAvatar,
+  removeAvatar,
   updatePreferences,
   changePassword,
   getContacts,
@@ -28,6 +29,7 @@ router.get('/', getUsers);
 router.get('/profile/:id', getUserById);
 router.put('/profile', updateProfile);
 router.post('/avatar', upload.single('avatar'), uploadAvatar);
+router.delete('/avatar', removeAvatar);
 router.put('/preferences', updatePreferences);
 router.put('/change-password', changePassword);
 router.get('/contacts', getContacts);

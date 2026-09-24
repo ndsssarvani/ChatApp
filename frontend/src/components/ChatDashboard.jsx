@@ -3,17 +3,36 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
+import { useCall } from "../context/CallContext";
 import conversationService from "../services/conversationService";
 import messageService from "../services/messageService";
 import userService from "../services/userService";
+import notificationService from "../services/notificationService";
 import { getMediaUrl } from "../utils/mediaUrl";
+import VoiceRecorder from "./VoiceRecorder";
+import VoiceMessagePlayer from "./VoiceMessagePlayer";
+import CallHistory from "./CallHistory";
+import ForwardModal from "./ForwardModal";
 import "./ChatDashboard.css";
+
+const WALLPAPER_PRESETS = [
+  { id: "default", name: "Default", style: { background: "var(--bg-secondary)" }, preview: "#1e293b" },
+  { id: "midnight", name: "Cosmic Nebula", style: { background: "radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%)" }, preview: "#090A0F" },
+  { id: "cyber", name: "Cyberpunk", style: { background: "linear-gradient(135deg, #0d1117 0%, #161b22 100%)" }, preview: "#161b22" },
+  { id: "emerald", name: "Emerald Forest", style: { background: "linear-gradient(135deg, #022c22 0%, #064e3b 100%)" }, preview: "#064e3b" },
+  { id: "sunset", name: "Sunset Mirage", style: { background: "linear-gradient(135deg, #2d142c 0%, #510a32 50%, #801336 100%)" }, preview: "#801336" },
+  { id: "sapphire", name: "Deep Sapphire", style: { background: "linear-gradient(135deg, #0b192c 0%, #1e3e62 100%)" }, preview: "#1e3e62" },
+  { id: "obsidian", name: "Pure Obsidian", style: { background: "#060911" }, preview: "#060911" },
+  { id: "slate", name: "Minimal Slate", style: { background: "#f1f5f9" }, preview: "#cbd5e1" },
+  { id: "lavender", name: "Soft Lavender", style: { background: "linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%)" }, preview: "#ede9fe" },
+];
 
 const ChatDashboard = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { user: currentUser, logout } = useAuth();
   const { socket, isUserOnline } = useSocket();
+  const { startCall } = useCall();
 
   // Conversations & Messages State
   const [conversations, setConversations] = useState([]);
@@ -21,6 +40,7 @@ const ChatDashboard = () => {
   const [messages, setMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [chatFilter, setChatFilter] = useState("all"); // 'all' | 'online' | 'unread' | 'groups'
   const [messageInput, setMessageInput] = useState("");
   const [isSending, setIsSending] = useState(false);
 
@@ -33,57 +53,77 @@ const ChatDashboard = () => {
 
   // UI state
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [activeTab, setActiveTab] = useState("media"); // 'media' | 'links' | 'docs'
+  const [activeTab, setActiveTab] = useState("media"); // 'media' | 'docs'
   const [showProfile, setShowProfile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showCallHistory, setShowCallHistory] = useState(false);
+  const [showWallpaperModal, setShowWallpaperModal] = useState(false);
+  const [customWpUrl, setCustomWpUrl] = useState("");
+  const [chatWallpapers, setChatWallpapers] = useState({});
+  const [globalWallpaper, setGlobalWallpaper] = useState(null);
+  const [contextMenu, setContextMenu] = useState(null); // { x, y, message }
+  const [messageInfoModal, setMessageInfoModal] = useState(null); // message
+  const [forwardingMessage, setForwardingMessage] = useState(null);
   const [typingUser, setTypingUser] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
   const [attachment, setAttachment] = useState(null);
   const [attachmentPreview, setAttachmentPreview] = useState(null);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [showEncryptionModal, setShowEncryptionModal] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [activeCall, setActiveCall] = useState(null); // { type: 'voice' | 'video', status: 'calling' | 'connected', seconds: 0 }
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [highlightedMsgId, setHighlightedMsgId] = useState(null);
+  const [isRailExpanded, setIsRailExpanded] = useState(false);
 
   const menuRef = useRef(null);
   const groupModalRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const messageElementsRef = useRef({});
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // Active call duration timer
+  // Format Last Seen helper
+  const formatLastSeen = (date, isOnline) => {
+    if (isOnline) return "● Online";
+    if (!date) return "Offline";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "Offline";
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = d.toDateString() === yesterday.toDateString();
+    const timeStr = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    if (isToday) return `Last seen today at ${timeStr}`;
+    if (isYesterday) return `Last seen yesterday at ${timeStr}`;
+    return `Last seen ${d.toLocaleDateString([], { month: "short", day: "numeric" })} at ${timeStr}`;
+  };
+
+  // Format Full Date Time helper
+  const formatFullDateTime = (date) => {
+    if (!date) return "N/A";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleString([], {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
+  // Global click to close context menu
   useEffect(() => {
-    let interval = null;
-    if (activeCall && activeCall.status === "connected") {
-      interval = setInterval(() => {
-        setActiveCall((prev) => (prev ? { ...prev, seconds: prev.seconds + 1 } : null));
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
+    const handleGlobalClick = () => {
+      if (contextMenu) setContextMenu(null);
     };
-  }, [activeCall?.status]);
-
-  const startCall = (type) => {
-    setActiveCall({ type, status: "calling", seconds: 0 });
-    setTimeout(() => {
-      setActiveCall((prev) => (prev ? { ...prev, status: "connected" } : null));
-    }, 2000);
-  };
-
-  const endCall = () => {
-    setActiveCall(null);
-    setIsMuted(false);
-    setIsVideoOff(false);
-  };
-
-  const formatCallTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
+    window.addEventListener("click", handleGlobalClick);
+    return () => window.removeEventListener("click", handleGlobalClick);
+  }, [contextMenu]);
 
   // Load theme preference
   useEffect(() => {
@@ -124,7 +164,6 @@ const ChatDashboard = () => {
       const res = await conversationService.getConversations();
       if (res.success) {
         setConversations(res.conversations);
-        // If a chat is already selected, refresh it
         if (selectedChat) {
           const updatedSelected = res.conversations.find((c) => c._id === selectedChat._id);
           if (updatedSelected) setSelectedChat(updatedSelected);
@@ -135,11 +174,22 @@ const ChatDashboard = () => {
     }
   };
 
+  // Load notification counts
+  const fetchNotifCounts = async () => {
+    try {
+      const res = await notificationService.getNotifications();
+      if (res.success) {
+        setUnreadNotifCount(res.unreadCount || 0);
+      }
+    } catch (err) {}
+  };
+
   useEffect(() => {
     fetchConversations();
+    fetchNotifCounts();
   }, []);
 
-  // Fetch users for group creation or starting chats
+  // Fetch users for group creation or starting direct chats
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -177,7 +227,6 @@ const ChatDashboard = () => {
 
     fetchChatMessages();
 
-    // Join room via socket
     if (socket) {
       socket.emit("join_chat", selectedChat._id);
       socket.emit("message_read", {
@@ -185,6 +234,11 @@ const ChatDashboard = () => {
         userId: currentUser?._id,
       });
     }
+
+    // Reset unread count locally for selected conversation
+    setConversations((prev) =>
+      prev.map((c) => (c._id === selectedChat._id ? { ...c, unreadCount: 0 } : c))
+    );
 
     return () => {
       if (socket) {
@@ -201,6 +255,17 @@ const ChatDashboard = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, typingUser]);
+
+  // Scroll to a quoted message
+  const handleScrollToMessage = (targetMsgId) => {
+    if (!targetMsgId) return;
+    const el = messageElementsRef.current[targetMsgId];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightedMsgId(targetMsgId);
+      setTimeout(() => setHighlightedMsgId(null), 2000);
+    }
+  };
 
   // Socket.IO event listeners
   useEffect(() => {
@@ -232,7 +297,6 @@ const ChatDashboard = () => {
           }
           return c;
         });
-        // Sort most recent to top
         return updated.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
       });
     };
@@ -268,12 +332,18 @@ const ChatDashboard = () => {
 
     const handleMessagesRead = ({ conversationId, userId }) => {
       if (selectedChat && selectedChat._id === conversationId) {
+        const myId = (currentUser?._id || currentUser?.id)?.toString();
+        const readerIdStr = userId?.toString();
         setMessages((prev) =>
           prev.map((m) => {
-            if (m.sender?._id === currentUser?._id) {
+            const senderIdStr = (m.sender?._id || m.sender?.id || m.sender)?.toString();
+            if (senderIdStr === myId) {
               const currentRead = m.readBy || [];
-              if (!currentRead.includes(userId)) {
-                return { ...m, readBy: [...currentRead, userId] };
+              const alreadyRead = currentRead.some(
+                (id) => (id?._id || id?.id || id)?.toString() === readerIdStr
+              );
+              if (!alreadyRead && readerIdStr) {
+                return { ...m, readBy: [...currentRead, readerIdStr] };
               }
             }
             return m;
@@ -282,12 +352,17 @@ const ChatDashboard = () => {
       }
     };
 
+    const handleNotification = () => {
+      setUnreadNotifCount((prev) => prev + 1);
+    };
+
     socket.on("message_received", handleMessageReceived);
     socket.on("typing", handleTyping);
     socket.on("stop_typing", handleStopTyping);
     socket.on("message_updated", handleMessageUpdated);
     socket.on("message_deleted", handleMessageDeleted);
     socket.on("messages_read", handleMessagesRead);
+    socket.on("notification_received", handleNotification);
 
     return () => {
       socket.off("message_received", handleMessageReceived);
@@ -296,10 +371,11 @@ const ChatDashboard = () => {
       socket.off("message_updated", handleMessageUpdated);
       socket.off("message_deleted", handleMessageDeleted);
       socket.off("messages_read", handleMessagesRead);
+      socket.off("notification_received", handleNotification);
     };
   }, [socket, selectedChat, currentUser?._id]);
 
-  // Handle Typing indicator emit
+  // Handle Typing indicator
   const handleInputChange = (e) => {
     setMessageInput(e.target.value);
 
@@ -354,7 +430,7 @@ const ChatDashboard = () => {
     try {
       let uploadedAttachments = [];
 
-      // 1. Upload attachment if attached
+      // Upload attachment if any
       if (attachment) {
         const uploadRes = await messageService.uploadAttachment(attachment);
         if (uploadRes.success && uploadRes.attachment) {
@@ -382,13 +458,21 @@ const ChatDashboard = () => {
         return;
       }
 
-      // 2. Create message on backend
+      // Determine messageType
+      let messageType = "text";
+      if (uploadedAttachments.length > 0) {
+        const first = uploadedAttachments[0];
+        if (first.type?.startsWith("image/")) messageType = "image";
+        else if (first.type?.startsWith("audio/")) messageType = "voice";
+        else messageType = "file";
+      }
+
       const messagePayload = {
         conversationId: selectedChat._id,
         text: messageInput.trim(),
         attachments: uploadedAttachments,
         replyToId: replyingTo ? replyingTo._id : undefined,
-        messageType: uploadedAttachments.length > 0 ? "image" : "text",
+        messageType,
       };
 
       const res = await messageService.sendMessage(messagePayload);
@@ -432,7 +516,56 @@ const ChatDashboard = () => {
     }
   };
 
-  // Keyboard Enter to send
+  // Send Voice Message
+  const handleSendVoice = async (audioFile, duration) => {
+    if (!selectedChat || !audioFile) return;
+    setShowVoiceRecorder(false);
+    setIsSending(true);
+
+    try {
+      const uploadRes = await messageService.uploadAttachment(audioFile);
+      if (uploadRes.success && uploadRes.attachment) {
+        const messagePayload = {
+          conversationId: selectedChat._id,
+          text: "",
+          attachments: [uploadRes.attachment],
+          replyToId: replyingTo ? replyingTo._id : undefined,
+          messageType: "voice",
+        };
+
+        const res = await messageService.sendMessage(messagePayload);
+        if (res.success && res.message) {
+          const createdMessage = res.message;
+          setMessages((prev) => [...prev, createdMessage]);
+
+          if (socket) {
+            socket.emit("send_message", createdMessage);
+          }
+
+          setConversations((prev) => {
+            const updated = prev.map((c) => {
+              if (c._id === selectedChat._id) {
+                return {
+                  ...c,
+                  lastMessage: createdMessage,
+                  updatedAt: new Date().toISOString(),
+                };
+              }
+              return c;
+            });
+            return updated.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+          });
+
+          setReplyingTo(null);
+        }
+      }
+    } catch (err) {
+      console.error("[Dashboard] Error sending voice message:", err);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -446,9 +579,7 @@ const ChatDashboard = () => {
       const res = await messageService.toggleStar(msgId);
       if (res.success) {
         setMessages((prev) =>
-          prev.map((m) =>
-            m._id === msgId ? { ...m, starredBy: res.starredBy } : m
-          )
+          prev.map((m) => (m._id === msgId ? { ...m, starredBy: res.starredBy } : m))
         );
       }
     } catch (err) {
@@ -537,7 +668,6 @@ const ChatDashboard = () => {
     try {
       const res = await conversationService.getOrCreateOneToOne(targetUser._id);
       if (res.success && res.conversation) {
-        // If not already in list, add it
         if (!conversations.some((c) => c._id === res.conversation._id)) {
           setConversations([res.conversation, ...conversations]);
         }
@@ -551,10 +681,11 @@ const ChatDashboard = () => {
 
   // Helper: get display info for a conversation
   const getChatDisplay = (conv) => {
+    if (!conv) return {};
     if (conv.isGroup) {
       return {
-        name: conv.groupName || "Unnamed Group",
-        avatar: conv.groupAvatar || "https://api.dicebear.com/7.x/identicon/svg?seed=group",
+        name: conv.groupName || "Group Chat",
+        avatar: conv.groupAvatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${conv.groupName || "group"}`,
         isOnline: false,
         memberCount: conv.participants?.length || 0,
         subtext: `${conv.participants?.length || 0} members`,
@@ -562,7 +693,7 @@ const ChatDashboard = () => {
     }
 
     const otherParticipant = conv.participants?.find(
-      (p) => p._id !== currentUser?._id
+      (p) => (p._id || p)?.toString() !== currentUser?._id?.toString()
     ) || conv.participants?.[0] || {};
 
     const online = isUserOnline(otherParticipant._id);
@@ -572,18 +703,98 @@ const ChatDashboard = () => {
       avatar: otherParticipant.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherParticipant.name || "User"}`,
       isOnline: online,
       phone: otherParticipant.phoneNumber || "",
-      subtext: online ? t("online") : t("offline"),
+      lastSeen: otherParticipant.lastSeen,
+      subtext: online ? "● Online" : formatLastSeen(otherParticipant.lastSeen, false),
       participant: otherParticipant,
     };
   };
 
-  // Filter conversations & search results
+  // Online users list for Active Now reel
+  const onlineUsersList = allUsers.filter(
+    (u) => u._id !== currentUser?._id && isUserOnline(u._id)
+  );
+
+  // Per-chat wallpaper getters and setters
+  const getActiveWallpaperStyle = () => {
+    if (!selectedChat) return {};
+    let wp = chatWallpapers[selectedChat._id];
+    if (!wp) {
+      const saved = localStorage.getItem(`chat_wallpaper_${selectedChat._id}`);
+      if (saved) {
+        try { wp = JSON.parse(saved); } catch (e) {}
+      }
+    }
+    if (!wp && globalWallpaper) {
+      wp = globalWallpaper;
+    }
+    if (!wp) {
+      const globalSaved = localStorage.getItem("global_chat_wallpaper");
+      if (globalSaved) {
+        try { wp = JSON.parse(globalSaved); } catch (e) {}
+      }
+    }
+
+    if (!wp || wp.id === "default") return {};
+    if (wp.customImage) {
+      return {
+        backgroundImage: `url(${wp.customImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      };
+    }
+    return wp.style || {};
+  };
+
+  const handleSetWallpaper = (wpObj, applyToAll = false) => {
+    if (applyToAll) {
+      localStorage.setItem("global_chat_wallpaper", JSON.stringify(wpObj));
+      setGlobalWallpaper(wpObj);
+    } else if (selectedChat) {
+      localStorage.setItem(`chat_wallpaper_${selectedChat._id}`, JSON.stringify(wpObj));
+      setChatWallpapers((prev) => ({ ...prev, [selectedChat._id]: wpObj }));
+    }
+    setShowWallpaperModal(false);
+  };
+
+  // Delete specific conversation
+  const handleDeleteConversation = async (convId) => {
+    if (!convId) return;
+    const confirmDelete = window.confirm(
+      "Are you sure you want to permanently delete this chat? All messages and attachments will be deleted!"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await conversationService.deleteConversation(convId);
+      if (res.success) {
+        setConversations((prev) => prev.filter((c) => c._id !== convId));
+        if (selectedChat?._id === convId) {
+          setSelectedChat(null);
+          setMessages([]);
+        }
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete chat");
+    }
+  };
+
+  // Filter conversations
   const filteredConversations = conversations.filter((c) => {
     const display = getChatDisplay(c);
-    return display.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = display.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    if (chatFilter === "online") {
+      if (c.isGroup) {
+        return matchesSearch && c.participants?.some(p => (p._id || p) !== currentUser?._id && isUserOnline(p._id || p));
+      }
+      return matchesSearch && display.isOnline;
+    }
+    if (chatFilter === "unread") return matchesSearch && (c.unreadCount > 0);
+    if (chatFilter === "groups") return matchesSearch && c.isGroup;
+    return matchesSearch;
   });
 
-  // Filter contacts not yet in conversation if searching
+  // Filter users when searching
   const filteredNewContacts = searchQuery.trim()
     ? allUsers.filter(
         (u) =>
@@ -593,625 +804,557 @@ const ChatDashboard = () => {
       )
     : [];
 
-  // Media attachments in active chat
   const chatMediaAttachments = messages
     .filter((m) => m.attachments && m.attachments.length > 0)
     .flatMap((m) => m.attachments);
 
+  const activeChatDisplay = getChatDisplay(selectedChat);
+
   return (
     <div className="dashboard-wrapper" data-theme={isDarkMode ? "dark" : "light"}>
-      {/* ─── CREATE GROUP MODAL ─── */}
-      {showCreateGroup && (
-        <div className="modal-overlay">
-          <div className="modal-content" ref={groupModalRef}>
-            <div className="modal-header">
-              <h2 className="modal-title">{t("createNewGroup")}</h2>
-              <button
-                className="modal-close"
-                onClick={() => {
-                  setShowCreateGroup(false);
-                  setGroupName("");
-                  setSelectedMembers([]);
-                }}
-              >
-                ✕
-              </button>
+      {/* ─── 1. LEFT ICON RAIL (Quick Navigation with Expand/Collapse) ─── */}
+      <nav className={`nav-rail ${isRailExpanded ? "expanded" : ""}`}>
+        <div className="rail-top">
+          <div className="rail-header-toggle">
+            <div className="rail-logo" onClick={() => navigate("/dashboard")} title="Chatify">
+              💬
             </div>
-
-            <div className="modal-body">
-              <div className="form-group">
-                <label className="form-label">{t("groupName")}</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder={t("enterGroupName")}
-                  value={groupName}
-                  onChange={(e) => setGroupName(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Group Description (Optional)</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Describe your group"
-                  value={groupDescription}
-                  onChange={(e) => setGroupDescription(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t("selectMembers")}</label>
-                {selectedMembers.length > 0 && (
-                  <div className="selected-count" style={{ color: "#22c55e", fontWeight: 600, marginBottom: "8px" }}>
-                    {selectedMembers.length} {t("membersSelected")}
-                  </div>
-                )}
-                <div className="members-list">
-                  {allUsers
-                    .filter((u) => u._id !== currentUser?._id)
-                    .map((userItem) => {
-                      const isSelected = !!selectedMembers.find((m) => m._id === userItem._id);
-                      return (
-                        <div
-                          key={userItem._id}
-                          className={`member-item ${isSelected ? "selected" : ""}`}
-                          onClick={() => toggleMemberSelection(userItem)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            padding: "8px 12px",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            background: isSelected ? "var(--bg-tertiary)" : "transparent",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: "20px",
-                              height: "20px",
-                              borderRadius: "4px",
-                              border: "1.5px solid var(--border-color)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "#22c55e",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {isSelected && "✓"}
-                          </div>
-                          <img
-                            src={userItem.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${userItem.name}`}
-                            alt={userItem.name}
-                            style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }}
-                          />
-                          <div>
-                            <div style={{ fontWeight: 600, fontSize: "14px" }}>{userItem.name}</div>
-                            <div style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>{userItem.email}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="button button-secondary"
-                style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid var(--border-color)", background: "transparent", color: "var(--text-primary)", cursor: "pointer" }}
-                onClick={() => {
-                  setShowCreateGroup(false);
-                  setGroupName("");
-                  setSelectedMembers([]);
-                }}
-              >
-                {t("cancel")}
-              </button>
-              <button
-                className="button button-primary"
-                style={{ padding: "8px 16px", borderRadius: "8px", border: "none", background: "#22c55e", color: "#ffffff", fontWeight: 600, cursor: "pointer" }}
-                onClick={handleCreateGroup}
-                disabled={!groupName.trim() || selectedMembers.length < 1}
-              >
-                {t("createGroup")}
-              </button>
-            </div>
+            <button
+              type="button"
+              className="rail-expand-btn"
+              onClick={() => setIsRailExpanded(!isRailExpanded)}
+              title={isRailExpanded ? "Collapse Menu" : "Expand Menu (Show Button Names)"}
+            >
+              {isRailExpanded ? "⇤" : "☰"}
+            </button>
           </div>
-        </div>
-      )}
 
-      {/* ─── ENCRYPTION MODAL ─── */}
-      {showEncryptionModal && (
-        <div className="modal-overlay" onClick={() => setShowEncryptionModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">🔐 Encryption Security Code</h2>
-              <button className="modal-close" onClick={() => setShowEncryptionModal(false)}>✕</button>
-            </div>
-            <div className="modal-body" style={{ textAlign: "center", padding: "24px" }}>
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "16px" }}>
-                Messages and calls in this conversation are secured with TLS transport encryption and SHA-256 integrity verification.
-              </p>
-              <div style={{ background: "var(--bg-tertiary)", padding: "16px", borderRadius: "12px", fontFamily: "monospace", letterSpacing: "2px", fontSize: "16px", color: "#16a34a", fontWeight: "bold" }}>
-                {selectedChat?._id
-                  ? selectedChat._id.toString().toUpperCase().match(/.{1,4}/g)?.join(" ")
-                  : "SECURE-E2EE-TLS256"}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── ACTIVE CALL MODAL ─── */}
-      {activeCall && (
-        <div className="modal-overlay" style={{ zIndex: 1100 }}>
-          <div
-            className="modal-content"
-            style={{
-              maxWidth: "420px",
-              textAlign: "center",
-              padding: "32px 24px",
-              background: "linear-gradient(180deg, #1e293b 0%, #0f172a 100%)",
-              color: "#ffffff",
-              borderRadius: "24px",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-            }}
+          <button
+            type="button"
+            className="rail-btn active"
+            onClick={() => setSelectedChat(null)}
+            title="Chats"
           >
-            {(() => {
-              const display = getChatDisplay(selectedChat);
-              return (
-                <>
-                  <div style={{ position: "relative", width: "96px", height: "96px", margin: "0 auto 16px" }}>
-                    <img
-                      src={display.avatar}
-                      alt={display.name}
-                      style={{
-                        width: "96px",
-                        height: "96px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        border: "3px solid #22c55e",
-                        boxShadow: "0 0 20px rgba(34, 197, 94, 0.5)",
-                      }}
-                    />
-                  </div>
+            <span>💬</span>
+            <span className="rail-btn-text">Chats</span>
+          </button>
 
-                  <h3 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "4px" }}>
-                    {display.name}
-                  </h3>
-                  <div style={{ fontSize: "14px", color: "#94a3b8", marginBottom: "20px" }}>
-                    {activeCall.status === "calling"
-                      ? `${activeCall.type === "video" ? "Video" : "Voice"} Calling...`
-                      : `In Call (${formatCallTime(activeCall.seconds)})`}
-                  </div>
+          <button
+            type="button"
+            className="rail-btn"
+            onClick={() => navigate("/contacts")}
+            title="Contacts"
+          >
+            <span>📇</span>
+            <span className="rail-btn-text">Contacts</span>
+          </button>
 
-                  {activeCall.type === "video" && (
-                    <div
-                      style={{
-                        background: "#020617",
-                        borderRadius: "14px",
-                        height: "160px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: "24px",
-                        overflow: "hidden",
-                        border: "1px solid #334155",
-                      }}
-                    >
-                      {isVideoOff ? (
-                        <div style={{ color: "#64748b", fontSize: "14px" }}>Camera Off</div>
-                      ) : (
-                        <div style={{ color: "#22c55e", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span>●</span> HD Video Stream Active
-                        </div>
-                      )}
-                    </div>
-                  )}
+          <button
+            type="button"
+            className="rail-btn"
+            onClick={() => setShowCreateGroup(true)}
+            title="Create Group"
+          >
+            <span>👥</span>
+            <span className="rail-btn-text">New Group</span>
+          </button>
 
-                  <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "12px" }}>
-                    <button
-                      type="button"
-                      onClick={() => setIsMuted(!isMuted)}
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        borderRadius: "50%",
-                        border: "none",
-                        background: isMuted ? "#ef4444" : "#334155",
-                        color: "#fff",
-                        fontSize: "20px",
-                        cursor: "pointer",
-                      }}
-                      title={isMuted ? "Unmute" : "Mute"}
-                    >
-                      {isMuted ? "🔇" : "🎤"}
-                    </button>
-                    {activeCall.type === "video" && (
-                      <button
-                        type="button"
-                        onClick={() => setIsVideoOff(!isVideoOff)}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "50%",
-                          border: "none",
-                          background: isVideoOff ? "#ef4444" : "#334155",
-                          color: "#fff",
-                          fontSize: "20px",
-                          cursor: "pointer",
-                        }}
-                        title={isVideoOff ? "Turn Camera On" : "Turn Camera Off"}
-                      >
-                        {isVideoOff ? "🚫" : "📹"}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={endCall}
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        borderRadius: "50%",
-                        border: "none",
-                        background: "#ef4444",
-                        color: "#fff",
-                        fontSize: "22px",
-                        cursor: "pointer",
-                      }}
-                      title="End Call"
-                    >
-                      📞
-                    </button>
-                  </div>
-                </>
-              );
-            })()}
+          <button
+            type="button"
+            className="rail-btn"
+            onClick={() => setShowCallHistory(true)}
+            title="Calls History"
+          >
+            <span>📞</span>
+            <span className="rail-btn-text">Call Logs</span>
+          </button>
+
+          <button
+            type="button"
+            className="rail-btn"
+            onClick={() => navigate("/notification")}
+            title="Notifications"
+          >
+            <span>🔔</span>
+            <span className="rail-btn-text">Notifications</span>
+            {unreadNotifCount > 0 && <span className="rail-badge">{unreadNotifCount}</span>}
+          </button>
+
+          <button
+            type="button"
+            className="rail-btn"
+            onClick={() => navigate("/starred")}
+            title="Starred Messages"
+          >
+            <span>⭐</span>
+            <span className="rail-btn-text">Starred</span>
+          </button>
+
+          <button
+            type="button"
+            className="rail-btn"
+            onClick={() => navigate("/analytics")}
+            title="Analytics"
+          >
+            <span>📊</span>
+            <span className="rail-btn-text">Analytics</span>
+          </button>
+        </div>
+
+        <div className="rail-bottom">
+          <button
+            type="button"
+            className="rail-btn"
+            onClick={toggleTheme}
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            <span>{isDarkMode ? "☀️" : "🌙"}</span>
+            <span className="rail-btn-text">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+          </button>
+
+          <button
+            type="button"
+            className="rail-btn"
+            onClick={() => navigate("/settings")}
+            title="Settings"
+          >
+            <span>⚙️</span>
+            <span className="rail-btn-text">Settings</span>
+          </button>
+
+          <div
+            className="rail-avatar-btn"
+            onClick={() => navigate("/profile")}
+            title={currentUser?.name}
+          >
+            <img
+              src={currentUser?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${currentUser?.name || "U"}`}
+              alt={currentUser?.name}
+            />
+            <div className="rail-user-details">
+              <span className="rail-user-name">{currentUser?.name}</span>
+              <span className="rail-user-email">{currentUser?.email}</span>
+            </div>
           </div>
         </div>
-      )}
+      </nav>
 
-      {/* ─── LEFT SIDEBAR (Conversations & Contacts) ─── */}
-      <div className={`contacts-sidebar ${selectedChat ? "chat-active" : ""}`}>
+      {/* ─── 2. CONVERSATIONS SIDEBAR ─── */}
+      <aside className={`contacts-sidebar ${selectedChat ? "chat-selected" : ""}`}>
         <div className="sidebar-header">
-          <div className="header-top">
-            <div className="app-logo" style={{ cursor: "pointer" }} onClick={() => navigate("/dashboard")}>
-              <div className="logo-icon">💬</div>
-              <span>Chatify</span>
-            </div>
-
-            <div className="header-actions">
+          <div className="sidebar-top-bar">
+            <h1 className="sidebar-heading">Messages</h1>
+            <div className="sidebar-action-icons">
               <button
-                className="icon-button"
-                onClick={() => navigate("/overview")}
-                title="Smart Dashboard Overview"
-              >
-                📊
-              </button>
-              <button
-                className="icon-button theme-toggle"
-                onClick={toggleTheme}
-                title={isDarkMode ? t("lightMode") : t("darkMode")}
-              >
-                {isDarkMode ? "☀️" : "🌙"}
-              </button>
-              <button
-                className="icon-button create-group"
+                type="button"
+                className="sidebar-icon-btn"
                 onClick={() => setShowCreateGroup(true)}
-                title={t("createGroup")}
+                title="New Group"
               >
                 👥
               </button>
               <button
-                className="icon-button"
-                title={t("settings")}
-                onClick={() => navigate("/settings")}
+                type="button"
+                className="sidebar-icon-btn"
+                onClick={() => navigate("/contacts")}
+                title="Find Contacts"
               >
-                ⚙️
+                📇
               </button>
-
-              {/* User Dropdown */}
-              <div className="user-menu-container" ref={menuRef}>
-                <div
-                  className="user-avatar-button"
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  title={currentUser?.name}
-                >
-                  <img
-                    src={currentUser?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${currentUser?.name || "U"}`}
-                    alt={currentUser?.name}
-                  />
-                </div>
-
-                {showUserMenu && (
-                  <div className="user-dropdown">
-                    <div className="user-dropdown-header">
-                      <div className="user-dropdown-info">
-                        <div className="user-dropdown-avatar">
-                          <img
-                            src={currentUser?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${currentUser?.name || "U"}`}
-                            alt={currentUser?.name}
-                          />
-                        </div>
-                        <div className="user-dropdown-details">
-                          <div className="user-dropdown-name">{currentUser?.name}</div>
-                          <div className="user-dropdown-email">{currentUser?.email}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="user-dropdown-menu">
-                      <button className="user-dropdown-item" onClick={() => navigate("/profile")}>
-                        <span className="user-dropdown-icon">👤</span>
-                        <span className="user-dropdown-text">{t("viewProfile")}</span>
-                      </button>
-                      <button className="user-dropdown-item" onClick={() => navigate("/contacts")}>
-                        <span className="user-dropdown-icon">📇</span>
-                        <span className="user-dropdown-text">Contacts</span>
-                      </button>
-                      <button className="user-dropdown-item" onClick={() => navigate("/starred")}>
-                        <span className="user-dropdown-icon">⭐</span>
-                        <span className="user-dropdown-text">Starred Messages</span>
-                      </button>
-                      <button className="user-dropdown-item" onClick={() => navigate("/analytics")}>
-                        <span className="user-dropdown-icon">📈</span>
-                        <span className="user-dropdown-text">Analytics</span>
-                      </button>
-                      <button className="user-dropdown-item" onClick={() => navigate("/notification")}>
-                        <span className="user-dropdown-icon">🔔</span>
-                        <span className="user-dropdown-text">{t("notification")}</span>
-                      </button>
-                      <button className="user-dropdown-item" onClick={() => navigate("/settings")}>
-                        <span className="user-dropdown-icon">⚙️</span>
-                        <span className="user-dropdown-text">{t("settings")}</span>
-                      </button>
-                      <button className="user-dropdown-item logout" onClick={logout}>
-                        <span className="user-dropdown-icon">🚪</span>
-                        <span className="user-dropdown-text">{t("logout")}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
-          <div className="search-box">
-            <span className="search-icon">🔍</span>
+          {/* Search */}
+          <div className="search-wrapper">
+            <span className="search-icon-inside">🔍</span>
             <input
               type="text"
-              className="search-input"
-              placeholder={t("search")}
+              className="search-input-modern"
+              placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+
+          {/* Filter Pills */}
+          <div className="chat-filter-pills">
+            <button
+              type="button"
+              className={`filter-pill ${chatFilter === "all" ? "active" : ""}`}
+              onClick={() => setChatFilter("all")}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              className={`filter-pill ${chatFilter === "online" ? "active" : ""}`}
+              onClick={() => setChatFilter("online")}
+            >
+              Online ({onlineUsersList.length})
+            </button>
+            <button
+              type="button"
+              className={`filter-pill ${chatFilter === "unread" ? "active" : ""}`}
+              onClick={() => setChatFilter("unread")}
+            >
+              Unread
+            </button>
+            <button
+              type="button"
+              className={`filter-pill ${chatFilter === "groups" ? "active" : ""}`}
+              onClick={() => setChatFilter("groups")}
+            >
+              Groups
+            </button>
+          </div>
+
+          {/* Active Now / Online Contacts Reel */}
+          {onlineUsersList.length > 0 && (
+            <div className="active-now-reel-container">
+              <div className="active-now-header-row">
+                <span className="online-live-pulse-dot" />
+                <span className="active-now-title-text">Active Now</span>
+                <span className="active-now-count-pill">{onlineUsersList.length}</span>
+              </div>
+              <div className="active-now-scroll-row">
+                {onlineUsersList.map((u) => (
+                  <div
+                    key={u._id}
+                    className="active-now-user-chip"
+                    onClick={() => handleStartDirectChat(u)}
+                    title={`Start chat with ${u.name}`}
+                  >
+                    <div className="active-now-avatar-ring">
+                      <img
+                        src={u.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${u.name}`}
+                        alt={u.name}
+                      />
+                      <span className="active-now-badge" />
+                    </div>
+                    <span className="active-now-chip-name">{u.name.split(" ")[0]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="contacts-list">
+        {/* Scrollable Conversation List */}
+        <div className="conversations-scroll-area">
           {filteredConversations.length > 0 ? (
             filteredConversations.map((conv) => {
               const display = getChatDisplay(conv);
               const isActive = selectedChat?._id === conv._id;
-              const lastText = conv.lastMessage
-                ? conv.lastMessage.isDeletedForEveryone
-                  ? "This message was deleted"
-                  : conv.lastMessage.text || (conv.lastMessage.attachments?.length ? "📎 Attachment" : "")
-                : "No messages yet";
+
+              let lastMsgText = "No messages yet";
+              if (conv.lastMessage) {
+                if (conv.lastMessage.isDeletedForEveryone) {
+                  lastMsgText = "This message was deleted";
+                } else if (conv.lastMessage.messageType === "voice") {
+                  lastMsgText = "🎤 Voice message";
+                } else if (conv.lastMessage.attachments?.length) {
+                  lastMsgText = "📎 Attachment";
+                } else {
+                  lastMsgText = conv.lastMessage.text || "Message";
+                }
+              }
 
               const timeStr = conv.lastMessage?.createdAt
-                ? new Date(conv.lastMessage.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                ? new Date(conv.lastMessage.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
                 : "";
 
               return (
                 <div
                   key={conv._id}
-                  className={`contact-item ${isActive ? "active" : ""} ${conv.isGroup ? "group" : ""}`}
+                  className={`chat-list-item ${isActive ? "active" : ""}`}
                   onClick={() => setSelectedChat(conv)}
                 >
-                  <div className="contact-avatar">
+                  <div className={`chat-item-avatar ${conv.isGroup ? "group" : ""}`}>
                     <img src={display.avatar} alt={display.name} />
-                    {display.isOnline && <div className="online-indicator" />}
+                    {display.isOnline && <div className="online-dot" />}
                   </div>
-                  <div className="contact-details">
-                    <div className="contact-name">{display.name}</div>
-                    <div className="contact-message">{lastText}</div>
-                    {conv.isGroup && (
-                      <div className="group-member-count">
-                        {display.memberCount} {t("members")}
+
+                  <div className="chat-item-info">
+                    <div className="chat-item-header">
+                      <span className="chat-item-name">{display.name}</span>
+                      <span className="chat-item-time">{timeStr}</span>
+                    </div>
+
+                    <div className="chat-item-preview-line">
+                      <span className="chat-item-last-msg">{lastMsgText}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        {conv.unreadCount > 0 && (
+                          <span className="unread-count-pill">{conv.unreadCount}</span>
+                        )}
+                        <button
+                          type="button"
+                          className="chat-item-quick-delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteConversation(conv._id);
+                          }}
+                          title="Delete Chat"
+                        >
+                          🗑️
+                        </button>
                       </div>
-                    )}
-                  </div>
-                  <div className="contact-meta">
-                    <div className="contact-time">{timeStr}</div>
-                    {conv.unreadCount > 0 && (
-                      <div className="unread-badge">{conv.unreadCount}</div>
-                    )}
+                    </div>
                   </div>
                 </div>
               );
             })
           ) : (
-            <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--text-tertiary)" }}>
-              {searchQuery ? "No conversations matching your search" : "No conversations yet"}
+            <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--text-tertiary)" }}>
+              {searchQuery ? "No matching conversations" : "No conversations yet. Start one!"}
             </div>
           )}
 
-          {/* If searching, also display registered users to start new chat with */}
+          {/* If searching, display users not in conversation yet */}
           {searchQuery.trim() && filteredNewContacts.length > 0 && (
-            <div style={{ padding: "12px 16px" }}>
-              <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--accent-blue)", marginBottom: "8px" }}>
-                Start Chat with Users
+            <div style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px solid var(--border-color)" }}>
+              <div style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", color: "var(--accent-blue)", marginBottom: "8px", paddingLeft: "8px" }}>
+                Start chat with user
               </div>
-              {filteredNewContacts.map((targetUser) => (
+              {filteredNewContacts.map((u) => (
                 <div
-                  key={targetUser._id}
-                  className="contact-item"
-                  onClick={() => handleStartDirectChat(targetUser)}
+                  key={u._id}
+                  className="chat-list-item"
+                  onClick={() => handleStartDirectChat(u)}
                 >
-                  <div className="contact-avatar">
+                  <div className="chat-item-avatar">
                     <img
-                      src={targetUser.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${targetUser.name}`}
-                      alt={targetUser.name}
+                      src={u.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${u.name}`}
+                      alt={u.name}
                     />
-                    {isUserOnline(targetUser._id) && <div className="online-indicator" />}
+                    {isUserOnline(u._id) && <div className="online-dot" />}
                   </div>
-                  <div className="contact-details">
-                    <div className="contact-name">{targetUser.name}</div>
-                    <div className="contact-message">{targetUser.email}</div>
+                  <div className="chat-item-info">
+                    <div className="chat-item-name">{u.name}</div>
+                    <div className="chat-item-last-msg">{u.email}</div>
                   </div>
-                  <div style={{ color: "#22c55e", fontSize: "18px" }}>+</div>
+                  <span style={{ color: "#22c55e", fontSize: "20px", fontWeight: "bold" }}>+</span>
                 </div>
               ))}
             </div>
           )}
         </div>
-      </div>
+      </aside>
 
-      {/* ─── CHAT AREA ─── */}
-      <div className={`chat-container ${selectedChat ? "chat-active" : ""}`}>
+      {/* ─── 3. ACTIVE CHAT AREA ─── */}
+      <main className={`chat-container ${selectedChat ? "chat-selected" : ""}`}>
         {selectedChat ? (
           <>
-            {/* Header */}
-            {(() => {
-              const display = getChatDisplay(selectedChat);
-              return (
-                <div className="chat-header">
-                  <div className="chat-user-info">
-                    {/* Mobile Back Button */}
-                    <button
-                      className="mobile-back-btn"
-                      onClick={() => setSelectedChat(null)}
-                      title="Back to Chats"
-                    >
-                      ←
-                    </button>
-                    <div className={`contact-avatar ${selectedChat.isGroup ? "group" : ""}`}>
-                      <img src={display.avatar} alt={display.name} />
-                      {display.isOnline && <div className="online-indicator" />}
-                    </div>
-                    <div className="chat-user-details">
-                      <h3>{display.name}</h3>
-                      <div className="chat-user-status">
-                        {selectedChat.isGroup
-                          ? `${display.memberCount} ${t("members")}`
-                          : display.isOnline
-                          ? t("online")
-                          : t("offline")}
-                      </div>
-                    </div>
+            {/* Chat Top Header */}
+            <header className="chat-main-header">
+              <div className="chat-header-user" onClick={() => setShowProfile(!showProfile)}>
+                {/* Mobile Back Button */}
+                <button
+                  type="button"
+                  className="sidebar-icon-btn mobile-only"
+                  style={{ display: "none" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedChat(null);
+                  }}
+                  title="Back to conversations"
+                >
+                  ←
+                </button>
+
+                <div className="chat-header-avatar">
+                  <img src={activeChatDisplay.avatar} alt={activeChatDisplay.name} />
+                  {activeChatDisplay.isOnline && <div className="online-dot" />}
+                </div>
+
+                <div className="chat-header-meta">
+                  <h2>{activeChatDisplay.name}</h2>
+                  <div className={`chat-header-status ${activeChatDisplay.isOnline ? "online" : ""}`}>
+                    {selectedChat.isGroup
+                      ? `${activeChatDisplay.memberCount} members`
+                      : activeChatDisplay.isOnline
+                      ? "● Online"
+                      : "Offline"}
                   </div>
-                  <div className="chat-header-actions">
+                </div>
+              </div>
+
+              {/* Call & Tool Actions */}
+              <div className="chat-header-actions">
+                {!selectedChat.isGroup && (
+                  <>
                     <button
-                      className="icon-button"
-                      title="Voice Call"
-                      onClick={() => startCall("voice")}
+                      type="button"
+                      className="header-action-btn call-audio"
+                      onClick={() => startCall(activeChatDisplay.participant, "audio", selectedChat._id)}
+                      title="Start Audio Call"
                     >
                       📞
                     </button>
                     <button
-                      className="icon-button"
-                      title="Video Call"
-                      onClick={() => startCall("video")}
+                      type="button"
+                      className="header-action-btn call-video"
+                      onClick={() => startCall(activeChatDisplay.participant, "video", selectedChat._id)}
+                      title="Start Video Call"
                     >
                       📹
                     </button>
-                    <button
-                      className="icon-button"
-                      title="Search in conversation"
-                      onClick={() => navigate("/search-messages")}
-                    >
-                      🔍
-                    </button>
-                    <button
-                      className="icon-button"
-                      title={showProfile ? t("closeProfile") : t("openProfile")}
-                      onClick={() => setShowProfile(!showProfile)}
-                    >
-                      {showProfile ? "✕" : "ℹ️"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
+                  </>
+                )}
 
-            {/* Messages Area */}
-            <div className="messages-area">
+                <button
+                  type="button"
+                  className="header-action-btn"
+                  onClick={() => setShowWallpaperModal(true)}
+                  title="Change Chat Wallpaper"
+                >
+                  🎨
+                </button>
+
+                <button
+                  type="button"
+                  className="header-action-btn"
+                  onClick={() => setShowEncryptionModal(true)}
+                  title="Encryption Info"
+                >
+                  🔐
+                </button>
+
+                <button
+                  type="button"
+                  className="header-action-btn"
+                  onClick={() => setShowProfile(!showProfile)}
+                  title={showProfile ? "Close Info" : "Conversation Info"}
+                >
+                  ℹ️
+                </button>
+
+                <button
+                  type="button"
+                  className="header-action-btn delete-chat-btn"
+                  onClick={() => handleDeleteConversation(selectedChat._id)}
+                  title="Delete this Conversation"
+                >
+                  🗑️
+                </button>
+              </div>
+            </header>
+
+            {/* Message Feed */}
+            <div className="messages-scroll-view" style={getActiveWallpaperStyle()}>
               {loadingMessages ? (
                 <div style={{ textAlign: "center", padding: "40px", color: "var(--text-tertiary)" }}>
-                  Loading chat history...
+                  Loading encrypted messages...
                 </div>
               ) : messages.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--text-tertiary)" }}>
-                  <div style={{ fontSize: "2.5rem", marginBottom: "12px" }}>👋</div>
-                  <div style={{ fontWeight: 600, fontSize: "16px", color: "var(--text-primary)" }}>
-                    No messages here yet
-                  </div>
-                  <div style={{ fontSize: "13px", marginTop: "4px" }}>
-                    Say hello to start the conversation!
-                  </div>
+                <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--text-tertiary)" }}>
+                  <div style={{ fontSize: "3rem", marginBottom: "12px" }}>👋</div>
+                  <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>
+                    No messages yet
+                  </h3>
+                  <p style={{ fontSize: "13px" }}>Say hello to start the conversation!</p>
                 </div>
               ) : (
                 messages.map((msg) => {
-                  const isMe = msg.sender?._id === currentUser?._id;
+                  const senderId = (msg.sender?._id || msg.sender?.id || msg.sender)?.toString();
+                  const myId = (currentUser?._id || currentUser?.id)?.toString();
+                  const isMe = Boolean(senderId && myId && senderId === myId);
                   const time = new Date(msg.createdAt).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   });
                   const isStarred = msg.starredBy?.some(
-                    (id) => id.toString() === currentUser?._id.toString()
+                    (id) => (id._id || id?.id || id)?.toString() === myId
                   );
-                  const isRead = msg.readBy && msg.readBy.length > 1;
+                  const isRead = msg.readBy && msg.readBy.some((id) => {
+                    const readerId = (id._id || id?.id || id)?.toString();
+                    return readerId && readerId !== myId;
+                  });
+                  const isHighlighted = highlightedMsgId === msg._id;
 
                   return (
-                    <div key={msg._id} className={`message ${isMe ? "sent" : "received"}`}>
-                      <div className="message-avatar">
+                    <div
+                      key={msg._id}
+                      ref={(el) => (messageElementsRef.current[msg._id] = el)}
+                      className={`message-row ${isMe ? "sent" : "received"} ${isHighlighted ? "highlighted" : ""}`}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setContextMenu({
+                          x: Math.min(e.clientX, window.innerWidth - 240),
+                          y: Math.min(e.clientY, window.innerHeight - 300),
+                          message: msg,
+                        });
+                      }}
+                    >
+                      {!isMe && (
                         <img
                           src={
                             msg.sender?.avatar ||
                             `https://api.dicebear.com/7.x/initials/svg?seed=${msg.sender?.name || "U"}`
                           }
                           alt="avatar"
+                          className="message-avatar-small"
                         />
-                      </div>
-                      <div className="message-content">
-                        {/* Hover Actions Menu */}
-                        <div className="message-hover-actions">
+                      )}
+
+                      <div className="message-bubble-wrapper">
+                        {/* Hover Action Dock */}
+                        <div className="message-hover-dock">
                           <button
-                            className="hover-action-btn"
+                            type="button"
+                            className="dock-btn"
+                            title="Message Info (Delivered & Seen Times)"
+                            onClick={() => setMessageInfoModal(msg)}
+                          >
+                            ℹ️
+                          </button>
+                          <button
+                            type="button"
+                            className="dock-btn"
                             title="Reply"
                             onClick={() => setReplyingTo(msg)}
                           >
                             ↩️
                           </button>
                           <button
-                            className="hover-action-btn"
+                            type="button"
+                            className="dock-btn"
                             title="React ❤️"
                             onClick={() => handleAddReaction(msg._id, "❤️")}
                           >
                             ❤️
                           </button>
                           <button
-                            className="hover-action-btn"
+                            type="button"
+                            className="dock-btn"
                             title="React 👍"
                             onClick={() => handleAddReaction(msg._id, "👍")}
                           >
                             👍
                           </button>
                           <button
-                            className="hover-action-btn"
+                            type="button"
+                            className="dock-btn"
                             title={isStarred ? "Unstar" : "Star"}
                             onClick={() => handleToggleStar(msg._id)}
                           >
                             {isStarred ? "⭐" : "☆"}
                           </button>
+                          <button
+                            type="button"
+                            className="dock-btn"
+                            title="Forward"
+                            onClick={() => setForwardingMessage(msg)}
+                          >
+                            ↗️
+                          </button>
                           {isMe && !msg.isDeletedForEveryone && (
                             <button
-                              className="hover-action-btn"
+                              type="button"
+                              className="dock-btn"
                               title="Edit"
                               onClick={() => {
                                 setEditingMessage(msg);
@@ -1222,7 +1365,8 @@ const ChatDashboard = () => {
                             </button>
                           )}
                           <button
-                            className="hover-action-btn"
+                            type="button"
+                            className="dock-btn"
                             title="Delete"
                             onClick={() => handleDeleteMessage(msg._id, isMe)}
                           >
@@ -1232,18 +1376,23 @@ const ChatDashboard = () => {
 
                         {/* Group Sender Name */}
                         {selectedChat.isGroup && !isMe && (
-                          <div className="message-sender-name">{msg.sender?.name}</div>
+                          <span className="message-sender-name-tag">{msg.sender?.name}</span>
                         )}
 
                         {/* Quoted Reply */}
                         {msg.replyTo && (
-                          <div className="quoted-reply">
-                            <strong>{msg.replyTo.sender?.name || "Replying"}: </strong>
-                            {msg.replyTo.text || "Attachment"}
+                          <div
+                            className="quoted-reply-box"
+                            onClick={() => handleScrollToMessage(msg.replyTo._id || msg.replyTo)}
+                          >
+                            <div className="quoted-sender-label">
+                              ↩ {msg.replyTo.sender?.name || "Replying to message"}
+                            </div>
+                            <div>{msg.replyTo.text || "Attachment / Media"}</div>
                           </div>
                         )}
 
-                        {/* Attachments */}
+                        {/* Message Attachments */}
                         {msg.attachments &&
                           msg.attachments.map((att, idx) => {
                             const fullUrl = getMediaUrl(att.url);
@@ -1256,7 +1405,7 @@ const ChatDashboard = () => {
                                     className="message-attachment-image"
                                     onClick={() => window.open(fullUrl, "_blank")}
                                   />
-                                ) : (
+                                ) : !att.type || !att.type.startsWith("audio/") ? (
                                   <a
                                     href={fullUrl}
                                     target="_blank"
@@ -1265,28 +1414,35 @@ const ChatDashboard = () => {
                                   >
                                     📄 {att.name || "Download file"}
                                   </a>
-                                )}
+                                ) : null}
                               </div>
                             );
                           })}
 
-                        {/* Text bubble */}
-                        <div className="message-bubble">
-                          {msg.text}
-                          {msg.isEdited && (
-                            <span style={{ fontSize: "10px", marginLeft: "6px", opacity: 0.7 }}>
-                              (edited)
-                            </span>
-                          )}
-                        </div>
+                        {/* Voice Note Player */}
+                        {msg.messageType === "voice" && msg.attachments?.[0]?.url && (
+                          <VoiceMessagePlayer audioUrl={msg.attachments[0].url} />
+                        )}
 
-                        {/* Reactions row */}
+                        {/* Text Bubble */}
+                        {msg.text && (
+                          <div className="message-bubble">
+                            {msg.text}
+                            {msg.isEdited && (
+                              <span style={{ fontSize: "10px", marginLeft: "6px", opacity: 0.7 }}>
+                                (edited)
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Reactions Row */}
                         {msg.reactions && msg.reactions.length > 0 && (
-                          <div className="message-reactions-row">
+                          <div className="message-reactions-pills">
                             {msg.reactions.map((r, rIdx) => (
                               <span
                                 key={rIdx}
-                                className="reaction-pill"
+                                className="reaction-chip"
                                 onClick={() => handleAddReaction(msg._id, r.emoji)}
                               >
                                 {r.emoji}
@@ -1295,12 +1451,21 @@ const ChatDashboard = () => {
                           </div>
                         )}
 
-                        {/* Message Meta */}
-                        <div className="message-meta-row">
-                          {isStarred && <span title="Starred">⭐</span>}
-                          <span>{time}</span>
+                        {/* Footer Meta with Sent Time and Single / Double Ticks */}
+                        <div className="message-meta-footer">
+                          {isStarred && <span className="message-starred-icon" title="Starred">⭐</span>}
+                          <span className="message-sent-time" title={`Sent at ${time}`}>
+                            {time}
+                          </span>
                           {isMe && (
-                            <span className="read-ticks" title={isRead ? "Read" : "Delivered"}>
+                            <span
+                              className={`message-ticks ${isRead ? "blue" : "single-sent"}`}
+                              title={
+                                isRead
+                                  ? `Seen • Sent at ${time}`
+                                  : `Sent at ${time}`
+                              }
+                            >
                               {isRead ? "✓✓" : "✓"}
                             </span>
                           )}
@@ -1313,7 +1478,7 @@ const ChatDashboard = () => {
 
               {/* Typing indicator */}
               {typingUser && (
-                <div className="typing-indicator-bar">
+                <div className="typing-bar">
                   <span>{typingUser} is typing</span>
                   <div className="typing-dots">
                     <span></span>
@@ -1326,74 +1491,121 @@ const ChatDashboard = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Reply Preview Banner */}
-            {replyingTo && (
-              <div className="reply-preview-bar">
-                <span className="reply-text">
-                  Replying to <strong>{replyingTo.sender?.name}</strong>: {replyingTo.text}
-                </span>
-                <button className="reply-close-btn" onClick={() => setReplyingTo(null)}>
-                  ✕
-                </button>
-              </div>
-            )}
+            {/* Composer Area */}
+            <div className="composer-area">
+              {/* Quoted Reply Banner */}
+              {replyingTo && (
+                <div className="composer-preview-banner">
+                  <div className="banner-content">
+                    <span className="banner-sender">
+                      Replying to {replyingTo.sender?.name || "User"}
+                    </span>
+                    <span className="banner-text">
+                      {replyingTo.text || (replyingTo.attachments?.length ? "Attachment" : "")}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="banner-close-btn"
+                    onClick={() => setReplyingTo(null)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
 
-            {/* Attachment Preview Banner */}
-            {attachment && (
-              <div className="attachment-preview-bar">
-                <span>📎 {attachment.name}</span>
-                <button className="reply-close-btn" onClick={clearAttachment}>
-                  ✕
-                </button>
-              </div>
-            )}
+              {/* Attachment Preview Banner */}
+              {attachment && (
+                <div className="composer-preview-banner">
+                  <div className="banner-content">
+                    <span className="banner-sender">📎 Attached file:</span>
+                    <span className="banner-text">{attachment.name}</span>
+                  </div>
+                  <button type="button" className="banner-close-btn" onClick={clearAttachment}>
+                    ✕
+                  </button>
+                </div>
+              )}
 
-            {/* Input Box */}
-            <div className="chat-input-container">
+              {/* Editing Banner */}
+              {editingMessage && (
+                <div className="composer-preview-banner">
+                  <div className="banner-content">
+                    <span className="banner-sender">✏️ Editing message</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="banner-close-btn"
+                    onClick={() => {
+                      setEditingMessage(null);
+                      setMessageInput("");
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Hidden file picker */}
               <input
                 type="file"
                 ref={fileInputRef}
                 style={{ display: "none" }}
                 onChange={handleFileSelect}
               />
-              <div className="input-wrapper">
-                <div className="input-actions" style={{ position: "relative" }}>
+
+              {/* Live Voice Recorder or Standard Input */}
+              {showVoiceRecorder ? (
+                <div className="composer-row">
+                  <VoiceRecorder
+                    onSendVoice={handleSendVoice}
+                    onCancel={() => setShowVoiceRecorder(false)}
+                  />
+                </div>
+              ) : (
+                <div className="composer-row">
                   <button
                     type="button"
-                    className="icon-button"
-                    title={t("attach")}
+                    className="composer-action-btn"
                     onClick={() => fileInputRef.current?.click()}
+                    title="Attach Image or File"
                   >
                     📎
                   </button>
+
                   <button
                     type="button"
-                    className="icon-button"
-                    title="Insert Emoji"
+                    className="composer-action-btn"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    title="Emoji Picker"
                   >
                     😊
                   </button>
+
+                  {/* Emoji Picker Popover */}
                   {showEmojiPicker && (
                     <div
                       style={{
                         position: "absolute",
-                        bottom: "100%",
-                        left: "0",
-                        marginBottom: "10px",
-                        background: "var(--bg-secondary, #ffffff)",
-                        border: "1px solid var(--border-color, #e5e7eb)",
-                        borderRadius: "14px",
-                        boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                        bottom: "75px",
+                        left: "60px",
+                        background: "var(--bg-primary)",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "16px",
+                        boxShadow: "var(--shadow-lg)",
                         padding: "10px",
                         display: "grid",
                         gridTemplateColumns: "repeat(6, 1fr)",
                         gap: "6px",
                         zIndex: 100,
-                        width: "230px",
+                        width: "240px",
                       }}
                     >
-                      {["😀", "😂", "😍", "👍", "❤️", "🔥", "🎉", "🙌", "✨", "😎", "🥳", "💯", "🙏", "👏", "🚀", "💡", "👋", "🤩"].map((emoji) => (
+                      {[
+                        "😀", "😂", "😍", "👍", "❤️", "🔥",
+                        "🎉", "🙌", "✨", "😎", "🥳", "💯",
+                        "🙏", "👏", "🚀", "💡", "👋", "🤩",
+                      ].map((emoji) => (
                         <button
                           key={emoji}
                           type="button"
@@ -1408,234 +1620,681 @@ const ChatDashboard = () => {
                             cursor: "pointer",
                             padding: "4px",
                             borderRadius: "6px",
-                            transition: "transform 0.15s",
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                         >
                           {emoji}
                         </button>
                       ))}
                     </div>
                   )}
+
+                  <textarea
+                    className="composer-textarea"
+                    placeholder={editingMessage ? "Edit message..." : "Type a message..."}
+                    value={messageInput}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                  />
+
+                  {/* Toggle Voice Recorder or Send */}
+                  {!messageInput.trim() && !attachment ? (
+                    <button
+                      type="button"
+                      className="composer-action-btn"
+                      onClick={() => setShowVoiceRecorder(true)}
+                      title="Record Voice Note"
+                      style={{ color: "#22c55e", fontSize: "20px" }}
+                    >
+                      🎤
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="composer-send-btn"
+                      onClick={handleSendMessage}
+                      disabled={isSending}
+                      title="Send Message"
+                    >
+                      {isSending ? "..." : "➤"}
+                    </button>
+                  )}
                 </div>
-                <textarea
-                  className="message-input-box"
-                  placeholder={
-                    editingMessage
-                      ? "Edit your message..."
-                      : t("typeMessage")
-                  }
-                  value={messageInput}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  rows={1}
-                />
-                <button
-                  type="button"
-                  className="send-button"
-                  title={t("send")}
-                  onClick={handleSendMessage}
-                  disabled={isSending}
-                >
-                  {isSending ? "..." : "➤"}
-                </button>
-              </div>
+              )}
             </div>
           </>
         ) : (
-          <div className="empty-state">
-            <div className="empty-icon">💬</div>
-            <div className="empty-title">{t("selectChat")}</div>
-            <div className="empty-subtitle">{t("selectChatSubtitle")}</div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "var(--text-tertiary)", padding: "20px" }}>
+            <div style={{ fontSize: "4rem", marginBottom: "16px" }}>💬</div>
+            <h2 style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", marginBottom: "6px" }}>
+              Welcome to Chatify
+            </h2>
+            <p style={{ fontSize: "14px", maxWidth: "340px", textAlign: "center" }}>
+              Select a conversation from the sidebar or start a new chat to begin messaging with real-time audio and video calls.
+            </p>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* ─── RIGHT SIDEBAR (Profile / Info) ─── */}
+      {/* ─── 4. RIGHT CONTEXTUAL PROFILE SIDEBAR ─── */}
       {selectedChat && (
-        <div className={`profile-sidebar ${!showProfile ? "hidden" : ""}`}>
-          {(() => {
-            const display = getChatDisplay(selectedChat);
-            return (
-              <>
-                <div className="profile-header">
-                  <div className={`profile-avatar ${selectedChat.isGroup ? "group" : ""}`}>
-                    <img src={display.avatar} alt={display.name} />
-                  </div>
-                  <div className="profile-name">{display.name}</div>
-                  {!selectedChat.isGroup && (
-                    <div className="profile-phone">{display.phone || display.subtext}</div>
-                  )}
-                  {selectedChat.isGroup && (
-                    <div className="profile-phone">
-                      {display.memberCount} {t("members")}
-                    </div>
-                  )}
-                  <div className="profile-actions">
-                    <button
-                      className="profile-action-btn search"
-                      title={t("search")}
-                      onClick={() => navigate("/search-messages")}
-                    >
-                      🔍
-                    </button>
-                    <button
-                      className="profile-action-btn"
-                      title="Temporary Chat"
-                      onClick={() => navigate("/temporary-chat")}
-                    >
-                      ⏳
-                    </button>
-                  </div>
-                </div>
+        <aside className={`profile-sidebar ${!showProfile ? "hidden" : ""}`}>
+          <div className="profile-header-card">
+            <img
+              src={activeChatDisplay.avatar}
+              alt={activeChatDisplay.name}
+              className="profile-header-avatar"
+            />
+            <h3 className="profile-header-name">{activeChatDisplay.name}</h3>
+            <p className="profile-header-status">
+              {selectedChat.isGroup
+                ? `${activeChatDisplay.memberCount} members`
+                : activeChatDisplay.phone || activeChatDisplay.subtext}
+            </p>
+          </div>
 
-                {/* Group members list */}
-                {selectedChat.isGroup && (
-                  <div className="profile-section">
-                    <div className="section-title">{t("groupMembers")}</div>
-                    <div className="group-members-list">
-                      {selectedChat.participants?.map((member) => (
-                        <div key={member._id} className="group-member-item">
-                          <div className="group-member-avatar">
-                            <img
-                              src={
-                                member.avatar ||
-                                `https://api.dicebear.com/7.x/initials/svg?seed=${member.name}`
-                              }
-                              alt={member.name}
-                            />
-                          </div>
-                          <div className="group-member-name">
-                            {member.name}
-                            {selectedChat.admins?.some((a) => (a._id || a) === member._id) && (
-                              <span style={{ fontSize: "11px", color: "#22c55e", marginLeft: "6px" }}>
-                                (Admin)
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Options */}
-                <div className="profile-section">
-                  <div className="section-title">{t("options")}</div>
+          {/* Group Members Section */}
+          {selectedChat.isGroup && (
+            <div>
+              <div className="profile-section-title">Group Participants</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {selectedChat.participants?.map((member) => (
                   <div
-                    className="section-item"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => navigate("/notification")}
+                    key={member._id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "6px 8px",
+                      borderRadius: "8px",
+                      background: "var(--bg-secondary)",
+                    }}
                   >
-                    <div className="section-icon">🔔</div>
-                    <div className="section-text">
-                      <div className="section-item-title">{t("notification")}</div>
-                    </div>
-                  </div>
-                  <div
-                    className="section-item"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => navigate("/starred")}
-                  >
-                    <div className="section-icon">⭐</div>
-                    <div className="section-text">
-                      <div className="section-item-title">{t("savedMessage")}</div>
-                    </div>
-                  </div>
-                  <div
-                    className="section-item"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => navigate("/privacy")}
-                  >
-                    <div className="section-icon">🔒</div>
-                    <div className="section-text">
-                      <div className="section-item-title">{t("lockedMessage")}</div>
-                    </div>
-                  </div>
-                  <div
-                    className="section-item"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => setShowEncryptionModal(true)}
-                  >
-                    <div className="section-icon">🔐</div>
-                    <div className="section-text">
-                      <div className="section-item-title">{t("encryptionCode")}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Media & Files */}
-                <div className="profile-section">
-                  <div className="section-title">{t("mediaAndFiles")}</div>
-                  <div className="tabs-container">
-                    <button
-                      className={`tab-button ${activeTab === "media" ? "active" : ""}`}
-                      onClick={() => setActiveTab("media")}
-                    >
-                      {t("media")}
-                    </button>
-                    <button
-                      className={`tab-button ${activeTab === "docs" ? "active" : ""}`}
-                      onClick={() => setActiveTab("docs")}
-                    >
-                      {t("docs")}
-                    </button>
-                  </div>
-                  {activeTab === "media" && (
-                    <div className="media-grid">
-                      {chatMediaAttachments.length > 0 ? (
-                        chatMediaAttachments
-                          .filter((att) => att.type && att.type.startsWith("image/"))
-                          .map((item, index) => {
-                            const fullUrl = getMediaUrl(item.url);
-                            return (
-                              <div key={index} className="media-item">
-                                <img
-                                  src={fullUrl}
-                                  alt={`media-${index}`}
-                                  onClick={() => window.open(fullUrl, "_blank")}
-                                />
-                              </div>
-                            );
-                          })
-                      ) : (
-                        <div style={{ color: "var(--text-tertiary)", fontSize: "12px", gridColumn: "1 / -1", textAlign: "center", padding: "12px" }}>
-                          No media shared in this chat
-                        </div>
+                    <img
+                      src={member.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${member.name}`}
+                      alt={member.name}
+                      style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }}
+                    />
+                    <div style={{ flex: 1, fontSize: "13px", fontWeight: 600 }}>
+                      {member.name}
+                      {selectedChat.admins?.some((a) => (a._id || a) === member._id) && (
+                        <span style={{ fontSize: "11px", color: "#22c55e", marginLeft: "6px" }}>
+                          (Admin)
+                        </span>
                       )}
                     </div>
-                  )}
-                  {activeTab === "docs" && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                      {chatMediaAttachments.filter((att) => !att.type || !att.type.startsWith("image/")).length > 0 ? (
-                        chatMediaAttachments
-                          .filter((att) => !att.type || !att.type.startsWith("image/"))
-                          .map((item, index) => {
-                            const fullUrl = getMediaUrl(item.url);
-                            return (
-                              <a
-                                key={index}
-                                href={fullUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ textDecoration: "none", color: "var(--text-primary)", fontSize: "13px", padding: "6px 8px", background: "var(--bg-tertiary)", borderRadius: "6px" }}
-                              >
-                                📄 {item.name || "Document"}
-                              </a>
-                            );
-                          })
-                      ) : (
-                        <div style={{ color: "var(--text-tertiary)", fontSize: "12px", textAlign: "center", padding: "12px" }}>
-                          No documents shared
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Shared Media & Docs */}
+          <div>
+            <div className="profile-section-title">Shared Media & Files</div>
+            <div style={{ display: "flex", gap: "6px", marginBottom: "10px" }}>
+              <button
+                type="button"
+                className={`filter-pill ${activeTab === "media" ? "active" : ""}`}
+                onClick={() => setActiveTab("media")}
+              >
+                Media
+              </button>
+              <button
+                type="button"
+                className={`filter-pill ${activeTab === "docs" ? "active" : ""}`}
+                onClick={() => setActiveTab("docs")}
+              >
+                Documents
+              </button>
+            </div>
+
+            {activeTab === "media" ? (
+              <div className="media-gallery-grid">
+                {chatMediaAttachments
+                  .filter((att) => att.type?.startsWith("image/"))
+                  .map((item, index) => {
+                    const fullUrl = getMediaUrl(item.url);
+                    return (
+                      <div key={index} className="media-gallery-item">
+                        <img
+                          src={fullUrl}
+                          alt={`media-${index}`}
+                          onClick={() => window.open(fullUrl, "_blank")}
+                        />
+                      </div>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {chatMediaAttachments
+                  .filter((att) => !att.type?.startsWith("image/"))
+                  .map((item, index) => {
+                    const fullUrl = getMediaUrl(item.url);
+                    return (
+                      <a
+                        key={index}
+                        href={fullUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          textDecoration: "none",
+                          color: "var(--text-primary)",
+                          fontSize: "13px",
+                          padding: "8px 10px",
+                          background: "var(--bg-secondary)",
+                          borderRadius: "8px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        📄 {item.name || "Document"}
+                      </a>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+
+          {/* Delete Chat Button inside Profile Sidebar */}
+          <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px solid var(--border-color)" }}>
+            <button
+              type="button"
+              onClick={() => handleDeleteConversation(selectedChat._id)}
+              style={{
+                width: "100%",
+                padding: "10px 16px",
+                borderRadius: "12px",
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                background: "rgba(239, 68, 68, 0.12)",
+                color: "#ef4444",
+                fontWeight: 700,
+                fontSize: "13px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                transition: "all 0.2s",
+              }}
+            >
+              <span>🗑️</span> Delete Entire Conversation
+            </button>
+          </div>
+        </aside>
+      )}
+
+      {/* ─── 5. GROUP CREATION MODAL ─── */}
+      {showCreateGroup && (
+        <div className="call-history-modal-overlay">
+          <div className="call-history-modal" ref={groupModalRef} style={{ maxWidth: "460px" }}>
+            <div className="call-history-header">
+              <div className="history-title-area">
+                <h2>Create New Group</h2>
+                <p>Start a collaboration room with multiple members</p>
+              </div>
+              <button type="button" className="history-close-btn" onClick={() => setShowCreateGroup(false)}>
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: "20px 24px" }}>
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ fontSize: "13px", fontWeight: 700, display: "block", marginBottom: "6px" }}>
+                  Group Name
+                </label>
+                <input
+                  type="text"
+                  className="search-input-modern"
+                  placeholder="e.g. Engineering Team"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                />
+              </div>
+
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ fontSize: "13px", fontWeight: 700, display: "block", marginBottom: "6px" }}>
+                  Description (Optional)
+                </label>
+                <input
+                  type="text"
+                  className="search-input-modern"
+                  placeholder="What is this group about?"
+                  value={groupDescription}
+                  onChange={(e) => setGroupDescription(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "13px", fontWeight: 700, display: "block", marginBottom: "6px" }}>
+                  Select Members ({selectedMembers.length} selected)
+                </label>
+                <div style={{ maxHeight: "180px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {allUsers
+                    .filter((u) => u._id !== currentUser?._id)
+                    .map((userItem) => {
+                      const isSelected = !!selectedMembers.find((m) => m._id === userItem._id);
+                      return (
+                        <div
+                          key={userItem._id}
+                          onClick={() => toggleMemberSelection(userItem)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            padding: "8px 12px",
+                            borderRadius: "10px",
+                            background: isSelected ? "rgba(34, 197, 94, 0.15)" : "var(--bg-secondary)",
+                            cursor: "pointer",
+                            border: isSelected ? "1px solid #22c55e" : "1px solid transparent",
+                          }}
+                        >
+                          <img
+                            src={userItem.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${userItem.name}`}
+                            alt={userItem.name}
+                            style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: "13px", fontWeight: 700 }}>{userItem.name}</div>
+                            <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>{userItem.email}</div>
+                          </div>
+                          {isSelected && <span style={{ color: "#22c55e", fontWeight: "bold" }}>✓</span>}
                         </div>
-                      )}
-                    </div>
-                  )}
+                      );
+                    })}
                 </div>
-              </>
-            );
-          })()}
+              </div>
+            </div>
+
+            <div style={{ padding: "16px 24px", borderTop: "1px solid var(--border-color)", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button
+                type="button"
+                className="filter-pill"
+                onClick={() => setShowCreateGroup(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="filter-pill active"
+                onClick={handleCreateGroup}
+                disabled={!groupName.trim() || selectedMembers.length < 1}
+              >
+                Create Group
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 6. ENCRYPTION MODAL ─── */}
+      {showEncryptionModal && (
+        <div className="call-history-modal-overlay" onClick={() => setShowEncryptionModal(false)}>
+          <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px", textAlign: "center", padding: "24px" }}>
+            <div style={{ fontSize: "3rem", marginBottom: "12px" }}>🔐</div>
+            <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "8px" }}>
+              End-to-End Encryption
+            </h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.5", marginBottom: "20px" }}>
+              Messages, media, and WebRTC calls in this conversation are protected with transport-layer encryption and SHA-256 integrity verification.
+            </p>
+            <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "12px", fontFamily: "monospace", letterSpacing: "2px", fontSize: "15px", color: "#22c55e", fontWeight: "bold", marginBottom: "20px" }}>
+              {selectedChat?._id
+                ? selectedChat._id.toString().toUpperCase().match(/.{1,4}/g)?.join(" ")
+                : "SECURE-E2EE-TLS256"}
+            </div>
+            <button
+              type="button"
+              className="filter-pill active"
+              style={{ width: "100%", padding: "10px" }}
+              onClick={() => setShowEncryptionModal(false)}
+            >
+              Verify & Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 7. CALL HISTORY MODAL ─── */}
+      {showCallHistory && (
+        <CallHistory
+          onClose={() => setShowCallHistory(false)}
+          onSelectChat={(conv) => {
+            setSelectedChat(conv);
+            setShowCallHistory(false);
+          }}
+        />
+      )}
+
+      {/* ─── 8. FORWARD MODAL ─── */}
+      {forwardingMessage && (
+        <ForwardModal
+          message={forwardingMessage}
+          conversations={conversations}
+          onClose={() => setForwardingMessage(null)}
+          onForwardSuccess={(targetConvId) => {
+            fetchConversations();
+          }}
+        />
+      )}
+
+      {/* ─── 9. CHAT WALLPAPER MODAL ─── */}
+      {showWallpaperModal && (
+        <div className="call-history-modal-overlay" onClick={() => setShowWallpaperModal(false)}>
+          <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px", padding: "24px" }}>
+            <div className="history-modal-header" style={{ marginBottom: "16px" }}>
+              <div className="history-title-wrap">
+                <span style={{ fontSize: "24px" }}>🎨</span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>Chat Wallpaper</h3>
+                  <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--text-tertiary)" }}>
+                    Customize background for {selectedChat ? activeChatDisplay.name : "all chats"}
+                  </p>
+                </div>
+              </div>
+              <button type="button" className="history-close-btn" onClick={() => setShowWallpaperModal(false)}>
+                ✕
+              </button>
+            </div>
+
+            {/* Presets Grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "20px" }}>
+              {WALLPAPER_PRESETS.map((wp) => (
+                <div
+                  key={wp.id}
+                  onClick={() => handleSetWallpaper(wp, false)}
+                  style={{
+                    height: "80px",
+                    borderRadius: "12px",
+                    ...wp.style,
+                    border: "2px solid rgba(255, 255, 255, 0.15)",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "flex-end",
+                    padding: "8px",
+                    transition: "transform 0.2s, border-color 0.2s",
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                  }}
+                  title={`Apply ${wp.name}`}
+                >
+                  <span style={{
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    background: "rgba(0,0,0,0.6)",
+                    padding: "2px 6px",
+                    borderRadius: "6px",
+                    backdropFilter: "blur(4px)",
+                  }}>
+                    {wp.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Custom URL */}
+            <div style={{ marginBottom: "18px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 700, display: "block", marginBottom: "6px" }}>
+                Custom Image URL:
+              </label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="text"
+                  placeholder="https://images.unsplash.com/..."
+                  value={customWpUrl}
+                  onChange={(e) => setCustomWpUrl(e.target.value)}
+                  className="search-input-modern"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  className="filter-pill active"
+                  disabled={!customWpUrl.trim()}
+                  onClick={() => {
+                    if (customWpUrl.trim()) {
+                      handleSetWallpaper({ id: "custom", name: "Custom URL", customImage: customWpUrl.trim() }, false);
+                      setCustomWpUrl("");
+                    }
+                  }}
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border-color)", paddingTop: "16px" }}>
+              <button
+                type="button"
+                className="filter-pill"
+                onClick={() => handleSetWallpaper({ id: "default", name: "Default" }, false)}
+              >
+                Reset Default
+              </button>
+              <button
+                type="button"
+                className="filter-pill active"
+                onClick={() => {
+                  const currentWp = chatWallpapers[selectedChat?._id] || { id: "default" };
+                  handleSetWallpaper(currentWp, true);
+                }}
+              >
+                Set For All Chats
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 10. RIGHT-CLICK CONTEXT MENU ─── */}
+      {contextMenu && (
+        <div
+          className="chat-context-menu"
+          style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            className="context-menu-item info-action"
+            onClick={() => {
+              setMessageInfoModal(contextMenu.message);
+              setContextMenu(null);
+            }}
+          >
+            <span>ℹ️</span> View Message Info (Delivered & Seen Time)
+          </button>
+          <div className="context-menu-divider" />
+          <button
+            type="button"
+            className="context-menu-item"
+            onClick={() => {
+              setReplyingTo(contextMenu.message);
+              setContextMenu(null);
+            }}
+          >
+            <span>↩️</span> Reply
+          </button>
+          {contextMenu.message.text && (
+            <button
+              type="button"
+              className="context-menu-item"
+              onClick={() => {
+                navigator.clipboard.writeText(contextMenu.message.text);
+                setContextMenu(null);
+              }}
+            >
+              <span>📋</span> Copy Text
+            </button>
+          )}
+          <button
+            type="button"
+            className="context-menu-item"
+            onClick={() => {
+              handleToggleStar(contextMenu.message._id);
+              setContextMenu(null);
+            }}
+          >
+            <span>⭐</span> Star / Unstar
+          </button>
+          <button
+            type="button"
+            className="context-menu-item"
+            onClick={() => {
+              setForwardingMessage(contextMenu.message);
+              setContextMenu(null);
+            }}
+          >
+            <span>↗️</span> Forward Message
+          </button>
+          <div className="context-menu-divider" />
+          <button
+            type="button"
+            className="context-menu-item danger"
+            onClick={() => {
+              const msgToDelete = contextMenu.message;
+              setContextMenu(null);
+              const senderId = (msgToDelete.sender?._id || msgToDelete.sender?.id || msgToDelete.sender)?.toString();
+              const myId = (currentUser?._id || currentUser?.id)?.toString();
+              handleDeleteMessage(msgToDelete._id, senderId === myId);
+            }}
+          >
+            <span>🗑️</span> Delete Message
+          </button>
+        </div>
+      )}
+
+      {/* ─── 11. MESSAGE INFO MODAL (DELIVERED & SEEN TIMESTAMPS) ─── */}
+      {messageInfoModal && (
+        <div className="call-history-modal-overlay" onClick={() => setMessageInfoModal(null)}>
+          <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px", padding: "24px" }}>
+            <div className="history-modal-header" style={{ marginBottom: "16px" }}>
+              <div className="history-title-wrap">
+                <span style={{ fontSize: "24px" }}>ℹ️</span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>Message Info</h3>
+                  <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--text-tertiary)" }}>
+                    Delivery and read receipt timestamps
+                  </p>
+                </div>
+              </div>
+              <button type="button" className="history-close-btn" onClick={() => setMessageInfoModal(null)}>
+                ✕
+              </button>
+            </div>
+
+            {/* Message Preview Box */}
+            <div style={{
+              background: "var(--bg-secondary)",
+              border: "1px solid var(--border-color)",
+              borderRadius: "14px",
+              padding: "14px",
+              marginBottom: "20px",
+            }}>
+              <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginBottom: "4px", fontWeight: 700 }}>
+                {messageInfoModal.sender?.name || "Sender"}:
+              </div>
+              <div style={{ fontSize: "14px", color: "var(--text-primary)", wordBreak: "break-word" }}>
+                {messageInfoModal.text || (messageInfoModal.messageType === "voice" ? "🎤 Voice Note" : "📎 Attachment")}
+              </div>
+            </div>
+
+            {/* Timestamps List */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
+              {/* Sent Time */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 14px",
+                borderRadius: "12px",
+                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid var(--border-color)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "18px" }}>📤</span>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 700 }}>Sent Time</div>
+                    <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>Dispatched from device</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", textAlign: "right" }}>
+                  {formatFullDateTime(messageInfoModal.createdAt)}
+                </div>
+              </div>
+
+              {/* Delivered Time */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 14px",
+                borderRadius: "12px",
+                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid var(--border-color)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "18px" }}>📥</span>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 700 }}>Delivered Time</div>
+                    <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>Delivered to recipient server</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", textAlign: "right" }}>
+                  {formatFullDateTime(messageInfoModal.deliveredAt || messageInfoModal.createdAt)}
+                </div>
+              </div>
+
+              {/* Seen / Read Time */}
+              {(() => {
+                const myId = (currentUser?._id || currentUser?.id)?.toString();
+                const isRead = messageInfoModal.readBy && messageInfoModal.readBy.some((id) => {
+                  const rId = (id._id || id?.id || id)?.toString();
+                  return rId && rId !== myId;
+                });
+                const seenTime = messageInfoModal.readAt || (isRead ? messageInfoModal.updatedAt : null);
+
+                return (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 14px",
+                    borderRadius: "12px",
+                    background: isRead ? "rgba(56, 189, 248, 0.08)" : "rgba(255, 255, 255, 0.04)",
+                    border: isRead ? "1px solid rgba(56, 189, 248, 0.3)" : "1px solid var(--border-color)"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{ fontSize: "18px", color: isRead ? "#38bdf8" : "inherit" }}>
+                        {isRead ? "✓✓" : "✓"}
+                      </span>
+                      <div>
+                        <div style={{ fontSize: "13px", fontWeight: 700, color: isRead ? "#38bdf8" : "inherit" }}>
+                          Seen / Read Time
+                        </div>
+                        <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>
+                          {isRead ? "Opened & read by recipient" : "Not yet read by recipient"}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "12px", fontWeight: 700, color: isRead ? "#38bdf8" : "var(--text-tertiary)", textAlign: "right" }}>
+                      {isRead ? formatFullDateTime(seenTime) : "Pending (Not seen)"}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <button
+              type="button"
+              className="filter-pill active"
+              style={{ width: "100%", padding: "10px" }}
+              onClick={() => setMessageInfoModal(null)}
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
     </div>

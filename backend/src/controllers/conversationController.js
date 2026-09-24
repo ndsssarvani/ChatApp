@@ -266,3 +266,29 @@ export const setTemporaryTimer = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Delete a specific conversation
+// @route   DELETE /api/conversations/:id
+export const deleteConversation = async (req, res) => {
+  try {
+    const conversation = await Conversation.findById(req.params.id);
+    if (!conversation) {
+      return res.status(404).json({ success: false, message: 'Conversation not found' });
+    }
+
+    if (!conversation.participants.some((p) => p.toString() === req.user._id.toString())) {
+      return res.status(403).json({ success: false, message: 'You are not a participant in this conversation' });
+    }
+
+    // Delete all messages in the conversation
+    await Message.deleteMany({ conversationId: conversation._id });
+
+    // Delete the conversation record
+    await Conversation.findByIdAndDelete(conversation._id);
+
+    res.status(200).json({ success: true, message: 'Chat deleted permanently' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

@@ -30,7 +30,7 @@ export const getMessages = async (req, res) => {
       .populate('sender', 'name username email avatar')
       .populate({
         path: 'replyTo',
-        populate: { path: 'sender', select: 'name' },
+        populate: { path: 'sender', select: 'name username avatar' },
       })
       .sort({ createdAt: 1 });
 
@@ -43,6 +43,7 @@ export const getMessages = async (req, res) => {
       },
       {
         $addToSet: { readBy: req.user._id, deliveredTo: req.user._id },
+        $set: { readAt: new Date() },
       }
     );
 
@@ -79,10 +80,24 @@ export const sendMessage = async (req, res) => {
       expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
     }
 
+    let determinedType = messageType || 'text';
+    if (!messageType) {
+      if (attachments && attachments.length > 0) {
+        const first = attachments[0];
+        if (first.type && first.type.startsWith('audio/')) {
+          determinedType = 'voice';
+        } else if (first.type && first.type.startsWith('image/')) {
+          determinedType = 'image';
+        } else {
+          determinedType = 'file';
+        }
+      }
+    }
+
     const newMessage = await Message.create({
       conversationId,
       sender: req.user._id,
-      messageType: messageType || (attachments && attachments.length > 0 ? 'image' : 'text'),
+      messageType: determinedType,
       text: text || '',
       attachments: attachments || [],
       replyTo: replyToId || null,
@@ -100,10 +115,61 @@ export const sendMessage = async (req, res) => {
       .populate('sender', 'name username email avatar')
       .populate({
         path: 'replyTo',
-        populate: { path: 'sender', select: 'name' },
+        populate: { path: 'sender', select: 'name username avatar' },
       });
 
     res.status(201).json({ success: true, message: populatedMessage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Forward a message to another conversation
+// @route   POST /api/messages/forward
+export const forwardMessage = async (req, res) => {
+  try {
+    const { targetConversationId, messageId } = req.body;
+
+    if (!targetConversationId || !messageId) {
+      return res.status(400).json({ success: false, message: 'Target conversation and message ID required' });
+    }
+
+    const conversation = await Conversation.findById(targetConversationId);
+    if (!conversation) {
+      return res.status(404).json({ success: false, message: 'Target conversation not found' });
+    }
+
+    if (!conversation.participants.some((p) => p.toString() === req.user._id.toString())) {
+      return res.status(403).json({ success: false, message: 'Not a member of target conversation' });
+    }
+
+    const originalMessage = await Message.findById(messageId);
+    if (!originalMessage) {
+      return res.status(404).json({ success: false, message: 'Original message not found' });
+    }
+
+    const forwarded = await Message.create({
+      conversationId: targetConversationId,
+      sender: req.user._id,
+      messageType: originalMessage.messageType,
+      text: originalMessage.text,
+      attachments: originalMessage.attachments,
+      deliveredTo: [req.user._id],
+      readBy: [req.user._id],
+    });
+
+    conversation.lastMessage = forwarded._id;
+    conversation.updatedAt = new Date();
+    await conversation.save();
+
+    const populated = await Message.findById(forwarded._id)
+      .populate('sender', 'name username email avatar')
+      .populate({
+        path: 'replyTo',
+        populate: { path: 'sender', select: 'name username avatar' },
+      });
+
+    res.status(201).json({ success: true, message: populated });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -52,6 +52,11 @@ export const messageService = {
     const res = await api.get(url);
     return res.data;
   },
+
+  async forwardMessage(targetConversationId, messageId) {
+    const res = await api.post('/messages/forward', { targetConversationId, messageId });
+    return res.data;
+  },
 };
 
 export default messageService;

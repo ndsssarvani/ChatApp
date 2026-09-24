@@ -14,7 +14,7 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['message', 'group_invite', 'reaction', 'mention', 'system'],
+      enum: ['message', 'call', 'missed_call', 'group_invite', 'reaction', 'mention', 'system'],
       default: 'message',
     },
     message: {

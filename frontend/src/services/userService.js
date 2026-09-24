@@ -25,6 +25,11 @@ export const userService = {
     return res.data;
   },
 
+  async removeAvatar() {
+    const res = await api.delete('/users/avatar');
+    return res.data;
+  },
+
   async updatePreferences(preferences) {
     const res = await api.put('/users/preferences', preferences);
     return res.data;

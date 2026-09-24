@@ -7,6 +7,7 @@ import {
   addGroupMembers,
   removeGroupMember,
   setTemporaryTimer,
+  deleteConversation,
 } from '../controllers/conversationController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -17,6 +18,7 @@ router.use(protect);
 router.get('/', getConversations);
 router.post('/one-to-one', getOrCreateOneToOne);
 router.post('/group', createGroup);
+router.delete('/:id', deleteConversation);
 router.put('/:id/group', updateGroup);
 router.post('/:id/members', addGroupMembers);
 router.delete('/:id/members/:userId', removeGroupMember);

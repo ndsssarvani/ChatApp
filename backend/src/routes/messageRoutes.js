@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getMessages,
   sendMessage,
+  forwardMessage,
   uploadAttachment,
   editMessage,
   deleteMessage,
@@ -20,6 +21,7 @@ router.use(protect);
 router.get('/starred', getStarredMessages);
 router.get('/search', searchMessages);
 router.post('/upload', upload.single('file'), uploadAttachment);
+router.post('/forward', forwardMessage);
 router.get('/:conversationId', getMessages);
 router.post('/', sendMessage);
 router.put('/:id', editMessage);

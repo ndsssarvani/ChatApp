@@ -5,6 +5,7 @@ import App from './App';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { CallProvider } from './context/CallContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -12,7 +13,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <AuthProvider>
           <SocketProvider>
-            <App />
+            <CallProvider>
+              <App />
+            </CallProvider>
           </SocketProvider>
         </AuthProvider>
       </BrowserRouter>

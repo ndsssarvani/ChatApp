@@ -1,48 +1,97 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
 import './Privacy.css';
 
 const Privacy = ({ onBack }) => {
   const navigate = useNavigate();
+  const { user, refreshUser } = useAuth();
   
   const [privacySettings, setPrivacySettings] = useState({
     activeStatus: true,
+    onlineStatus: true,
+    typing: true,
     readReceipts: true,
     lastSeen: 'everyone',
     profilePhoto: 'everyone',
     about: 'everyone',
-    status: 'contacts',
+    status: 'everyone',
+    storiesPrivacy: 'everyone',
     groups: 'everyone',
+    callPrivacy: 'everyone',
     screenSecurity: false,
-    onlineStatus: true,
-    typing: true,
   });
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [passwordMsg, setPasswordMsg] = useState({ text: '', isError: false });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [saveToast, setSaveToast] = useState(null);
 
-  const handleToggle = (setting) => {
-    setPrivacySettings(prev => {
-      const updated = {
+  useEffect(() => {
+    if (user?.preferences) {
+      setPrivacySettings((prev) => ({
         ...prev,
-        [setting]: !prev[setting]
-      };
-      userService.updatePreferences(updated).catch(() => {});
-      return updated;
-    });
+        activeStatus: user.preferences.activeStatus !== undefined ? user.preferences.activeStatus : true,
+        onlineStatus: user.preferences.privacyOnline ? user.preferences.privacyOnline !== 'nobody' : true,
+        typing: user.preferences.typing !== undefined ? user.preferences.typing : true,
+        readReceipts: user.preferences.privacyReadReceipts !== undefined ? user.preferences.privacyReadReceipts : true,
+        lastSeen: user.preferences.privacyLastSeen || 'everyone',
+        profilePhoto: user.preferences.privacyProfilePhoto || 'everyone',
+        about: user.preferences.about || 'everyone',
+        status: user.preferences.status || 'everyone',
+        storiesPrivacy: user.preferences.storiesPrivacy || 'everyone',
+        groups: user.preferences.groups || 'everyone',
+        callPrivacy: user.preferences.callPrivacy || 'everyone',
+        screenSecurity: !!user.preferences.screenSecurity,
+      }));
+    }
+  }, [user]);
+
+  const showToast = (msg) => {
+    setSaveToast(msg);
+    setTimeout(() => setSaveToast(null), 2500);
   };
 
-  const handleSelectChange = (setting, value) => {
-    setPrivacySettings(prev => {
-      const updated = {
-        ...prev,
-        [setting]: value
-      };
-      userService.updatePreferences(updated).catch(() => {});
-      return updated;
-    });
+  const handleToggle = async (setting) => {
+    const updatedVal = !privacySettings[setting];
+    const newSettings = { ...privacySettings, [setting]: updatedVal };
+    setPrivacySettings(newSettings);
+
+    const payload = {
+      [setting]: updatedVal,
+      ...(setting === 'readReceipts' && { privacyReadReceipts: updatedVal }),
+      ...(setting === 'onlineStatus' && { privacyOnline: updatedVal ? 'everyone' : 'nobody' }),
+      ...(setting === 'screenSecurity' && { screenSecurity: updatedVal }),
+    };
+
+    try {
+      await userService.updatePreferences(payload);
+      if (refreshUser) refreshUser();
+      showToast('Privacy preference saved');
+    } catch {
+      showToast('Saved locally');
+    }
+  };
+
+  const handleSelectChange = async (setting, value) => {
+    const newSettings = { ...privacySettings, [setting]: value };
+    setPrivacySettings(newSettings);
+
+    const payload = {
+      [setting]: value,
+      ...(setting === 'lastSeen' && { privacyLastSeen: value }),
+      ...(setting === 'profilePhoto' && { privacyProfilePhoto: value }),
+    };
+
+    try {
+      await userService.updatePreferences(payload);
+      if (refreshUser) refreshUser();
+      showToast('Visibility updated');
+    } catch {
+      showToast('Saved locally');
+    }
   };
 
   const handleBackClick = () => {
@@ -65,6 +114,7 @@ const Privacy = ({ onBack }) => {
     }
 
     try {
+      setPasswordLoading(true);
       const res = await userService.changePassword({
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
@@ -79,395 +129,394 @@ const Privacy = ({ onBack }) => {
       }
     } catch (err) {
       setPasswordMsg({ text: err.response?.data?.message || 'Failed to change password', isError: true });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
   return (
-    <div className="privacy-container">
-      <div className="privacy-header">
-        <div className="header-top">
-          <button className="back-button" onClick={handleBackClick}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <div className="modern-privacy-container">
+      {/* Toast Notification */}
+      {saveToast && (
+        <div className="privacy-toast">
+          <span>✓</span> {saveToast}
+        </div>
+      )}
+
+      {/* Header */}
+      <header className="privacy-top-header">
+        <div className="privacy-header-content">
+          <button className="privacy-back-btn" onClick={handleBackClick} title="Back to Settings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1>Privacy</h1>
-        </div>
-      </div>
-
-      <div className="privacy-content">
-        <div className="privacy-card">
-          {/* Active Status Section */}
-          <div className="privacy-section">
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Active Status</h3>
-              <p>Show when you're active on this app</p>
-            </div>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={privacySettings.activeStatus}
-                onChange={() => handleToggle('activeStatus')}
-              />
-              <span className="slider"></span>
-            </label>
-          </div>
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Online Status</h3>
-              <p>Show online indicator to others</p>
-            </div>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={privacySettings.onlineStatus}
-                onChange={() => handleToggle('onlineStatus')}
-              />
-              <span className="slider"></span>
-            </label>
-          </div>
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Typing Indicator</h3>
-              <p>Show when you're typing a message</p>
-            </div>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={privacySettings.typing}
-                onChange={() => handleToggle('typing')}
-              />
-              <span className="slider"></span>
-            </label>
+          <div className="privacy-header-title-box">
+            <h1>Privacy & Visibility</h1>
+            <p>Control who can see your activity, read receipts, and personal info</p>
           </div>
         </div>
+      </header>
 
-        <div className="divider"></div>
-
-        {/* Read Receipts Section */}
-        <div className="privacy-section">
-          <div className="section-header">
-            <h2>Message Privacy</h2>
-            <p>Control message delivery and read information</p>
-          </div>
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Read Receipts</h3>
-              <p>Send read receipts when you view messages</p>
+      {/* Main Form Body */}
+      <main className="privacy-main-body">
+        {/* Section 1: Online Presence */}
+        <section className="privacy-card-group">
+          <div className="privacy-group-header">
+            <span className="privacy-group-icon">🟢</span>
+            <div>
+              <h2>Online Presence & Activity</h2>
+              <p>Manage real-time status indicators and typing visibility</p>
             </div>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={privacySettings.readReceipts}
-                onChange={() => handleToggle('readReceipts')}
-              />
-              <span className="slider"></span>
-            </label>
           </div>
+
+          <div className="privacy-card-items">
+            <div className="privacy-toggle-row">
+              <div className="privacy-item-desc">
+                <h3>Active Status</h3>
+                <p>Show when you are currently active or recently active on Chatify</p>
+              </div>
+              <label className="privacy-custom-switch">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.activeStatus}
+                  onChange={() => handleToggle('activeStatus')}
+                />
+                <span className="privacy-custom-slider"></span>
+              </label>
+            </div>
+
+            <div className="privacy-toggle-row">
+              <div className="privacy-item-desc">
+                <h3>Online Green Dot</h3>
+                <p>Display real-time online green indicator badge to other users</p>
+              </div>
+              <label className="privacy-custom-switch">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.onlineStatus}
+                  onChange={() => handleToggle('onlineStatus')}
+                />
+                <span className="privacy-custom-slider"></span>
+              </label>
+            </div>
+
+            <div className="privacy-toggle-row">
+              <div className="privacy-item-desc">
+                <h3>Live Typing Indicator</h3>
+                <p>Broadcast "typing..." animation when composing a message in chat</p>
+              </div>
+              <label className="privacy-custom-switch">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.typing}
+                  onChange={() => handleToggle('typing')}
+                />
+                <span className="privacy-custom-slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 2: Read Receipts (Blue Ticks) */}
+        <section className="privacy-card-group">
+          <div className="privacy-group-header">
+            <span className="privacy-group-icon">✓✓</span>
+            <div>
+              <h2>Message Read Receipts (Blue Ticks)</h2>
+              <p>Control delivery and read acknowledgement indicators</p>
+            </div>
+          </div>
+
+          <div className="privacy-card-items">
+            <div className="privacy-toggle-row">
+              <div className="privacy-item-desc">
+                <h3>Read Receipts (Blue Ticks)</h3>
+                <p>
+                  When enabled, you and your chat partner will see blue double checkmarks (✓✓) 
+                  and timestamps when a message has been opened and read.
+                </p>
+              </div>
+              <label className="privacy-custom-switch">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.readReceipts}
+                  onChange={() => handleToggle('readReceipts')}
+                />
+                <span className="privacy-custom-slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 3: Visibility & Audience */}
+        <section className="privacy-card-group">
+          <div className="privacy-group-header">
+            <span className="privacy-group-icon">👁️</span>
+            <div>
+              <h2>Who Can See My Information</h2>
+              <p>Customize who has access to your last seen time, avatar, and bio</p>
+            </div>
+          </div>
+
+          <div className="privacy-card-items">
+            <div className="privacy-select-row">
+              <div className="privacy-item-desc">
+                <h3>Last Seen Timestamp</h3>
+                <p>Who can view the exact date & time you were last active</p>
+              </div>
+              <select
+                className="privacy-modern-select"
+                value={privacySettings.lastSeen}
+                onChange={(e) => handleSelectChange('lastSeen', e.target.value)}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="contacts">My Contacts Only</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+
+            <div className="privacy-select-row">
+              <div className="privacy-item-desc">
+                <h3>Profile Photo</h3>
+                <p>Who can see your profile picture</p>
+              </div>
+              <select
+                className="privacy-modern-select"
+                value={privacySettings.profilePhoto}
+                onChange={(e) => handleSelectChange('profilePhoto', e.target.value)}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="contacts">My Contacts Only</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+
+            <div className="privacy-select-row">
+              <div className="privacy-item-desc">
+                <h3>About / Bio</h3>
+                <p>Who can see your status text and bio information</p>
+              </div>
+              <select
+                className="privacy-modern-select"
+                value={privacySettings.about}
+                onChange={(e) => handleSelectChange('about', e.target.value)}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="contacts">My Contacts Only</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+
+            <div className="privacy-select-row">
+              <div className="privacy-item-desc">
+                <h3>Status & Stories</h3>
+                <p>Who can view your posted status updates and temporary stories</p>
+              </div>
+              <select
+                className="privacy-modern-select"
+                value={privacySettings.status}
+                onChange={(e) => handleSelectChange('status', e.target.value)}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="contacts">My Contacts Only</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 4: Communication & Groups */}
+        <section className="privacy-card-group">
+          <div className="privacy-group-header">
+            <span className="privacy-group-icon">📞</span>
+            <div>
+              <h2>Communication & Calls</h2>
+              <p>Control group invites and direct audio/video calling permissions</p>
+            </div>
+          </div>
+
+          <div className="privacy-card-items">
+            <div className="privacy-select-row">
+              <div className="privacy-item-desc">
+                <h3>Who Can Add Me to Groups</h3>
+                <p>Restrict automatic group membership additions</p>
+              </div>
+              <select
+                className="privacy-modern-select"
+                value={privacySettings.groups}
+                onChange={(e) => handleSelectChange('groups', e.target.value)}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="contacts">My Contacts Only</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+
+            <div className="privacy-select-row">
+              <div className="privacy-item-desc">
+                <h3>Who Can Call Me</h3>
+                <p>Allow incoming WebRTC audio and video calls</p>
+              </div>
+              <select
+                className="privacy-modern-select"
+                value={privacySettings.callPrivacy}
+                onChange={(e) => handleSelectChange('callPrivacy', e.target.value)}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="contacts">My Contacts Only</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 5: Security & Access */}
+        <section className="privacy-card-group">
+          <div className="privacy-group-header">
+            <span className="privacy-group-icon">🛡️</span>
+            <div>
+              <h2>Security & Access Protection</h2>
+              <p>Account credentials, screen protection, and blocklists</p>
+            </div>
+          </div>
+
+          <div className="privacy-card-items">
+            <div className="privacy-toggle-row">
+              <div className="privacy-item-desc">
+                <h3>Screen Security</h3>
+                <p>Mask application contents in app switcher and prevent unauthorized captures</p>
+              </div>
+              <label className="privacy-custom-switch">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.screenSecurity}
+                  onChange={() => handleToggle('screenSecurity')}
+                />
+                <span className="privacy-custom-slider"></span>
+              </label>
+            </div>
+
+            <div className="privacy-nav-row" onClick={() => navigate('/report-block')}>
+              <div className="privacy-item-desc">
+                <h3>Blocked Contacts & Reports</h3>
+                <p>View and manage blocked users or submit incident reports</p>
+              </div>
+              <div className="privacy-nav-action">
+                <span>Manage</span>
+                <span className="privacy-nav-chevron">›</span>
+              </div>
+            </div>
+
+            <div className="privacy-nav-row" onClick={() => setShowPasswordModal(true)}>
+              <div className="privacy-item-desc">
+                <h3>Change Password</h3>
+                <p>Update your account password with standard cryptographic security</p>
+              </div>
+              <div className="privacy-nav-action">
+                <span>Update</span>
+                <span className="privacy-nav-chevron">›</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Informational Banner */}
+        <div className="privacy-safety-notice">
+          <div className="notice-icon-box">🔒</div>
+          <p>
+            All messages, voice notes, and direct WebRTC calls are encrypted end-to-end. 
+            Modifications to visibility preferences update in real-time across all your devices.
+          </p>
         </div>
+      </main>
 
-        <div className="divider"></div>
-
-        {/* Last Seen Section */}
-        <div className="privacy-section">
-          <div className="section-header">
-            <h2>Visibility Settings</h2>
-            <p>Choose who can see your information</p>
-          </div>
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Last Seen</h3>
-              <p>Who can see when you were last active</p>
+      {/* Modern Change Password Modal */}
+      {showPasswordModal && (
+        <div className="modern-modal-overlay" onClick={() => setShowPasswordModal(false)}>
+          <div className="modern-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-top-bar">
+              <div className="modal-title-wrap">
+                <span className="modal-key-icon">🔑</span>
+                <h3>Change Password</h3>
+              </div>
+              <button
+                className="modal-close-btn"
+                onClick={() => setShowPasswordModal(false)}
+              >
+                ✕
+              </button>
             </div>
-            <select 
-              className="privacy-select"
-              value={privacySettings.lastSeen}
-              onChange={(e) => handleSelectChange('lastSeen', e.target.value)}
-            >
-              <option value="everyone">Everyone</option>
-              <option value="contacts">My Contacts</option>
-              <option value="nobody">Nobody</option>
-            </select>
-          </div>
 
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Profile Photo</h3>
-              <p>Who can see your profile photo</p>
-            </div>
-            <select 
-              className="privacy-select"
-              value={privacySettings.profilePhoto}
-              onChange={(e) => handleSelectChange('profilePhoto', e.target.value)}
-            >
-              <option value="everyone">Everyone</option>
-              <option value="contacts">My Contacts</option>
-              <option value="nobody">Nobody</option>
-            </select>
-          </div>
+            <p className="modal-subtext">
+              Ensure your new password contains at least 6 characters with a combination of letters and numbers.
+            </p>
 
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>About</h3>
-              <p>Who can see your about info</p>
-            </div>
-            <select 
-              className="privacy-select"
-              value={privacySettings.about}
-              onChange={(e) => handleSelectChange('about', e.target.value)}
-            >
-              <option value="everyone">Everyone</option>
-              <option value="contacts">My Contacts</option>
-              <option value="nobody">Nobody</option>
-            </select>
-          </div>
+            {passwordMsg.text && (
+              <div className={`password-toast-msg ${passwordMsg.isError ? 'msg-error' : 'msg-success'}`}>
+                {passwordMsg.isError ? '⚠️ ' : '✓ '} {passwordMsg.text}
+              </div>
+            )}
 
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Status</h3>
-              <p>Who can see your status updates</p>
-            </div>
-            <select 
-              className="privacy-select"
-              value={privacySettings.status}
-              onChange={(e) => handleSelectChange('status', e.target.value)}
-            >
-              <option value="everyone">Everyone</option>
-              <option value="contacts">My Contacts</option>
-              <option value="selected">Selected Contacts</option>
-              <option value="nobody">Nobody</option>
-            </select>
-          </div>
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Stories</h3>
-              <p>Who can see your stories</p>
-            </div>
-            <select 
-              className="privacy-select"
-              value={privacySettings.storiesPrivacy}
-              onChange={(e) => handleSelectChange('storiesPrivacy', e.target.value)}
-            >
-              <option value="everyone">Everyone</option>
-              <option value="contacts">My Contacts</option>
-              <option value="selected">Selected Contacts</option>
-              <option value="nobody">Nobody</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="divider"></div>
-
-        {/* Groups and Calls Section */}
-        <div className="privacy-section">
-          <div className="section-header">
-            <h2>Communication</h2>
-            <p>Manage groups and calls privacy</p>
-          </div>
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Groups</h3>
-              <p>Who can add you to groups</p>
-            </div>
-            <select 
-              className="privacy-select"
-              value={privacySettings.groups}
-              onChange={(e) => handleSelectChange('groups', e.target.value)}
-            >
-              <option value="everyone">Everyone</option>
-              <option value="contacts">My Contacts</option>
-              <option value="nobody">Nobody</option>
-            </select>
-          </div>
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Calls</h3>
-              <p>Who can call you</p>
-            </div>
-            <select 
-              className="privacy-select"
-              value={privacySettings.callPrivacy}
-              onChange={(e) => handleSelectChange('callPrivacy', e.target.value)}
-            >
-              <option value="everyone">Everyone</option>
-              <option value="contacts">My Contacts</option>
-              <option value="nobody">Nobody</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="divider"></div>
-
-        {/* Security Section */}
-        <div className="privacy-section">
-          <div className="section-header">
-            <h2>Security</h2>
-            <p>Additional security features</p>
-          </div>
-
-          <div className="privacy-item">
-            <div className="item-info">
-              <h3>Screen Security</h3>
-              <p>Prevent screenshots and screen recording</p>
-            </div>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={privacySettings.screenSecurity}
-                onChange={() => handleToggle('screenSecurity')}
-              />
-              <span className="slider"></span>
-            </label>
-          </div>
-
-          <div className="privacy-item clickable" onClick={() => navigate('/report-block')}>
-            <div className="item-info">
-              <h3>Blocked Contacts</h3>
-              <p>Manage blocked users and reports</p>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-
-          <div className="privacy-item clickable" onClick={() => setShowPasswordModal(true)}>
-            <div className="item-info">
-              <h3>Change Password</h3>
-              <p>Update your login password securely</p>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          </div>
-        </div>
-
-        {/* Change Password Modal */}
-        {showPasswordModal && (
-          <div className="modal-overlay" style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-          }}>
-            <div style={{
-              background: '#ffffff', borderRadius: '16px', padding: '24px', maxWidth: '400px', width: '90%',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.15)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#111827' }}>Change Password</h3>
-                <button
-                  onClick={() => setShowPasswordModal(false)}
-                  style={{ background: 'transparent', border: 'none', fontSize: '18px', cursor: 'pointer' }}
-                >
-                  ✕
-                </button>
+            <form onSubmit={handleChangePassword} className="modal-form">
+              <div className="form-group">
+                <label>Current Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Enter current password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                  className="modal-input"
+                />
               </div>
 
-              {passwordMsg.text && (
-                <div style={{
-                  padding: '8px 12px', borderRadius: '8px', fontSize: '13px', marginBottom: '12px',
-                  background: passwordMsg.isError ? '#fee2e2' : '#dcfce7',
-                  color: passwordMsg.isError ? '#dc2626' : '#15803d'
-                }}>
-                  {passwordMsg.text}
-                </div>
-              )}
+              <div className="form-group">
+                <label>New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Min 6 characters"
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                  className="modal-input"
+                />
+              </div>
 
-              <form onSubmit={handleChangePassword}>
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', boxSizing: 'border-box' }}
-                  />
-                </div>
+              <div className="form-group">
+                <label>Confirm New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Re-enter new password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                  className="modal-input"
+                />
+              </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="Min 6 characters"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', boxSizing: 'border-box' }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', boxSizing: 'border-box' }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswordModal(false)}
-                    style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #d1d5db', background: 'transparent', cursor: 'pointer' }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#22c55e', color: 'white', fontWeight: 600, cursor: 'pointer' }}
-                  >
-                    Save Password
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="modal-actions-row">
+                <button
+                  type="button"
+                  className="modal-btn-cancel"
+                  onClick={() => setShowPasswordModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="modal-btn-submit"
+                >
+                  {passwordLoading ? 'Updating...' : 'Save Password'}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-
-        {/* Information Banner - Outside the card */}
-        <div className="privacy-info-banner">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-            <path d="M12 16V12M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          <p>Changes to your privacy settings will affect how others see your information and interact with you.</p>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
 export default Privacy;
-
-/* 
-USAGE EXAMPLES:
-
-1. With React Router:
-   - Uncomment the useNavigate import and line in the code
-   - Uncomment navigate('/settings') in handleBackClick
-   
-2. With callback prop:
-   <Privacy onBack={() => setCurrentView('settings')} />
-   
-3. With browser history (default):
-   <Privacy />
-   - Will use window.history.back()
-*/

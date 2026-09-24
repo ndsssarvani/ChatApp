@@ -19,7 +19,7 @@ const messageSchema = new mongoose.Schema(
     },
     messageType: {
       type: String,
-      enum: ['text', 'image', 'file', 'system'],
+      enum: ['text', 'image', 'file', 'voice', 'audio', 'system'],
       default: 'text',
     },
     text: {
@@ -50,12 +50,19 @@ const messageSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+    deliveredAt: {
+      type: Date,
+      default: Date.now,
+    },
     readBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
       },
     ],
+    readAt: {
+      type: Date,
+    },
     starredBy: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -73,7 +73,7 @@ export const updateProfile = async (req, res) => {
     if (place !== undefined) user.place = place;
     if (location !== undefined) user.location = location;
     if (country !== undefined) user.country = country;
-    if (avatar) user.avatar = avatar;
+    if (avatar !== undefined) user.avatar = avatar;
 
     if (username && username !== user.username) {
       const usernameExists = await User.findOne({ username: username.toLowerCase().trim() });
@@ -116,6 +116,27 @@ export const uploadAvatar = async (req, res) => {
       success: true,
       message: 'Avatar uploaded successfully',
       avatarUrl,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Remove avatar (reset to default)
+// @route   DELETE /api/users/avatar
+export const removeAvatar = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatar: '' },
+      { new: true }
+    ).select('-passwordHash');
+
+    res.status(200).json({
+      success: true,
+      message: 'Avatar removed successfully',
+      avatarUrl: '',
       user,
     });
   } catch (error) {

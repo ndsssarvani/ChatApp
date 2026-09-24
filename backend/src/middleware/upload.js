@@ -25,7 +25,6 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  // Allow common images and documents
   const allowedMimes = [
     'image/jpeg',
     'image/png',
@@ -36,19 +35,36 @@ const fileFilter = (req, file, cb) => {
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'text/plain',
+    'audio/webm',
+    'audio/mp3',
+    'audio/mpeg',
+    'audio/wav',
+    'audio/ogg',
+    'audio/aac',
+    'audio/m4a',
+    'audio/x-m4a',
+    'audio/mp4',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
   ];
 
-  if (allowedMimes.includes(file.mimetype) || file.mimetype.startsWith('image/')) {
+  if (
+    allowedMimes.includes(file.mimetype) ||
+    file.mimetype.startsWith('image/') ||
+    file.mimetype.startsWith('audio/') ||
+    file.mimetype.startsWith('video/')
+  ) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Supported types: images, PDF, Word, text.'), false);
+    cb(new Error('Invalid file type. Supported types: images, audio, video, PDF, Word, text.'), false);
   }
 };
 
 export const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 25 * 1024 * 1024, // 25MB limit
   },
   fileFilter: fileFilter,
 });

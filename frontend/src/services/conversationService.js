@@ -35,6 +35,11 @@ export const conversationService = {
     const res = await api.put(`/conversations/${id}/temporary`, { isTemporary, timerHours });
     return res.data;
   },
+
+  async deleteConversation(id) {
+    const res = await api.delete(`/conversations/${id}`);
+    return res.data;
+  },
 };
 
 export default conversationService;

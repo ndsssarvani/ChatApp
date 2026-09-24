@@ -81,7 +81,7 @@ const Profile = () => {
         const res = await userService.uploadAvatar(file);
         if (res.success && res.user) {
           updateUser(res.user);
-          setProfileData((prev) => ({ ...prev, avatar: res.user.avatar }));
+          setProfileData((prev) => ({ ...prev, avatar: getMediaUrl(res.user.avatar) }));
           setMessage("Avatar updated successfully!");
           setTimeout(() => setMessage(""), 3000);
         }
@@ -91,6 +91,26 @@ const Profile = () => {
       } finally {
         setSaving(false);
       }
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!window.confirm("Are you sure you want to remove your profile photo?")) return;
+    try {
+      setSaving(true);
+      const res = await userService.removeAvatar();
+      if (res.success) {
+        const defaultAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || "U"}`;
+        updateUser({ ...user, avatar: "" });
+        setProfileData((prev) => ({ ...prev, avatar: defaultAvatar }));
+        setMessage("Profile photo removed successfully!");
+        setTimeout(() => setMessage(""), 3000);
+      }
+    } catch (err) {
+      console.error("Failed to remove avatar:", err);
+      setMessage("Failed to remove avatar");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -195,6 +215,44 @@ const Profile = () => {
               style={{ display: "none" }}
               onChange={handleAvatarChange}
             />
+
+            <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "12px", marginBottom: "8px" }}>
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: "#22c55e",
+                  color: "#ffffff",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Change Photo
+              </button>
+              {user?.avatar && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    border: "1px solid #ef4444",
+                    background: "transparent",
+                    color: "#ef4444",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Remove Photo
+                </button>
+              )}
+            </div>
+
             <h2 className="profile-card-name">{profileData.name}</h2>
             <p style={{ color: "var(--text-tertiary)", fontSize: "13px", marginTop: "4px" }}>
               {user?.email}
