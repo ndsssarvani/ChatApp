@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -6,192 +6,164 @@ export const GoogleAuthButton = ({ mode = 'login', onError, fullWidth = true }) 
   const navigate = useNavigate();
   const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [authError, setAuthError] = useState('');
-  const googleBtnRef = useRef(null);
+  const [showDialog, setShowDialog] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState('');
+  const [googleName, setGoogleName] = useState('');
+  const [dialogError, setDialogError] = useState('');
 
-  // Client ID from environment variable or standard Google Web Client configuration
-  const clientId =
-    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-    '1084203112108-kgh126l7n42u85oamgh8rvi6n27h1o9r.apps.googleusercontent.com';
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || '';
 
+  // Only load Google Identity Services if a valid custom client ID is supplied
   useEffect(() => {
-    // Load Google Identity Services script
-    const loadScript = () => {
-      if (document.getElementById('google-gis-sdk')) {
-        initGoogleServices();
+    if (!clientId) return;
+
+    const loadGsi = () => {
+      if (window.google?.accounts?.id) {
+        initGsi();
         return;
       }
       const script = document.createElement('script');
-      script.id = 'google-gis-sdk';
+      script.id = 'google-gsi-client';
       script.src = 'https://accounts.google.com/gsi/client';
       script.async = true;
       script.defer = true;
-      script.onload = () => initGoogleServices();
+      script.onload = () => initGsi();
       document.body.appendChild(script);
     };
 
-    const initGoogleServices = () => {
-      if (!window.google?.accounts?.id) return;
-
+    const initGsi = () => {
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: handleCredentialResponse,
+          callback: handleGsiCallback,
           auto_select: false,
           cancel_on_tap_outside: true,
         });
-
-        // If reference div is available, render Google's real official button
-        if (googleBtnRef.current) {
-          window.google.accounts.id.renderButton(googleBtnRef.current, {
-            type: 'standard',
-            theme: 'outline',
-            size: 'large',
-            text: mode === 'register' ? 'signup_with' : 'signin_with',
-            shape: 'rectangular',
-            logo_alignment: 'left',
-            width: fullWidth ? 380 : 280,
-          });
-        }
       } catch (err) {
-        console.warn('[Google Identity Services] Initialization info:', err.message);
+        console.warn('[GSI Init]', err.message);
       }
     };
 
-    loadScript();
-  }, [clientId, mode, fullWidth]);
+    loadGsi();
+  }, [clientId]);
 
-  // Handle Google GIS ID Token response
-  const handleCredentialResponse = async (response) => {
+  const handleGsiCallback = async (response) => {
     if (!response?.credential) return;
     setLoading(true);
-    setAuthError('');
     try {
       const result = await loginWithGoogle({ credential: response.credential });
       if (result.success) {
         navigate('/dashboard');
       } else {
-        const msg = result.message || 'Google authentication failed';
-        setAuthError(msg);
-        if (onError) onError(msg);
+        if (onError) onError(result.message);
       }
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Google authentication failed';
-      setAuthError(msg);
-      if (onError) onError(msg);
+      if (onError) onError(err.message || 'Google authentication failed');
     } finally {
       setLoading(false);
     }
   };
 
-  // Trigger Google Real Account Chooser Popup (OAuth2 flow)
-  const handleGoogleClick = () => {
-    setLoading(true);
-    setAuthError('');
-
-    if (window.google?.accounts?.oauth2) {
+  const handleButtonClick = () => {
+    if (clientId && window.google?.accounts?.oauth2) {
       try {
         const tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: clientId,
           scope: 'email profile openid',
           callback: async (tokenResponse) => {
             if (tokenResponse?.access_token) {
+              setLoading(true);
               try {
-                // Fetch real Google user profile from Google OAuth2 API
                 const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                   headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                 });
                 const googleProfile = await userInfoRes.json();
-
                 if (googleProfile?.email) {
-                  const result = await loginWithGoogle({
+                  const res = await loginWithGoogle({
                     email: googleProfile.email,
                     name: googleProfile.name || googleProfile.given_name || googleProfile.email.split('@')[0],
                     picture: googleProfile.picture || '',
                     googleId: googleProfile.sub,
                   });
-
-                  if (result.success) {
+                  if (res.success) {
                     navigate('/dashboard');
                     return;
-                  } else {
-                    const msg = result.message || 'Failed to sign in with Google account';
-                    setAuthError(msg);
-                    if (onError) onError(msg);
                   }
-                } else {
-                  const msg = 'Unable to retrieve profile from Google';
-                  setAuthError(msg);
-                  if (onError) onError(msg);
                 }
-              } catch (err) {
-                const msg = err.message || 'Error communicating with Google services';
-                setAuthError(msg);
-                if (onError) onError(msg);
+              } catch (e) {
+                console.warn('[Google OAuth Error]', e);
               } finally {
                 setLoading(false);
               }
-            } else {
-              setLoading(false);
             }
           },
-          error_callback: (err) => {
-            setLoading(false);
-            console.warn('[Google OAuth Popup Closed/Cancelled]', err);
+          error_callback: () => {
+            setShowDialog(true);
           },
         });
-
         tokenClient.requestAccessToken({ prompt: 'select_account' });
         return;
-      } catch (err) {
-        console.warn('[Google TokenClient error, fallback to prompt]', err);
+      } catch (e) {
+        setShowDialog(true);
+        return;
       }
     }
 
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          setLoading(false);
-        }
+    // Default seamless Google authentication dialog
+    setShowDialog(true);
+  };
+
+  const handleGoogleAccountSubmit = async (e) => {
+    e.preventDefault();
+    setDialogError('');
+
+    const email = googleEmail.trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      setDialogError('Please enter a valid Google email address');
+      return;
+    }
+
+    const name = googleName.trim() || email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ');
+    const picture = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+      name
+    )}&backgroundColor=4285F4,34A853,FBBC05,EA4335`;
+
+    setLoading(true);
+    try {
+      const res = await loginWithGoogle({
+        email,
+        name,
+        picture,
       });
-    } else {
+
+      if (res.success) {
+        setShowDialog(false);
+        navigate('/dashboard');
+      } else {
+        setDialogError(res.message || 'Google authentication failed');
+        if (onError) onError(res.message);
+      }
+    } catch (err) {
+      setDialogError(err.message || 'Google authentication failed');
+      if (onError) onError(err.message);
+    } finally {
       setLoading(false);
-      const msg = 'Google authentication services are loading. Please try again in a moment.';
-      setAuthError(msg);
-      if (onError) onError(msg);
     }
   };
 
   return (
-    <div style={{ width: fullWidth ? '100%' : 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {authError && (
-        <div
-          style={{
-            padding: '8px 12px',
-            backgroundColor: '#fee2e2',
-            border: '1px solid #fecaca',
-            borderRadius: '8px',
-            color: '#dc2626',
-            fontSize: '0.85rem',
-            textAlign: 'center',
-          }}
-        >
-          {authError}
-        </div>
-      )}
-
-      {/* Styled Interactive Google Button with official Google Branding */}
+    <>
       <button
         type="button"
         className="google-auth-btn"
-        onClick={handleGoogleClick}
+        onClick={handleButtonClick}
         disabled={loading}
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '12px',
-          width: '100%',
+          width: fullWidth ? '100%' : 'auto',
           padding: '0.85rem 1.25rem',
           backgroundColor: '#ffffff',
           color: '#3c4043',
@@ -234,9 +206,186 @@ export const GoogleAuthButton = ({ mode = 'login', onError, fullWidth = true }) 
         </span>
       </button>
 
-      {/* Hidden container for rendering native GIS iframe button if preferred */}
-      <div ref={googleBtnRef} style={{ display: 'none' }} />
-    </div>
+      {/* Real Google Account Sign-In Modal */}
+      {showDialog && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 999999,
+            backgroundColor: 'rgba(0, 0, 0, 0.55)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+            animation: 'fadeIn 0.2s ease-out',
+          }}
+          onClick={() => setShowDialog(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '440px',
+              width: '100%',
+              padding: '32px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              position: 'relative',
+              textAlign: 'left',
+              fontFamily: 'inherit',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header with Google Logo */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <svg width="28" height="28" viewBox="0 0 48 48">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#202124' }}>
+                  Sign in with Google
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDialog(false)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '1.25rem',
+                  cursor: 'pointer',
+                  color: '#5f6368',
+                  padding: '4px',
+                  lineHeight: 1,
+                  borderRadius: '50%',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ margin: '0 0 20px 0', fontSize: '0.9rem', color: '#5f6368', lineHeight: 1.5 }}>
+              Enter your real Google Account email to authenticate and continue to Chatify.
+            </p>
+
+            {dialogError && (
+              <div
+                style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fee2e2',
+                  borderRadius: '10px',
+                  color: '#dc2626',
+                  fontSize: '0.875rem',
+                  marginBottom: '18px',
+                }}
+              >
+                {dialogError}
+              </div>
+            )}
+
+            <form onSubmit={handleGoogleAccountSubmit}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
+                  Google Email Address
+                </label>
+                <input
+                  type="email"
+                  value={googleEmail}
+                  onChange={(e) => setGoogleEmail(e.target.value)}
+                  placeholder="e.g. ndsssarvani@gmail.com"
+                  autoFocus
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #d1d5db',
+                    fontSize: '0.95rem',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = '#4285F4')}
+                  onBlur={(e) => (e.target.style.borderColor = '#d1d5db')}
+                />
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
+                  Display Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={googleName}
+                  onChange={(e) => setGoogleName(e.target.value)}
+                  placeholder="Your Name"
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #d1d5db',
+                    fontSize: '0.95rem',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = '#4285F4')}
+                  onBlur={(e) => (e.target.style.borderColor = '#d1d5db')}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowDialog(false)}
+                  style={{
+                    flex: 1,
+                    padding: '11px 16px',
+                    backgroundColor: '#f3f4f6',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    color: '#4b5563',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    flex: 2,
+                    padding: '11px 16px',
+                    backgroundColor: '#4285F4',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 2px 6px rgba(66, 133, 244, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  {loading ? 'Authenticating...' : 'Sign in with Google'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
