@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GoogleAuthButton from '../components/GoogleAuthButton';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -933,22 +934,10 @@ const Register = () => {
             </div>
 
             <div className="social-login">
-              <button 
-                type="button" 
-                className="social-btn" 
-                onClick={() => alert('Social OAuth is configured for production Google OAuth client. Please use standard registration or Demo Login.')}
-              >
-                <span style={{fontSize: '1.5rem'}}>🔍</span>
-                Sign up with Google
-              </button>
-              <button 
-                type="button" 
-                className="social-btn"
-                onClick={() => alert('Social OAuth is configured for Facebook client. Please use standard registration or Demo Login.')}
-              >
-                <span style={{fontSize: '1.5rem'}}>👍</span>
-                Sign up with Facebook
-              </button>
+              <GoogleAuthButton
+                mode="register"
+                onError={(msg) => setErrors((prev) => ({ ...prev, api: msg }))}
+              />
             </div>
 
             <p className="login-prompt">

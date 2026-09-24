@@ -276,3 +276,131 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Google OAuth Login / Register
+// @route   POST /api/auth/google
+export const googleAuth = async (req, res) => {
+  try {
+    const { credential, email, name, picture, googleId } = req.body;
+    let userEmail = email;
+    let userName = name;
+    let userPicture = picture;
+    let userGoogleId = googleId;
+
+    // If Google GIS ID Token credential was provided, decode the payload
+    if (credential) {
+      try {
+        const parts = credential.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+          if (payload.email) {
+            userEmail = payload.email;
+            userName = payload.name || payload.given_name || userEmail.split('@')[0];
+            userPicture = payload.picture || '';
+            userGoogleId = payload.sub;
+          }
+        }
+      } catch (e) {
+        console.warn('[Google Auth] Could not decode credential token:', e.message);
+      }
+    }
+
+    if (!userEmail) {
+      return res.status(400).json({ success: false, message: 'Google account email is required' });
+    }
+
+    const emailNormalized = userEmail.toLowerCase().trim();
+    let user = await User.findOne({ email: emailNormalized });
+
+    if (user) {
+      // Existing user - update avatar if empty or provided by Google
+      if (!user.avatar && userPicture) {
+        user.avatar = userPicture;
+      }
+      user.isOnline = true;
+      user.lastSeen = new Date();
+      await user.save();
+    } else {
+      // Create new user from Google profile
+      const baseUsername = emailNormalized.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') || 'user';
+      let username = baseUsername;
+      let count = 1;
+      while (await User.findOne({ username })) {
+        username = `${baseUsername}${count++}`;
+      }
+
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(randomPassword, salt);
+
+      const avatar =
+        userPicture ||
+        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+          userName || username
+        )}&backgroundColor=51cf66,4dabf7,845ef7`;
+
+      user = await User.create({
+        name: userName || username,
+        username,
+        email: emailNormalized,
+        passwordHash,
+        avatar,
+        fullName: userName || username,
+        isOnline: true,
+        lastSeen: new Date(),
+      });
+    }
+
+    const token = generateToken(user._id);
+
+    // Track device session
+    const userAgent = req.headers['user-agent'] || 'Unknown Device';
+    await DeviceSession.create({
+      user: user._id,
+      device: userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Browser',
+      browser: userAgent.includes('Chrome')
+        ? 'Chrome'
+        : userAgent.includes('Firefox')
+        ? 'Firefox'
+        : userAgent.includes('Safari')
+        ? 'Safari'
+        : 'Web Browser',
+      os: userAgent.includes('Windows')
+        ? 'Windows'
+        : userAgent.includes('Mac')
+        ? 'macOS'
+        : userAgent.includes('Android')
+        ? 'Android'
+        : userAgent.includes('iPhone')
+        ? 'iOS'
+        : 'Unknown OS',
+      ip: req.ip || req.connection.remoteAddress || '127.0.0.1',
+      token,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Google login successful',
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
+        fullName: user.fullName,
+        phoneNumber: user.phoneNumber,
+        place: user.place,
+        location: user.location,
+        country: user.country,
+        isOnline: user.isOnline,
+        preferences: user.preferences,
+      },
+    });
+  } catch (error) {
+    console.error('[Google Auth Error]', error);
+    res.status(500).json({ success: false, message: error.message || 'Server error during Google authentication' });
+  }
+};
+

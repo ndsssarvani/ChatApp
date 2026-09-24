@@ -11,6 +11,11 @@ export const authService = {
     return res.data;
   },
 
+  async googleAuth(payload) {
+    const res = await api.post('/auth/google', payload);
+    return res.data;
+  },
+
   async getMe() {
     const res = await api.get('/auth/me');
     return res.data;

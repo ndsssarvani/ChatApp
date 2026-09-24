@@ -75,6 +75,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (payload) => {
+    setLoading(true);
+    try {
+      const res = await authService.googleAuth(payload);
+      if (res.success && res.token) {
+        localStorage.setItem('chatify_token', res.token);
+        localStorage.setItem('chatify_user', JSON.stringify(res.user));
+        setToken(res.token);
+        setUser(res.user);
+        return { success: true, user: res.user };
+      }
+      return { success: false, message: res.message || 'Google authentication failed' };
+    } catch (err) {
+      const message = err.response?.data?.message || err.message || 'Google authentication failed';
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       if (token) {
@@ -105,6 +125,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         register,
+        loginWithGoogle,
         logout,
         updateUser,
       }}
