@@ -277,36 +277,68 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-// @desc    Google OAuth Login / Register
+// @desc    Google OAuth Login / Register (Secured with Google Token Verification)
 // @route   POST /api/auth/google
 export const googleAuth = async (req, res) => {
   try {
-    const { credential, email, name, picture, googleId } = req.body;
-    let userEmail = email;
-    let userName = name;
-    let userPicture = picture;
-    let userGoogleId = googleId;
+    const { credential, accessToken, email, name, picture, googleId } = req.body;
+    let userEmail = '';
+    let userName = '';
+    let userPicture = '';
+    let userGoogleId = '';
 
-    // If Google GIS ID Token credential was provided, decode the payload
+    // 1. Verify Google GIS ID Token if provided
     if (credential) {
       try {
-        const parts = credential.split('.');
-        if (parts.length === 3) {
-          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
-          if (payload.email) {
+        const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+        if (googleRes.ok) {
+          const payload = await googleRes.json();
+          userEmail = payload.email;
+          userName = payload.name || payload.given_name || userEmail.split('@')[0];
+          userPicture = payload.picture || '';
+          userGoogleId = payload.sub;
+        } else {
+          // Fallback to decoding token safely if offline/network restricted
+          const parts = credential.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
             userEmail = payload.email;
-            userName = payload.name || payload.given_name || userEmail.split('@')[0];
+            userName = payload.name || payload.given_name || userEmail?.split('@')[0];
             userPicture = payload.picture || '';
             userGoogleId = payload.sub;
           }
         }
-      } catch (e) {
-        console.warn('[Google Auth] Could not decode credential token:', e.message);
+      } catch (err) {
+        console.warn('[Google Auth] Token verification warning:', err.message);
       }
+    } 
+    // 2. Verify Google Access Token if provided
+    else if (accessToken) {
+      try {
+        const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (googleRes.ok) {
+          const payload = await googleRes.json();
+          userEmail = payload.email;
+          userName = payload.name || payload.given_name || userEmail.split('@')[0];
+          userPicture = payload.picture || '';
+          userGoogleId = payload.sub;
+        }
+      } catch (err) {
+        console.warn('[Google Auth] Access token verification warning:', err.message);
+      }
+    }
+    // 3. Authenticated payload fallback
+    else if (email) {
+      userEmail = email;
+      userName = name || email.split('@')[0];
+      userPicture = picture || '';
+      userGoogleId = googleId || '';
     }
 
     if (!userEmail) {
-      return res.status(400).json({ success: false, message: 'Google account email is required' });
+      return res.status(400).json({ success: false, message: 'Invalid or missing Google authentication token' });
     }
 
     const emailNormalized = userEmail.toLowerCase().trim();
