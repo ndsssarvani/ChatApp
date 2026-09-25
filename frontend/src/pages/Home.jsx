@@ -1,1452 +1,1509 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 const Home = () => {
   const navigate = useNavigate();
 
+  const [activeAccordion, setActiveAccordion] = useState(0);
+  const [selectedPlan, setSelectedPlan] = useState("pro");
+  const [hoveredFeature, setHoveredFeature] = useState(null);
 
-  const [scrollY, setScrollY] = useState(0);
-  const [hoveredCard, setHoveredCard] = useState(null);
-
+  // Scroll visibility observer for sections
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
-      
-      // Add fade-in effect on scroll
-      const sections = document.querySelectorAll('.fade-in-section');
-      sections.forEach(section => {
+      const sections = document.querySelectorAll(".finix-fade-section");
+      sections.forEach((section) => {
         const rect = section.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight * 0.85;
-        if (isVisible) {
-          section.classList.add('visible');
+        if (rect.top < window.innerHeight * 0.88) {
+          section.classList.add("finix-visible");
         }
       });
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-    
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const heroBullets = [
+    {
+      title: "End-to-end encryption",
+      desc: "Every direct message, voice note, and file is encrypted using modern protocols. Only you and your recipient can read them.",
+      icon: "🔒",
+    },
+    {
+      title: "Free voice & video calls",
+      desc: "Low-latency HD audio and video calling powered by WebRTC. Seamless one-on-one and group communication without limits.",
+      icon: "📞",
+    },
+    {
+      title: "Unlimited group chats",
+      desc: "Create dynamic channels for your team, friends, or community with admin controls, media reels, and pinned messages.",
+      icon: "👥",
+    },
+    {
+      title: "24/7 sync across devices",
+      desc: "Instant cloud synchronization via WebSockets. Pick up exactly where you left off on desktop, tablet, or mobile.",
+      icon: "⚡",
+    },
+  ];
+
+  const testimonials = [
+    {
+      name: "Alex Rivera",
+      handle: "@alexrivera_dev",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+      role: "Lead Fullstack Engineer",
+      text: "Switching to Chatify cut our team communication lag to zero. The built-in AI assistant and real-time voice notes are absolute game changers.",
+    },
+    {
+      name: "Sarah Chen",
+      handle: "@sarahc_design",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+      role: "Product Designer",
+      text: "Chatify's UI is so clean and snappy. It feels like what modern messaging should be — fast, clutter-free, and beautifully crafted.",
+    },
+    {
+      name: "Marcus Vance",
+      handle: "@marcus_vance",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus",
+      role: "Founder & Creator",
+      text: "Our entire remote team moved to Chatify for group calls and daily standup threads. Encryption plus instant translation made global collaboration effortless.",
+    },
+  ];
+
   return (
-    <>
+    <div className="finix-landing-wrapper">
       <style>{`
-        /* Import unique fonts for distinctive design */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,600;1,6..72,700&display=swap');
 
         :root {
-          --primary-green: #a3e635;
-          --primary-dark: #1a1a1a;
-          --secondary-gray: #f5f5f5;
-          --text-primary: #0a0a0a;
-          --text-secondary: #666;
-          --accent-purple: #8b5cf6;
-          --accent-blue: #3b82f6;
-          --white: #ffffff;
-          --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-          --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-          --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-          --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          --fn-bg-gradient: radial-gradient(120% 120% at 50% 0%, #ffffff 0%, #f6f8fb 50%, #edf2f7 100%);
+          --fn-card-bg: #ffffff;
+          --fn-card-border: rgba(226, 232, 240, 0.8);
+          --fn-text-primary: #090d16;
+          --fn-text-secondary: #475569;
+          --fn-text-muted: #94a3b8;
+          --fn-accent: #10b981;
+          --fn-accent-glow: rgba(16, 185, 129, 0.25);
+          --fn-dark-btn: #090d16;
+          --fn-dark-btn-hover: #1e293b;
+          --fn-font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+          --fn-font-serif: 'Newsreader', Georgia, serif;
+          --fn-shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
+          --fn-shadow-md: 0 12px 32px rgba(15, 23, 42, 0.08);
+          --fn-shadow-lg: 0 24px 64px -12px rgba(15, 23, 42, 0.14);
+          --fn-shadow-float: 0 30px 60px -15px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0,0,0,0.05);
         }
 
         * {
+          box-sizing: border-box;
           margin: 0;
           padding: 0;
-          box-sizing: border-box;
         }
 
-        body {
-          font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-          color: var(--text-primary);
-          background: var(--white);
+        .finix-landing-wrapper {
+          font-family: var(--fn-font-main);
+          background: var(--fn-bg-gradient);
+          color: var(--fn-text-primary);
+          min-height: 100vh;
           overflow-x: hidden;
-          line-height: 1.6;
-        }
-
-        .home-container {
-          width: 100%;
-          overflow-x: hidden;
-        }
-
-        /* Navbar Styles */
-        .navbar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(12px);
-          z-index: 1000;
-          padding: 1rem 0;
-          box-shadow: var(--shadow-sm);
-          animation: slideDown 0.6s ease-out;
-        }
-
-        @keyframes slideDown {
-          from {
-            transform: translateY(-100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-
-        .nav-content {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 2rem;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .nav-left, .nav-center, .nav-right {
-          display: flex;
-          align-items: center;
-          gap: 2rem;
-        }
-
-        .logo {
-          font-family: 'Poppins', sans-serif;
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: var(--text-primary);
-          letter-spacing: -0.5px;
-          cursor: pointer;
-          transition: var(--transition-smooth);
-        }
-
-        .logo:hover {
-          color: var(--primary-green);
-          transform: scale(1.05);
-        }
-
-        .nav-link {
-          text-decoration: none;
-          color: var(--text-secondary);
-          font-weight: 500;
-          font-size: 0.95rem;
           position: relative;
-          transition: var(--transition-smooth);
+          letter-spacing: -0.01em;
         }
 
-        .nav-link::after {
+        /* Ambient diagonal light sweep */
+        .finix-landing-wrapper::before {
           content: '';
-          position: absolute;
-          bottom: -4px;
-          left: 0;
-          width: 0;
-          height: 2px;
-          background: var(--primary-green);
-          transition: width 0.3s ease;
+          position: fixed;
+          top: -30%;
+          left: -10%;
+          width: 140%;
+          height: 140%;
+          background: radial-gradient(circle at 75% 20%, rgba(240, 249, 255, 0.7) 0%, transparent 60%),
+                      radial-gradient(circle at 20% 80%, rgba(236, 253, 245, 0.5) 0%, transparent 50%);
+          pointer-events: none;
+          z-index: 0;
         }
 
-        .nav-link:hover {
-          color: var(--text-primary);
+        /* Stylistic accent serif word */
+        .fn-italic {
+          font-family: var(--fn-font-serif);
+          font-style: italic;
+          font-weight: 400;
+          letter-spacing: 0.01em;
+          color: #0f172a;
         }
 
-        .nav-link:hover::after {
-          width: 100%;
+        /* ─── NAVBAR ─── */
+        .fn-navbar {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          background: rgba(255, 255, 255, 0.85);
+          border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+          transition: all 0.3s ease;
         }
 
-        .btn-login, .btn-register {
-          padding: 0.65rem 1.5rem;
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 0.95rem;
-          cursor: pointer;
-          transition: var(--transition-smooth);
-          border: none;
-          font-family: inherit;
-        }
-
-        .btn-login {
-          background: transparent;
-          color: var(--text-primary);
-          border: 2px solid var(--text-primary);
-        }
-
-        .btn-login:hover {
-          background: var(--text-primary);
-          color: var(--white);
-          transform: translateY(-2px);
-          box-shadow: var(--shadow-md);
-        }
-
-        .btn-register {
-          background: var(--text-primary);
-          color: var(--white);
-        }
-
-        .btn-register:hover {
-          background: var(--primary-green);
-          color: var(--text-primary);
-          transform: translateY(-2px);
-          box-shadow: var(--shadow-lg);
-        }
-
-        /* Hero Section */
-        .hero-section {
-          padding: 140px 2rem 100px;
-          max-width: 1400px;
+        .fn-nav-container {
+          max-width: 1240px;
           margin: 0 auto;
-          min-height: 90vh;
+          padding: 14px 24px;
           display: flex;
-          flex-direction: column;
-          justify-content: center;
-          position: relative;
-        }
-
-        .hero-content {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 4rem;
           align-items: center;
+          justify-content: space-between;
         }
 
-        .hero-text {
-          max-width: 600px;
-        }
-
-        .hero-title {
-          font-family: 'Poppins', sans-serif;
-          font-size: 4rem;
-          font-weight: 800;
-          line-height: 1.1;
-          margin-bottom: 1.5rem;
-          letter-spacing: -2px;
-        }
-
-        .title-line {
-          display: block;
-          opacity: 0;
-          animation: fadeInUp 0.8s ease forwards;
-        }
-
-        .delay-1 {
-          animation-delay: 0.2s;
-        }
-
-        .delay-2 {
-          animation-delay: 0.4s;
-        }
-
-        .delay-3 {
-          animation-delay: 0.6s;
-        }
-
-        .delay-4 {
-          animation-delay: 0.8s;
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .fade-in-up {
-          opacity: 0;
-          animation: fadeInUp 0.8s ease forwards;
-        }
-
-        .hero-description {
-          font-size: 1.15rem;
-          line-height: 1.8;
-          color: var(--text-secondary);
-          margin-bottom: 2.5rem;
-        }
-
-        .highlight {
-          color: var(--text-primary);
-          font-weight: 600;
-          position: relative;
-        }
-
-        .highlight-green {
-          color: var(--primary-green);
-          font-weight: 700;
-          
-          background-repeat: no-repeat;
-          background-size: 100% 40%;
-          background-position: 0 85%;
-          padding: 0 4px;
-        }
-
-        .hero-buttons {
+        .fn-brand {
           display: flex;
-          gap: 1rem;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          text-decoration: none;
         }
 
-        .btn-primary, .btn-secondary {
-          padding: 1rem 2rem;
+        .fn-logo-mark {
+          width: 38px;
+          height: 38px;
           border-radius: 12px;
+          background: linear-gradient(135deg, #090d16 0%, #1e293b 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .fn-logo-mark svg {
+          width: 20px;
+          height: 20px;
+          stroke: #10b981;
+        }
+
+        .fn-logo-text {
+          font-size: 20px;
+          font-weight: 800;
+          color: var(--fn-text-primary);
+          letter-spacing: -0.03em;
+        }
+
+        .fn-nav-links {
+          display: flex;
+          align-items: center;
+          gap: 32px;
+          list-style: none;
+        }
+
+        .fn-nav-link {
+          font-size: 14.5px;
           font-weight: 600;
-          font-size: 1rem;
+          color: var(--fn-text-secondary);
+          text-decoration: none;
+          transition: color 0.2s;
           cursor: pointer;
+        }
+
+        .fn-nav-link:hover {
+          color: var(--fn-text-primary);
+        }
+
+        .fn-nav-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .fn-store-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 7px 12px;
+          border-radius: 9999px;
+          background: #ffffff;
+          border: 1px solid rgba(203, 213, 225, 0.8);
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--fn-text-primary);
+          text-decoration: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .fn-store-badge:hover {
+          border-color: #94a3b8;
+          transform: translateY(-1px);
+        }
+
+        .fn-btn-ghost {
+          background: transparent;
           border: none;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          transition: var(--transition-smooth);
-          font-family: inherit;
-        }
-
-        .btn-primary {
-          background: var(--text-primary);
-          color: var(--white);
-        }
-
-        .btn-primary:hover {
-          background: var(--primary-green);
-          color: var(--text-primary);
-          transform: translateY(-3px);
-          box-shadow: var(--shadow-lg);
-        }
-
-        .btn-primary:hover svg {
-          transform: translateX(4px);
-        }
-
-        .btn-secondary {
-          background: var(--secondary-gray);
-          color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-          background: var(--text-primary);
-          color: var(--white);
-          transform: translateY(-3px);
-          box-shadow: var(--shadow-md);
-        }
-
-        .btn-secondary:hover svg {
-          transform: translateX(4px);
-        }
-
-        .btn-primary svg, .btn-secondary svg {
-          transition: transform 0.3s ease;
-        }
-
-        /* Hero Visuals */
-        .hero-visuals {
-          position: relative;
-          height: 600px;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          grid-template-rows: repeat(3, 1fr);
-          gap: 1rem;
-        }
-
-        .feature-card {
-          background: var(--white);
-          border-radius: 20px;
-          padding: 1.5rem;
-          box-shadow: var(--shadow-md);
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          transition: var(--transition-smooth);
+          padding: 8px 16px;
+          font-size: 14.5px;
+          font-weight: 600;
+          color: var(--fn-text-primary);
           cursor: pointer;
+          border-radius: 9999px;
+          transition: all 0.2s;
         }
 
-        .feature-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: var(--shadow-lg);
-          background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+        .fn-btn-ghost:hover {
+          background: rgba(0, 0, 0, 0.05);
         }
 
-        .float-animation {
-          animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        .card-1 {
-          grid-column: 1 / 3;
-          background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        }
-
-        .card-2 {
-          grid-column: 3 / 4;
-          grid-row: 1 / 2;
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        .card-3 {
-          grid-column: 1 / 2;
-          grid-row: 2 / 3;
-          justify-content: center;
-        }
-
-        .card-4 {
-          grid-column: 2 / 4;
-          grid-row: 2 / 3;
-          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        }
-
-        .card-5 {
-          grid-column: 1 / 2;
-          grid-row: 3 / 4;
-          justify-content: center;
-          background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        }
-
-        .card-6 {
-          grid-column: 2 / 4;
-          grid-row: 3 / 4;
-          background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-        }
-
-        .card-icon {
-          font-size: 2rem;
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
-        .card-content h3 {
-          font-size: 1rem;
+        .fn-btn-pill-dark {
+          background: var(--fn-dark-btn);
+          color: #ffffff;
+          border: none;
+          padding: 10px 22px;
+          font-size: 14.5px;
           font-weight: 700;
-          margin-bottom: 0.25rem;
-        }
-
-        .card-content p {
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-        }
-
-        .avatar {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2rem;
-        }
-
-        .close-btn {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          border: none;
-          background: var(--text-primary);
-          color: var(--white);
-          font-size: 1.2rem;
+          border-radius: 9999px;
           cursor: pointer;
-          transition: var(--transition-smooth);
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 4px 14px rgba(9, 13, 22, 0.2);
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          text-decoration: none;
         }
 
-        .close-btn:hover {
-          background: var(--primary-green);
-          color: var(--text-primary);
-          transform: rotate(90deg);
+        .fn-btn-pill-dark:hover {
+          background: var(--fn-dark-btn-hover);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(9, 13, 22, 0.3);
         }
 
-        /* Scroll Indicator */
-        .scroll-indicator {
-          position: absolute;
-          bottom: 2rem;
-          left: 50%;
-          transform: translateX(-50%);
-          animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% {
-            transform: translateX(-50%) translateY(0);
-          }
-          40% {
-            transform: translateX(-50%) translateY(-10px);
-          }
-          60% {
-            transform: translateX(-50%) translateY(-5px);
-          }
-        }
-
-        .mouse {
-          width: 28px;
-          height: 45px;
-          border: 2px solid var(--text-primary);
-          border-radius: 20px;
-          position: relative;
-        }
-
-        .wheel {
-          width: 4px;
-          height: 8px;
-          background: var(--text-primary);
-          border-radius: 2px;
-          position: absolute;
-          top: 8px;
-          left: 50%;
-          transform: translateX(-50%);
-          animation: wheel 1.5s infinite;
-        }
-
-        @keyframes wheel {
-          0% {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-          }
-          100% {
-            opacity: 0;
-            transform: translateX(-50%) translateY(12px);
-          }
-        }
-
-        /* Section Styles */
-        section {
-          padding: 100px 2rem;
-          max-width: 1400px;
-          margin: 0 auto;
-        }
-
-        .fade-in-section {
+        /* ─── SECTION COMMON ─── */
+        .finix-fade-section {
           opacity: 0;
-          transform: translateY(40px);
-          transition: opacity 0.8s ease, transform 0.8s ease;
+          transform: translateY(30px);
+          transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+          position: relative;
+          z-index: 1;
         }
 
-        .fade-in-section.visible {
+        .finix-fade-section.finix-visible {
           opacity: 1;
           transform: translateY(0);
         }
 
-        .section-title {
-          font-family: 'Poppins', sans-serif;
-          font-size: 3.0rem;
-          font-weight: 800;
-          line-height: 1.2;
-          letter-spacing: -1.5px;
-          margin-bottom: 1.5rem;
-          color: black;
+        .fn-container {
+          max-width: 1240px;
+          margin: 0 auto;
+          padding: 0 24px;
         }
 
-        .section-title.centered {
-          text-align: center;
+        .fn-badge-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(16, 185, 129, 0.1);
+          color: #059669;
+          border: 1px solid rgba(16, 185, 129, 0.25);
+          padding: 5px 14px;
+          border-radius: 9999px;
+          font-size: 12.5px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          margin-bottom: 20px;
         }
 
-        .section-description {
-          font-size: 1.1rem;
-          line-height: 1.8;
-          color: var(--text-secondary);
-          max-width: 800px;
+        /* ─── 1. HERO SECTION ─── */
+        .fn-hero-section {
+          padding: 70px 0 100px;
         }
 
-        .section-description.centered {
-          text-align: center;
-          margin: 0 auto 3rem;
-        }
-
-        .label {
-          display: inline-block;
-          padding: 0.5rem 1rem;
-          background: var(--secondary-gray);
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          margin-bottom: 1.5rem;
-          text-transform: lowercase;
-        }
-
-        /* Benefits Grid */
-        .benefits-grid {
+        .fn-hero-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 2rem;
-          margin-top: 3rem;
-        }
-
-        .benefit-card {
-          background: var(--white);
-          border: 2px solid var(--secondary-gray);
-          border-radius: 24px;
-          padding: 2.5rem;
-          transition: var(--transition-smooth);
-          cursor: pointer;
-        }
-
-        .benefit-card:hover, .benefit-card.hovered {
-          border-color: var(--primary-green);
-          transform: translateY(-8px);
-          box-shadow: var(--shadow-lg);
-          background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-        }
-
-        .benefit-card.large {
-          grid-column: span 2;
-          display: flex;
+          grid-template-columns: 1.15fr 0.95fr;
+          gap: 50px;
           align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-          color: var(--white);
-          min-height: 200px;
         }
 
-        .benefit-header {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .benefit-icon {
-          width: 50px;
-          height: 50px;
-          border-radius: 12px;
-          background: var(--secondary-gray);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-        }
-
-        .benefit-label {
-          font-size: 0.85rem;
-          font-weight: 600;
-          text-transform: lowercase;
-          color: var(--text-secondary);
-        }
-
-        .benefit-text {
-          line-height: 1.8;
-          color: var(--text-secondary);
-        }
-
-        .benefit-title {
-          font-family: 'Poppins', sans-serif;
-          font-size: 2.5rem;
+        .fn-hero-headline {
+          font-size: 3.75rem;
           font-weight: 800;
-          line-height: 1.2;
-          letter-spacing: -1px;
+          line-height: 1.08;
+          letter-spacing: -0.035em;
+          color: var(--fn-text-primary);
+          margin-bottom: 24px;
         }
 
-        /* Testimonials */
-        .testimonials-carousel {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 2rem;
-          margin: 3rem 0 2rem;
+        .fn-hero-subhead {
+          font-size: 1.15rem;
+          line-height: 1.6;
+          color: var(--fn-text-secondary);
+          max-width: 520px;
+          margin-bottom: 36px;
         }
 
-        .testimonial-card {
-          background: var(--white);
-          border: 2px solid var(--secondary-gray);
-          border-radius: 24px;
-          padding: 2.5rem;
+        /* Expandable Accordion */
+        .fn-accordion-list {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
-          transition: var(--transition-smooth);
+          gap: 10px;
+          max-width: 520px;
+          margin-bottom: 36px;
+        }
+
+        .fn-accordion-item {
+          background: #ffffff;
+          border: 1px solid var(--fn-card-border);
+          border-radius: 16px;
+          padding: 16px 20px;
           cursor: pointer;
+          transition: all 0.25s ease;
+          box-shadow: var(--fn-shadow-sm);
         }
 
-        .testimonial-card:hover, .testimonial-card.hovered {
-          border-color: var(--primary-green);
-          transform: translateY(-8px);
-          box-shadow: var(--shadow-lg);
+        .fn-accordion-item:hover, .fn-accordion-item.active {
+          border-color: rgba(16, 185, 129, 0.4);
+          box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
         }
 
-        .testimonial-badge {
-          display: inline-block;
-          padding: 0.5rem 1rem;
-          background: var(--secondary-gray);
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
+        .fn-accordion-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .fn-accordion-title-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 15.5px;
+          font-weight: 700;
+          color: var(--fn-text-primary);
+        }
+
+        .fn-accordion-icon-box {
+          font-size: 18px;
+        }
+
+        .fn-accordion-chevron {
+          width: 20px;
+          height: 20px;
+          transition: transform 0.25s ease;
+          color: var(--fn-text-muted);
+        }
+
+        .fn-accordion-item.active .fn-accordion-chevron {
+          transform: rotate(90deg);
+          color: var(--fn-accent);
+        }
+
+        .fn-accordion-body {
+          margin-top: 10px;
+          padding-top: 10px;
+          border-top: 1px solid #f1f5f9;
+          font-size: 13.5px;
+          line-height: 1.55;
+          color: var(--fn-text-secondary);
+          animation: fnFadeIn 0.3s ease;
+        }
+
+        @keyframes fnFadeIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Right Column: Floating Phone Mockup */
+        .fn-hero-visual {
+          position: relative;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .fn-phone-mockup {
+          width: 320px;
+          height: 600px;
+          background: #090d16;
+          border-radius: 46px;
+          padding: 12px;
+          box-shadow: var(--fn-shadow-float);
+          position: relative;
+          animation: fnFloat 6s ease-in-out infinite;
+          border: 4px solid #1e293b;
+        }
+
+        @keyframes fnFloat {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(0.5deg); }
+        }
+
+        .fn-phone-screen {
+          width: 100%;
+          height: 100%;
+          background: #0b0f19;
+          border-radius: 36px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+        }
+
+        .fn-phone-notch {
+          width: 110px;
+          height: 22px;
+          background: #000;
+          border-radius: 0 0 14px 14px;
+          margin: 0 auto;
+        }
+
+        .fn-phone-chat-header {
+          padding: 12px 16px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(17, 24, 39, 0.8);
+        }
+
+        .fn-phone-avatar {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          background: #22c55e;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: bold;
+          color: #fff;
+        }
+
+        .fn-phone-chat-body {
+          flex: 1;
+          padding: 16px 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          justify-content: flex-end;
+        }
+
+        .fn-mock-bubble {
+          padding: 10px 14px;
+          border-radius: 16px;
+          font-size: 12.5px;
+          line-height: 1.4;
+          max-width: 82%;
+        }
+
+        .fn-mock-bubble.in {
+          background: #1f2937;
+          color: #f8fafc;
+          align-self: flex-start;
+          border-bottom-left-radius: 4px;
+        }
+
+        .fn-mock-bubble.out {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: #ffffff;
+          align-self: flex-end;
+          border-bottom-right-radius: 4px;
+        }
+
+        .fn-mock-typing {
+          display: flex;
+          gap: 4px;
+          padding: 8px 12px;
+          background: #1f2937;
+          border-radius: 14px;
+          align-self: flex-start;
           width: fit-content;
         }
 
-        .testimonial-text {
-          line-height: 1.8;
-          color: var(--text-secondary);
-          flex: 1;
-        }
-
-        .testimonial-author {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .author-avatar {
-          width: 50px;
-          height: 50px;
+        .fn-mock-typing span {
+          width: 6px;
+          height: 6px;
+          background: #10b981;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
+          animation: fnDotPulse 1.4s infinite ease-in-out both;
         }
 
-        .author-info h4 {
+        .fn-mock-typing span:nth-child(1) { animation-delay: -0.32s; }
+        .fn-mock-typing span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes fnDotPulse {
+          0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; }
+          40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Floating 3D Reaction & Notification cards */
+        .fn-floating-reaction {
+          position: absolute;
+          top: 18%;
+          right: -24px;
+          background: #ffffff;
+          padding: 10px 16px;
+          border-radius: 20px;
+          box-shadow: 0 16px 36px rgba(0,0,0,0.15);
+          font-size: 22px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          animation: fnFloatReverse 5s ease-in-out infinite;
+          border: 1px solid rgba(226, 232, 240, 0.8);
+          z-index: 5;
+        }
+
+        .fn-floating-reaction-badge {
+          font-size: 12px;
           font-weight: 700;
-          margin-bottom: 0.25rem;
+          color: #0f172a;
         }
 
-        .author-info p {
-          font-size: 0.85rem;
-          color: var(--text-secondary);
+        .fn-floating-notif {
+          position: absolute;
+          bottom: 12%;
+          left: -32px;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(12px);
+          padding: 12px 18px;
+          border-radius: 18px;
+          box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          z-index: 5;
+          animation: fnFloat 7s ease-in-out infinite;
+          max-width: 240px;
         }
 
-        .explore-btn {
-          padding: 0.75rem 1.5rem;
-          background: var(--text-primary);
-          color: var(--white);
-          border: none;
+        .fn-notif-icon {
+          width: 36px;
+          height: 36px;
+          background: rgba(16, 185, 129, 0.12);
           border-radius: 10px;
-          font-weight: 600;
-          cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.5rem;
-          transition: var(--transition-smooth);
-          font-family: inherit;
+          font-size: 18px;
         }
 
-        .explore-btn:hover {
-          background: var(--primary-green);
-          color: var(--text-primary);
-          transform: scale(1.02);
+        .fn-notif-title {
+          font-size: 12.5px;
+          font-weight: 700;
+          color: var(--fn-text-primary);
         }
 
-        /* Final CTA */
-        .final-cta-section {
-          background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-          border-radius: 40px;
-          padding: 80px 4rem;
+        .fn-notif-sub {
+          font-size: 11px;
+          color: var(--fn-text-muted);
         }
 
-        .cta-content {
+        @keyframes fnFloatReverse {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(10px); }
+        }
+
+        /* ─── 2. SECTION: MESSAGING WITHOUT BORDERS ─── */
+        .fn-globe-section {
+          padding: 100px 0;
+          background: #ffffff;
+          border-top: 1px solid var(--fn-card-border);
+          border-bottom: 1px solid var(--fn-card-border);
+        }
+
+        .fn-globe-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 60px;
+          align-items: center;
+        }
+
+        .fn-globe-visual-box {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 420px;
+        }
+
+        .fn-3d-globe-sphere {
+          width: 320px;
+          height: 320px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 35% 35%, #1e293b 0%, #090d16 80%);
+          box-shadow: 0 24px 64px rgba(15, 23, 42, 0.25), inset 0 0 40px rgba(16, 185, 129, 0.3);
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .fn-globe-ring {
+          position: absolute;
+          width: 380px;
+          height: 380px;
+          border-radius: 50%;
+          border: 1px dashed rgba(16, 185, 129, 0.4);
+          animation: fnSpin 24s linear infinite;
+        }
+
+        @keyframes fnSpin {
+          100% { transform: rotate(360deg); }
+        }
+
+        .fn-globe-pulse-dot {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 12px #10b981;
+        }
+
+        .fn-globe-headline {
+          font-size: 3.25rem;
+          font-weight: 800;
+          line-height: 1.12;
+          letter-spacing: -0.03em;
+          color: var(--fn-text-primary);
+          margin-bottom: 20px;
+        }
+
+        .fn-globe-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+          margin-top: 36px;
+        }
+
+        .fn-stat-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .fn-stat-number {
+          font-size: 2rem;
+          font-weight: 800;
+          color: var(--fn-text-primary);
+          letter-spacing: -0.03em;
+        }
+
+        .fn-stat-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--fn-text-muted);
+          margin-top: 4px;
+        }
+
+        /* ─── 3. SECTION: CONVERSATIONS WITHOUT DELAYS ─── */
+        .fn-delays-section {
+          padding: 120px 0;
+        }
+
+        .fn-delays-top {
           text-align: center;
-          max-width: 800px;
-          margin: 0 auto 4rem;
+          max-width: 680px;
+          margin: 0 auto 60px;
         }
 
-        .cta-title {
-          font-family: 'Poppins', sans-serif;
+        .fn-delays-headline {
+          font-size: 3.25rem;
+          font-weight: 800;
+          line-height: 1.15;
+          letter-spacing: -0.03em;
+          color: var(--fn-text-primary);
+          margin-bottom: 16px;
+        }
+
+        .fn-cards-row {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+        }
+
+        .fn-feature-card {
+          background: #ffffff;
+          border: 1px solid var(--fn-card-border);
+          border-radius: 24px;
+          padding: 32px 28px;
+          box-shadow: var(--fn-shadow-sm);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+        }
+
+        .fn-feature-card:hover {
+          transform: translateY(-6px);
+          box-shadow: var(--fn-shadow-lg);
+          border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .fn-feature-icon-box {
+          width: 52px;
+          height: 52px;
+          border-radius: 16px;
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          margin-bottom: 22px;
+        }
+
+        .fn-feature-title {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: var(--fn-text-primary);
+          margin-bottom: 10px;
+        }
+
+        .fn-feature-desc {
+          font-size: 14.5px;
+          line-height: 1.6;
+          color: var(--fn-text-secondary);
+        }
+
+        /* ─── 4. SECTION: JOIN CHATIFY IN MINUTES ─── */
+        .fn-join-section {
+          padding: 100px 0;
+          background: #ffffff;
+          border-top: 1px solid var(--fn-card-border);
+          border-bottom: 1px solid var(--fn-card-border);
+        }
+
+        .fn-join-grid {
+          display: grid;
+          grid-template-columns: 1fr 1.05fr;
+          gap: 60px;
+          align-items: center;
+        }
+
+        .fn-join-headline {
+          font-size: 3.25rem;
+          font-weight: 800;
+          line-height: 1.15;
+          letter-spacing: -0.03em;
+          color: var(--fn-text-primary);
+          margin-bottom: 32px;
+        }
+
+        .fn-step-list {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          margin-bottom: 36px;
+        }
+
+        .fn-step-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 16px;
+        }
+
+        .fn-step-num {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: var(--fn-dark-btn);
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .fn-step-heading {
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--fn-text-primary);
+          margin-bottom: 4px;
+        }
+
+        .fn-step-desc {
+          font-size: 14px;
+          color: var(--fn-text-secondary);
+          line-height: 1.5;
+        }
+
+        /* Plans dark card panel */
+        .fn-plan-card-dark {
+          background: #090d16;
+          color: #ffffff;
+          border-radius: 28px;
+          padding: 36px 32px;
+          box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+          position: relative;
+        }
+
+        .fn-plan-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+        }
+
+        .fn-plan-badge {
+          background: rgba(16, 185, 129, 0.2);
+          color: #34d399;
+          font-size: 12px;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 20px;
+        }
+
+        .fn-plan-price {
+          font-size: 2.75rem;
+          font-weight: 800;
+          letter-spacing: -0.03em;
+          margin-bottom: 8px;
+        }
+
+        .fn-plan-price span {
+          font-size: 15px;
+          font-weight: 500;
+          color: #94a3b8;
+        }
+
+        .fn-plan-features {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin: 24px 0 32px;
+          font-size: 14px;
+          color: #cbd5e1;
+        }
+
+        .fn-plan-features li {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .fn-plan-features li span {
+          color: #10b981;
+          font-weight: bold;
+        }
+
+        .fn-plan-btn {
+          width: 100%;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: #ffffff;
+          border: none;
+          border-radius: 9999px;
+          padding: 14px;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .fn-plan-btn:hover {
+          filter: brightness(1.1);
+          transform: translateY(-2px);
+        }
+
+        /* ─── 5. SECTION: TESTIMONIALS ─── */
+        .fn-reviews-section {
+          padding: 120px 0;
+        }
+
+        .fn-reviews-top {
+          text-align: center;
+          max-width: 600px;
+          margin: 0 auto 50px;
+        }
+
+        .fn-reviews-headline {
+          font-size: 3rem;
+          font-weight: 800;
+          letter-spacing: -0.03em;
+          color: var(--fn-text-primary);
+        }
+
+        .fn-reviews-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+          margin-bottom: 40px;
+        }
+
+        .fn-tweet-card {
+          background: #ffffff;
+          border: 1px solid var(--fn-card-border);
+          border-radius: 20px;
+          padding: 24px;
+          box-shadow: var(--fn-shadow-sm);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          transition: all 0.25s ease;
+        }
+
+        .fn-tweet-card:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--fn-shadow-md);
+        }
+
+        .fn-tweet-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 16px;
+        }
+
+        .fn-tweet-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+        }
+
+        .fn-tweet-name {
+          font-size: 14.5px;
+          font-weight: 700;
+          color: var(--fn-text-primary);
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .fn-tweet-handle {
+          font-size: 12.5px;
+          color: var(--fn-text-muted);
+        }
+
+        .fn-tweet-text {
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--fn-text-secondary);
+        }
+
+        .fn-reviews-footer {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+        }
+
+        .fn-avatar-stack {
+          display: flex;
+          margin-right: -8px;
+        }
+
+        .fn-avatar-stack img {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 2px solid #ffffff;
+          margin-left: -8px;
+        }
+
+        /* ─── 6. FINAL CTA SECTION ─── */
+        .fn-cta-section {
+          padding: 100px 0 120px;
+          position: relative;
+        }
+
+        .fn-cta-card {
+          background: radial-gradient(100% 100% at 50% 0%, #1e293b 0%, #090d16 100%);
+          border-radius: 36px;
+          padding: 70px 48px;
+          color: #ffffff;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+          box-shadow: var(--fn-shadow-float);
+        }
+
+        .fn-cta-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 600px;
+          height: 300px;
+          background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+          pointer-events: none;
+        }
+
+        .fn-cta-headline {
           font-size: 3.5rem;
           font-weight: 800;
-          line-height: 1.2;
-          letter-spacing: -1.5px;
-          margin: 2rem 0 1.5rem;
+          line-height: 1.12;
+          letter-spacing: -0.035em;
+          margin-bottom: 20px;
         }
 
-        .cta-images {
-          display: grid;
-          grid-template-columns: repeat(6, 1fr);
-          gap: 1.5rem;
+        .fn-cta-subhead {
+          font-size: 1.15rem;
+          color: #94a3b8;
+          max-width: 540px;
+          margin: 0 auto 36px;
+          line-height: 1.6;
         }
 
-        .cta-image-card {
-          aspect-ratio: 1;
-          background: var(--white);
-          border-radius: 20px;
+        .fn-btn-cta-light {
+          background: #ffffff;
+          color: #090d16;
+          border: none;
+          padding: 14px 36px;
+          font-size: 16px;
+          font-weight: 800;
+          border-radius: 9999px;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .fn-btn-cta-light:hover {
+          background: #f1f5f9;
+          transform: translateY(-3px);
+          box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
+        }
+
+        /* ─── FOOTER ─── */
+        .fn-footer {
+          border-top: 1px solid var(--fn-card-border);
+          padding: 40px 0;
+          background: #ffffff;
+          font-size: 13.5px;
+          color: var(--fn-text-muted);
+        }
+
+        .fn-footer-content {
           display: flex;
           align-items: center;
-          justify-content: center;
-          box-shadow: var(--shadow-md);
-          transition: var(--transition-smooth);
-          cursor: pointer;
-          font-size: 3rem;
+          justify-content: space-between;
         }
 
-        .cta-image-card:hover {
-          transform: translateY(-10px) scale(1.05);
-          box-shadow: var(--shadow-lg);
-        }
-
-        /* Footer */
-        .footer {
-          background: var(--text-primary);
-          color: var(--white);
-          padding: 80px 2rem 2rem;
-        }
-
-        .footer-content {
-          max-width: 1400px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: 2fr 1fr 1fr 1fr;
-          gap: 4rem;
-          margin-bottom: 3rem;
-        }
-
-        .footer-logo {
-          font-family: 'Poppins', sans-serif;
-          font-size: 1.8rem;
-          font-weight: 800;
-          margin-bottom: 1rem;
-        }
-
-        .footer-description {
-          color: rgba(255, 255, 255, 0.7);
-          line-height: 1.8;
-        }
-
-        .footer-section h4 {
-          margin-bottom: 1rem;
-        }
-
-        .footer-section a {
-          display: block;
-          color: rgba(255, 255, 255, 0.7);
-          text-decoration: none;
-          margin-bottom: 0.75rem;
-          transition: var(--transition-smooth);
-        }
-
-        .footer-section a:hover {
-          color: var(--primary-green);
-          transform: translateX(4px);
-        }
-
-        .footer-bottom {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding-top: 2rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-          text-align: center;
-          color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-          .hero-content {
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 1024px) {
+          .fn-hero-headline, .fn-globe-headline, .fn-delays-headline, .fn-join-headline, .fn-cta-headline {
+            font-size: 2.75rem;
+          }
+          .fn-hero-grid, .fn-globe-grid, .fn-join-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+          }
+          .fn-cards-row, .fn-reviews-grid {
             grid-template-columns: 1fr;
           }
-          
-          .benefits-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-          
-          .testimonials-carousel {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .nav-center {
+          .fn-nav-links {
             display: none;
           }
-          
-          .nav-content {
-            padding: 0 1rem;
-          }
-
-          .nav-left, .nav-right {
-            gap: 0.75rem;
-          }
-
-          .btn-login, .btn-register {
-            padding: 0.5rem 1rem;
-            font-size: 0.88rem;
-          }
-          
-          .hero-section {
-            padding: 110px 1.25rem 60px;
-          }
-
-          .hero-title {
-            font-size: 2.4rem;
-          }
-          
-          .section-title {
-            font-size: 1.85rem;
-          }
-          
-          .benefits-grid {
-            grid-template-columns: 1fr;
-          }
-          
-          .benefit-card.large {
-            grid-column: span 1;
-          }
-          
-          .cta-images {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          
-          .footer-content {
-            grid-template-columns: 1fr;
-          }
         }
 
-        @media (max-width: 480px) {
-          .nav-left .nav-link {
+        @media (max-width: 640px) {
+          .fn-hero-headline, .fn-globe-headline, .fn-delays-headline, .fn-join-headline, .fn-cta-headline {
+            font-size: 2.25rem;
+          }
+          .fn-store-badge {
             display: none;
           }
-
-          .hero-title {
-            font-size: 2rem;
+          .fn-phone-mockup {
+            width: 280px;
+            height: 520px;
           }
-
-          .hero-stats {
+          .fn-globe-stats-grid {
             grid-template-columns: 1fr;
+            gap: 16px;
           }
-
-          .btn-login, .btn-register {
-            padding: 0.45rem 0.75rem;
-            font-size: 0.82rem;
-          }
-        }
-
-        html {
-          scroll-behavior: smooth;
         }
       `}</style>
 
-      <div className="home-container">
-        {/* Navigation */}
-        <nav className="navbar">
-          <div className="nav-content">
-            <div className="nav-left">
-              <div 
-                className="logo" 
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              >
-                Chatify
-              </div>
-              <span 
-                className="nav-link" 
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate('/help')}
-              >
-                Contact Us
-              </span>
-            </div>
-            <div className="nav-center">
-              <span 
-                className="nav-link" 
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate('/about')}
-              >
-                About
-              </span>
-              <a 
-                href="#benefits" 
-                className="nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Benefits
-              </a>
-              <a 
-                href="#app" 
-                className="nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('app')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                App
-              </a>
-              <a 
-                href="#features" 
-                className="nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Features
-              </a>
-              <a 
-                href="#reviews" 
-                className="nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Reviews
-              </a>
-              <a 
-                href="#plans" 
-                className="nav-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Plans
-              </a>
-            </div>
-            <div className="nav-right">
-              <button className="btn-login" onClick={() => navigate('/login')}>Login</button>
-              <button className="btn-register" onClick={() => navigate('/register')}>Register</button>
-            </div>
-          </div>
-        </nav>
-
-        {/* Hero Section */}
-        <section className="hero-section">
-          <div className="hero-content">
-            <div className="hero-text">
-              <h1 className="hero-title">
-                <span className="title-line fade-in-up">Empower</span>
-                <span className="title-line fade-in-up delay-1">Connections</span>
-                <span className="title-line fade-in-up delay-2">with Chatify</span>
-              </h1>
-              <p className="hero-description fade-in-up delay-3">
-                Instant real-time <span className="highlight">communication</span>, providing both
-                visual connection and <span className="highlight">immediate answers</span> to customers requires.
-              </p>
-              <div className="hero-buttons fade-in-up delay-4">
-                <button className="btn-primary" onClick={() => navigate('/register')}>
-                  Try Out
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </button>
-                <button
-                  className="btn-secondary"
-                  onClick={() => document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Learn More
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <div className="hero-visuals">
-              <div className="feature-card card-1 float-animation">
-                <div className="card-icon">📱</div>
-                <div className="card-content">
-                  <h3>Try Out</h3>
-                  <p>Experience seamless chat</p>
-                </div>
-              </div>
-              
-              <div className="feature-card card-2 float-animation delay-1">
-                <div className="card-icon">❓</div>
-                <div className="card-content">
-                  <h3>Ask Me A Question</h3>
-                  <p>Get instant support</p>
-                </div>
-              </div>
-              
-              <div className="feature-card card-3 float-animation delay-2">
-                <div className="avatar">👤</div>
-              </div>
-              
-              <div className="feature-card card-4 float-animation delay-3">
-                <div className="card-icon">🎤</div>
-                <div className="card-content">
-                  <h3>Type here</h3>
-                </div>
-              </div>
-              
-              <div className="feature-card card-5 float-animation delay-4">
-                <button className="close-btn">✕</button>
-              </div>
-              
-              <div className="feature-card card-6 float-animation delay-2">
-                <div className="card-icon">📝</div>
-                <div className="card-content">
-                  <h3>Ask Me A Question</h3>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="scroll-indicator">
-            <div className="mouse">
-              <div className="wheel"></div>
-            </div>
-          </div>
-        </section>
-
-        {/* AI Operator & App Showcase Section */}
-        <section className="fade-in-section" id="app" style={{textAlign: 'center', padding: '120px 2rem'}}>
-          <div style={{display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '2rem'}}>
-            <div style={{width: '60px', height: '60px', borderRadius: '50%', background: 'var(--secondary-gray)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', boxShadow: 'var(--shadow-sm)'}}>🌐</div>
-            <div style={{width: '60px', height: '60px', borderRadius: '50%', background: 'var(--secondary-gray)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', boxShadow: 'var(--shadow-sm)'}}>📹</div>
-          </div>
-          <h2 className="section-title">
-            Even if your operator is reluctant to appear
-            on camera, <span style={{ color: '#86df5d', fontWeight: 600 }}>
-  our AI expresses
-</span>
- engagement
-            through text or facial expressions.
-          </h2>
-        </section>
-
-        {/* Live Chat & Features Section */}
-        <section className="fade-in-section" id="features" style={{background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', borderRadius: '40px', padding: '90px 2rem', textAlign: 'center'}}>
-          <div className="label" style={{ background: '#dcfce7', color: '#15803d' }}>✨ core capabilities</div>
-          <h2 className="section-title">
-            Introducing <span style={{ color: '#6fd341', fontWeight: 600 }}>
-  Live Chat
-</span>
- Of The Future
-          </h2>
-          <p style={{ maxWidth: '700px', margin: '0 auto 2.5rem', color: '#166534', fontSize: '1.1rem' }}>
-            Built with modern MERN architecture, Socket.IO WebSockets, and real-time synchronization.
-          </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', maxWidth: '1050px', margin: '0 auto', textAlign: 'left' }}>
-            <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>💬</div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Real-Time Messaging</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>Instant message delivery with typing indicators, read receipts, and reactions.</p>
-            </div>
-            <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📹</div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>HD Audio & Video</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>Crystal-clear calls with duration timers, mute, camera toggle, and screen privacy.</p>
-            </div>
-            <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>👥</div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Group Channels</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>Create multi-user group spaces, manage members, and collaborate effortlessly.</p>
-            </div>
-            <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔒</div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Privacy & Security</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>TLS transport encryption, disappearing temporary chats, and safety controls.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Benefits Section */}
-        <section className="fade-in-section" id="benefits">
-          <div className="label">🔓 unlocking value</div>
-          <h2 className="section-title">Our Benefits</h2>
-          
-          <div className="benefits-grid">
-            <div 
-              className={`benefit-card ${hoveredCard === 'engagement' ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCard('engagement')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="benefit-header">
-                <div className="benefit-icon">😊</div>
-                <div className="benefit-label">clients engagement</div>
-              </div>
-              <p className="benefit-text">
-                The inclusion of an on-site chat feature ensures that your clients remain engaged and are more
-                likely to take the desired action before leaving.
-              </p>
-            </div>
-            
-            <div 
-              className={`benefit-card large ${hoveredCard === 'elevate' ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCard('elevate')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <h3 className="benefit-title">We are here to<br/>Elevate Engagement</h3>
-            </div>
-            
-            <div 
-              className={`benefit-card ${hoveredCard === 'refusals' ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCard('refusals')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="benefit-header">
-                <div className="benefit-icon">🛒</div>
-                <div className="benefit-label">reduced purchase refusals</div>
-              </div>
-              <p className="benefit-text">
-                The occurrence of purchase and order refusals is anticipated to decrease, resulting in a more
-                streamlined and efficient transaction process.
-              </p>
-            </div>
-            
-            <div 
-              className={`benefit-card ${hoveredCard === 'data' ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCard('data')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="benefit-header">
-                <div className="benefit-icon">📊</div>
-                <div className="benefit-label">data acquisition</div>
-              </div>
-              <p className="benefit-text">
-                The business is poised to enhance its data acquisition efforts by collecting a more
-                comprehensive set of visitor contact information.
-              </p>
-            </div>
-            
-            <div 
-              className={`benefit-card large ${hoveredCard === 'website' ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCard('website')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <h3 className="benefit-title">We are here to<br/>Elevate Your Website<br/>Performance</h3>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="fade-in-section" id="reviews">
-          <div className="label">📋 customer reviews</div>
-          <h2 className="section-title">Trusted By People</h2>
-          
-          <div className="testimonials-carousel">
-            <div 
-              className={`testimonial-card ${hoveredCard === 'test1' ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCard('test1')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="testimonial-badge">Customer Stories</div>
-              <p className="testimonial-text">
-                Reducing our no-show rate was important to have higher utilization of our sales team.
-                With Chatify, we brought it down to about 20%, and time is money.
-              </p>
-              <div className="testimonial-author">
-                <div className="author-avatar">👩‍💼</div>
-                <div className="author-info">
-                  <h4>Elara Steele</h4>
-                  <p>Senior VP, Sales and Service, Blue Nile</p>
-                </div>
-              </div>
-              <button className="explore-btn" onClick={() => navigate('/about')}>
-                Explore More
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-            
-            <div 
-              className={`testimonial-card ${hoveredCard === 'test2' ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCard('test2')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="testimonial-badge">Customer Stories</div>
-              <p className="testimonial-text">
-                Chatify is so intuitive and user-friendly. Our team finds it very simple to connect,
-                share media files instantly, and communicate in real-time.
-              </p>
-              <div className="testimonial-author">
-                <div className="author-avatar">👩‍💼</div>
-                <div className="author-info">
-                  <h4>Seraphina Quinn</h4>
-                  <p>Senior IT Operations Analyst, Alterra Mountain Company</p>
-                </div>
-              </div>
-              <button className="explore-btn" onClick={() => navigate('/about')}>
-                Explore More
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-            
-            <div 
-              className={`testimonial-card ${hoveredCard === 'test3' ? 'hovered' : ''}`}
-              onMouseEnter={() => setHoveredCard('test3')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="testimonial-badge">Customer Stories</div>
-              <p className="testimonial-text">
-                We use Chatify for everything across departments. Group chats, audio-video calls, and instant
-                search make collaboration fast and seamless.
-              </p>
-              <div className="testimonial-author">
-                <div className="author-avatar">👨‍💼</div>
-                <div className="author-info">
-                  <h4>Xander Frost</h4>
-                  <p>System Administrator, Allbirds</p>
-                </div>
-              </div>
-              <button className="explore-btn" onClick={() => navigate('/about')}>
-                Explore More
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Plans / Pricing Section */}
-        <section className="fade-in-section" id="plans" style={{ padding: '80px 2rem' }}>
-          <div className="label">💳 flexible options</div>
-          <h2 className="section-title centered">Choose Your Plan</h2>
-          <p className="section-description centered">
-            Start for free and scale seamlessly as your community or team expands.
-          </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-            {/* Free Plan */}
-            <div style={{
-              background: 'var(--white)',
-              border: '2px solid var(--secondary-gray)',
-              borderRadius: '24px',
-              padding: '2.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'var(--transition-smooth)',
-            }}>
-              <div>
-                <span style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', color: '#16a34a' }}>Starter</span>
-                <h3 style={{ fontSize: '2.25rem', fontWeight: 800, margin: '12px 0 8px 0' }}>$0 <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)' }}>/ month</span></h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>Perfect for individuals and personal conversations.</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', fontSize: '14px', lineHeight: 2, color: 'var(--text-primary)' }}>
-                  <li>✓ Unlimited 1-on-1 chats</li>
-                  <li>✓ Real-time typing indicators</li>
-                  <li>✓ Media & file sharing up to 10MB</li>
-                  <li>✓ Standard audio & video calls</li>
-                </ul>
-              </div>
-              <button
-                className="btn-register"
-                onClick={() => navigate('/register')}
-                style={{ width: '100%', background: 'var(--text-primary)', color: '#fff', border: 'none', padding: '12px', borderRadius: '10px' }}
-              >
-                Get Started Free
-              </button>
-            </div>
-
-            {/* Pro Plan */}
-            <div style={{
-              background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-              color: '#ffffff',
-              borderRadius: '24px',
-              padding: '2.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              boxShadow: 'var(--shadow-lg)',
-              position: 'relative',
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '-12px',
-                right: '24px',
-                background: '#22c55e',
-                color: '#fff',
-                fontSize: '12px',
-                fontWeight: 700,
-                padding: '4px 12px',
-                borderRadius: '20px'
-              }}>
-                MOST POPULAR
-              </div>
-              <div>
-                <span style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', color: '#4ade80' }}>Pro Team</span>
-                <h3 style={{ fontSize: '2.25rem', fontWeight: 800, margin: '12px 0 8px 0', color: '#fff' }}>$9 <span style={{ fontSize: '14px', fontWeight: 500, color: '#94a3b8' }}>/ month</span></h3>
-                <p style={{ color: '#cbd5e1', fontSize: '14px', marginBottom: '20px' }}>For teams and power users needing advanced groups and storage.</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', fontSize: '14px', lineHeight: 2, color: '#f1f5f9' }}>
-                  <li>✓ Everything in Starter</li>
-                  <li>✓ Unlimited Group channels</li>
-                  <li>✓ Priority WebSocket routing</li>
-                  <li>✓ 100MB file uploads & analytics</li>
-                </ul>
-              </div>
-              <button
-                className="btn-register"
-                onClick={() => navigate('/register')}
-                style={{ width: '100%', background: '#22c55e', color: '#fff', border: 'none', padding: '12px', borderRadius: '10px' }}
-              >
-                Start Pro Trial
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA Section */}
-        <section className="final-cta-section fade-in-section">
-          <div className="cta-content">
-            <div style={{display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '2rem'}}>
-              <div style={{width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem'}}>🌐</div>
-              <div style={{width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem'}}>💬</div>
-            </div>
-            <h2 className="cta-title">
-              Connect Instantly,<br/>
-              Communicate Effortlessly<br/>
-              - Chatify!
-            </h2>
-            <p style={{fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--text-secondary)', marginBottom: '2.5rem'}}>
-              Seamlessly bridge distances, spark dialogues, and elevate your communication
-              game to a whole new level.
-            </p>
-            <button
-              className="btn-primary"
-              style={{padding: '1.25rem 2.5rem', fontSize: '1.1rem'}}
-              onClick={() => navigate('/register')}
-            >
-              Get Started
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      {/* ─── NAVBAR ─── */}
+      <nav className="fn-navbar">
+        <div className="fn-nav-container">
+          <div className="fn-brand" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            <div className="fn-logo-mark">
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
               </svg>
+            </div>
+            <span className="fn-logo-text">Chatify</span>
+          </div>
+
+          <ul className="fn-nav-links">
+            <li><a href="#features" className="fn-nav-link">Features</a></li>
+            <li><a href="#solutions" className="fn-nav-link">Solutions</a></li>
+            <li><a href="#plans" className="fn-nav-link">Pricing</a></li>
+            <li><span className="fn-nav-link" onClick={() => navigate("/about")}>About</span></li>
+            <li><span className="fn-nav-link" onClick={() => navigate("/help")}>Help</span></li>
+          </ul>
+
+          <div className="fn-nav-actions">
+            <div className="fn-store-badge" title="Download for iOS">
+              <span></span>
+              <span>App Store</span>
+            </div>
+            <div className="fn-store-badge" title="Download for Android">
+              <span>▶</span>
+              <span>Google Play</span>
+            </div>
+            <button type="button" className="fn-btn-ghost" onClick={() => navigate("/login")}>
+              Log In
+            </button>
+            <button type="button" className="fn-btn-pill-dark" onClick={() => navigate("/register")}>
+              Sign Up →
             </button>
           </div>
-          
-          <div className="cta-images">
-            <div className="cta-image-card">👨‍💼</div>
-            <div className="cta-image-card">👩‍💼</div>
-            <div className="cta-image-card">✍️</div>
-            <div className="cta-image-card">👨‍💼</div>
-            <div className="cta-image-card">👩‍💼</div>
-            <div className="cta-image-card">💼</div>
-          </div>
-        </section>
+        </div>
+      </nav>
 
-        {/* Footer */}
-        <footer className="footer">
-          <div className="footer-content">
-            <div className="footer-section">
-              <h3 className="footer-logo" style={{ cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Chatify</h3>
-              <p className="footer-description">
-                Seamlessly bridge distances, spark dialogues, and elevate your communication.
+      {/* ─── SECTION 1: HERO ─── */}
+      <section className="fn-hero-section finix-fade-section">
+        <div className="fn-container">
+          <div className="fn-hero-grid">
+            {/* Left Column */}
+            <div>
+              <div className="fn-badge-pill">✨ Next-Gen Realtime Messaging</div>
+              <h1 className="fn-hero-headline">
+                Chat anytime,<br />
+                <span className="fn-italic">anywhere</span> with ease
+              </h1>
+              <p className="fn-hero-subhead">
+                Chatify connects friends, communities, and global teams with instant encrypted messaging, crystal-clear voice calls, and an intelligent Gemini AI assistant.
+              </p>
+
+              {/* Accordion Bullets */}
+              <div className="fn-accordion-list">
+                {heroBullets.map((bullet, idx) => {
+                  const isOpen = activeAccordion === idx;
+                  return (
+                    <div
+                      key={idx}
+                      className={`fn-accordion-item ${isOpen ? "active" : ""}`}
+                      onClick={() => setActiveAccordion(isOpen ? -1 : idx)}
+                    >
+                      <div className="fn-accordion-header">
+                        <div className="fn-accordion-title-group">
+                          <span className="fn-accordion-icon-box">{bullet.icon}</span>
+                          <span>{bullet.title}</span>
+                        </div>
+                        <svg className="fn-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </div>
+                      {isOpen && <p className="fn-accordion-body">{bullet.desc}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                className="fn-btn-pill-dark"
+                style={{ padding: "14px 32px", fontSize: "16px" }}
+                onClick={() => navigate("/register")}
+              >
+                Get Started Free →
+              </button>
+            </div>
+
+            {/* Right Column: Floating 3D Phone Mockup */}
+            <div className="fn-hero-visual">
+              {/* Floating Reaction Bubble */}
+              <div className="fn-floating-reaction">
+                <span>❤️</span>
+                <span className="fn-floating-reaction-badge">12 reactions</span>
+              </div>
+
+              {/* Floating Notification */}
+              <div className="fn-floating-notif">
+                <div className="fn-notif-icon">🤖</div>
+                <div>
+                  <div className="fn-notif-title">Chatify AI Assistant</div>
+                  <div className="fn-notif-sub">"I translated the note to Telugu!"</div>
+                </div>
+              </div>
+
+              {/* Phone Frame */}
+              <div className="fn-phone-mockup">
+                <div className="fn-phone-screen">
+                  <div className="fn-phone-notch" />
+                  <div className="fn-phone-chat-header">
+                    <div className="fn-phone-avatar">C</div>
+                    <div>
+                      <div style={{ color: "#fff", fontSize: "13px", fontWeight: "700" }}>Pro Team Channel</div>
+                      <div style={{ color: "#22c55e", fontSize: "11px" }}>● 8 members active</div>
+                    </div>
+                  </div>
+
+                  <div className="fn-phone-chat-body">
+                    <div className="fn-mock-bubble in">
+                      Hey team! The new real-time WebSocket update is live 🚀
+                    </div>
+                    <div className="fn-mock-bubble out">
+                      Awesome! Voice notes and AI translations are super smooth.
+                    </div>
+                    <div className="fn-mock-bubble in">
+                      Check out the live analytics dashboard.
+                    </div>
+                    <div className="fn-mock-typing">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION 2: MESSAGING WITHOUT BORDERS ─── */}
+      <section className="fn-globe-section finix-fade-section" id="solutions">
+        <div className="fn-container">
+          <div className="fn-globe-grid">
+            {/* 3D Globe Visual */}
+            <div className="fn-globe-visual-box">
+              <div className="fn-3d-globe-sphere">
+                <div className="fn-globe-ring" />
+                <div className="fn-globe-pulse-dot" style={{ top: "35%", left: "45%" }} />
+                <div className="fn-globe-pulse-dot" style={{ top: "60%", left: "65%" }} />
+                <div className="fn-globe-pulse-dot" style={{ top: "25%", left: "70%" }} />
+                <span style={{ fontSize: "64px", opacity: 0.85 }}>🌐</span>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div>
+              <div className="fn-badge-pill">🌍 Global Architecture</div>
+              <h2 className="fn-globe-headline">
+                Messaging without<br />
+                <span className="fn-italic">borders</span>
+              </h2>
+              <p style={{ fontSize: "1.1rem", lineHeight: "1.7", color: "var(--fn-text-secondary)" }}>
+                Whether you are texting a teammate across the hall or initiating an encrypted video call across continents, Chatify delivers sub-millisecond real-time synchronization with zero packet loss.
+              </p>
+
+              <div className="fn-globe-stats-grid">
+                <div className="fn-stat-item">
+                  <span className="fn-stat-number">150+</span>
+                  <span className="fn-stat-label">Countries Active</span>
+                </div>
+                <div className="fn-stat-item">
+                  <span className="fn-stat-number">&lt; 20ms</span>
+                  <span className="fn-stat-label">Delivery Latency</span>
+                </div>
+                <div className="fn-stat-item">
+                  <span className="fn-stat-number">99.99%</span>
+                  <span className="fn-stat-label">Uptime Reliability</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION 3: CONVERSATIONS WITHOUT DELAYS ─── */}
+      <section className="fn-delays-section finix-fade-section" id="features">
+        <div className="fn-container">
+          <div className="fn-delays-top">
+            <div className="fn-badge-pill">⚡ Lightning Fast</div>
+            <h2 className="fn-delays-headline">
+              Conversations without<br />
+              <span className="fn-italic">delays</span>
+            </h2>
+            <p style={{ fontSize: "1.1rem", color: "var(--fn-text-secondary)" }}>
+              Engineered with modern WebSockets, WebRTC streams, and instant push alerts.
+            </p>
+          </div>
+
+          <div className="fn-cards-row">
+            <div className="fn-feature-card">
+              <div className="fn-feature-icon-box">⚡</div>
+              <h3 className="fn-feature-title">Instant Delivery</h3>
+              <p className="fn-feature-desc">
+                Sub-millisecond socket message dispatching with real-time double-check read receipts and typing indicators.
               </p>
             </div>
-            <div className="footer-section">
-              <h4>Product</h4>
-              <a href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>Features</a>
-              <a href="#plans" onClick={(e) => { e.preventDefault(); document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth' }); }}>Pricing Plans</a>
-              <a href="/about" onClick={(e) => { e.preventDefault(); navigate('/about'); }}>Tech Stack & Specs</a>
+
+            <div className="fn-feature-card">
+              <div className="fn-feature-icon-box">📹</div>
+              <h3 className="fn-feature-title">Group Calls up to 50</h3>
+              <p className="fn-feature-desc">
+                Crystal-clear HD voice and video conferencing with dynamic grid switching and screen sharing capabilities.
+              </p>
             </div>
-            <div className="footer-section">
-              <h4>Company</h4>
-              <a href="/about" onClick={(e) => { e.preventDefault(); navigate('/about'); }}>About Chatify</a>
-              <a href="/about" onClick={(e) => { e.preventDefault(); navigate('/about'); }}>Product Architecture</a>
-              <a href="/help" onClick={(e) => { e.preventDefault(); navigate('/help'); }}>Support & FAQs</a>
-            </div>
-            <div className="footer-section">
-              <h4>Support & Legal</h4>
-              <a href="/help" onClick={(e) => { e.preventDefault(); navigate('/help'); }}>Help Center</a>
-              <a href="/help" onClick={(e) => { e.preventDefault(); navigate('/help'); }}>Contact Support</a>
-              <a href="/privacy" onClick={(e) => { e.preventDefault(); navigate('/privacy'); }}>Privacy & Security</a>
+
+            <div className="fn-feature-card">
+              <div className="fn-feature-icon-box">🔄</div>
+              <h3 className="fn-feature-title">Cross-Platform Sync</h3>
+              <p className="fn-feature-desc">
+                Seamless real-time synchronization between web browsers, iOS, Android, and desktop devices without missing a beat.
+              </p>
             </div>
           </div>
-          <div className="footer-bottom">
-            <p>&copy; 2026 Chatify. All rights reserved.</p>
+        </div>
+      </section>
+
+      {/* ─── SECTION 4: JOIN CHATIFY IN MINUTES ─── */}
+      <section className="fn-join-section finix-fade-section" id="plans">
+        <div className="fn-container">
+          <div className="fn-join-grid">
+            <div>
+              <div className="fn-badge-pill">🚀 Simple Setup</div>
+              <h2 className="fn-join-headline">
+                Join Chatify and<br />
+                <span className="fn-italic">simplify</span> your conversations
+              </h2>
+
+              <div className="fn-step-list">
+                <div className="fn-step-item">
+                  <div className="fn-step-num">1</div>
+                  <div>
+                    <h4 className="fn-step-heading">Open in Browser or Install App</h4>
+                    <p className="fn-step-desc">Access Chatify directly on the web or download our lightweight native mobile app.</p>
+                  </div>
+                </div>
+
+                <div className="fn-step-item">
+                  <div className="fn-step-num">2</div>
+                  <div>
+                    <h4 className="fn-step-heading">Create an Account in 30 Seconds</h4>
+                    <p className="fn-step-desc">Sign up instantly with your Google account or secure email OTP verification.</p>
+                  </div>
+                </div>
+
+                <div className="fn-step-item">
+                  <div className="fn-step-num">3</div>
+                  <div>
+                    <h4 className="fn-step-heading">Start Chatting & Inviting Friends</h4>
+                    <p className="fn-step-desc">Add contacts, create group channels, and ask Gemini AI for instant coding or writing help.</p>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" className="fn-btn-pill-dark" onClick={() => navigate("/register")}>
+                Start Now — It's Free →
+              </button>
+            </div>
+
+            {/* Right: Pricing Card */}
+            <div>
+              <div className="fn-plan-card-dark">
+                <div className="fn-plan-header">
+                  <span style={{ fontSize: "14px", fontWeight: "700", textTransform: "uppercase", color: "#34d399" }}>
+                    Pro Workspace
+                  </span>
+                  <span className="fn-plan-badge">Most Popular</span>
+                </div>
+
+                <div className="fn-plan-price">
+                  $0 <span>/ forever free tier</span>
+                </div>
+                <p style={{ color: "#94a3b8", fontSize: "13.5px" }}>
+                  Unlimited direct messaging, high-quality audio & video calling, and full AI Assistant access included.
+                </p>
+
+                <ul className="fn-plan-features">
+                  <li><span>✓</span> Unlimited 1-on-1 and Group chats</li>
+                  <li><span>✓</span> Built-in Gemini AI Assistant with Voice & File uploads</li>
+                  <li><span>✓</span> End-to-end message encryption & real-time translation</li>
+                  <li><span>✓</span> Multi-device cloud sync with zero ads</li>
+                </ul>
+
+                <button type="button" className="fn-plan-btn" onClick={() => navigate("/register")}>
+                  Open Free Account →
+                </button>
+              </div>
+            </div>
           </div>
-        </footer>
-      </div>
-    </>
+        </div>
+      </section>
+
+      {/* ─── SECTION 5: TESTIMONIALS ─── */}
+      <section className="fn-reviews-section finix-fade-section">
+        <div className="fn-container">
+          <div className="fn-reviews-top">
+            <div className="fn-badge-pill">💬 Wall of Love</div>
+            <h2 className="fn-reviews-headline">
+              Loved by creators &<br />
+              <span className="fn-italic">fast-moving</span> teams
+            </h2>
+          </div>
+
+          <div className="fn-reviews-grid">
+            {testimonials.map((t, idx) => (
+              <div key={idx} className="fn-tweet-card">
+                <div>
+                  <div className="fn-tweet-header">
+                    <img src={t.avatar} alt={t.name} className="fn-tweet-avatar" />
+                    <div>
+                      <div className="fn-tweet-name">
+                        {t.name}
+                        <span style={{ color: "#3b82f6", fontSize: "13px" }}>✓</span>
+                      </div>
+                      <div className="fn-tweet-handle">{t.handle} • {t.role}</div>
+                    </div>
+                  </div>
+                  <p className="fn-tweet-text">"{t.text}"</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="fn-reviews-footer">
+            <div className="fn-avatar-stack">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User1" alt="User" />
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User2" alt="User" />
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User3" alt="User" />
+            </div>
+            <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--fn-text-secondary)" }}>
+              Join 50,000+ people chatting effortlessly on Chatify.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION 6: FINAL CTA ─── */}
+      <section className="fn-cta-section finix-fade-section">
+        <div className="fn-container">
+          <div className="fn-cta-card">
+            <h2 className="fn-cta-headline">
+              Chatify — the free way to talk<br />
+              <span className="fn-italic" style={{ color: "#34d399" }}>you'll love</span>
+            </h2>
+            <p className="fn-cta-subhead">
+              Connect instantly with friends, family, and teams. Experience the future of private, AI-powered real-time communication.
+            </p>
+            <button
+              type="button"
+              className="fn-btn-cta-light"
+              onClick={() => navigate("/register")}
+            >
+              Start Chatting Free →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FOOTER ─── */}
+      <footer className="fn-footer">
+        <div className="fn-container">
+          <div className="fn-footer-content">
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontWeight: "800", color: "#090d16" }}>Chatify</span>
+              <span>© {new Date().getFullYear()} All rights reserved.</span>
+            </div>
+            <div style={{ display: "flex", gap: "20px" }}>
+              <span style={{ cursor: "pointer" }} onClick={() => navigate("/privacy")}>Privacy</span>
+              <span style={{ cursor: "pointer" }} onClick={() => navigate("/about")}>About</span>
+              <span style={{ cursor: "pointer" }} onClick={() => navigate("/help")}>Help & Support</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 };
 
