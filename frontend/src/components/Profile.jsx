@@ -152,6 +152,12 @@ const Profile = () => {
 
       {/* Top Header */}
       <div className="top-header">
+        <button className="mobile-header-back-btn" onClick={() => navigate("/dashboard")} title="Back to Chat">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          <span className="mobile-back-text">Dashboard</span>
+        </button>
         <div className="header-actions">
           <button className="header-icon" onClick={toggleTheme} title={isDarkMode ? t("lightMode") : t("darkMode")}>
             {isDarkMode ? "☀️" : "🌙"}

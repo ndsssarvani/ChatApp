@@ -850,12 +850,29 @@ const Home = () => {
             display: none;
           }
           
+          .nav-content {
+            padding: 0 1rem;
+          }
+
+          .nav-left, .nav-right {
+            gap: 0.75rem;
+          }
+
+          .btn-login, .btn-register {
+            padding: 0.5rem 1rem;
+            font-size: 0.88rem;
+          }
+          
+          .hero-section {
+            padding: 110px 1.25rem 60px;
+          }
+
           .hero-title {
-            font-size: 2.5rem;
+            font-size: 2.4rem;
           }
           
           .section-title {
-            font-size: 2rem;
+            font-size: 1.85rem;
           }
           
           .benefits-grid {
@@ -867,11 +884,30 @@ const Home = () => {
           }
           
           .cta-images {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
           }
           
           .footer-content {
             grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .nav-left .nav-link {
+            display: none;
+          }
+
+          .hero-title {
+            font-size: 2rem;
+          }
+
+          .hero-stats {
+            grid-template-columns: 1fr;
+          }
+
+          .btn-login, .btn-register {
+            padding: 0.45rem 0.75rem;
+            font-size: 0.82rem;
           }
         }
 

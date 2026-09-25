@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -16,6 +16,133 @@ const Register = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const tokenClientRef = useRef(null);
+  const googleBtnRef = useRef(null);
+
+  // Initialize Official Google Identity Services (GIS) & OAuth 2.0
+  useEffect(() => {
+    const initializeGoogle = () => {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      if (!clientId || clientId.includes('demo') || clientId.includes('your_google_client_id')) {
+        return; // Prevent initializing with non-existent client ID
+      }
+
+      if (window.google?.accounts) {
+        try {
+          if (window.google.accounts.id) {
+            window.google.accounts.id.initialize({
+              client_id: clientId,
+              callback: handleGoogleSuccess,
+              auto_select: false,
+              cancel_on_tap_outside: true,
+            });
+
+            if (googleBtnRef.current) {
+              window.google.accounts.id.renderButton(googleBtnRef.current, {
+                type: 'standard',
+                theme: 'outline',
+                size: 'large',
+                text: 'continue_with',
+                shape: 'rectangular',
+                logo_alignment: 'left',
+                width: 380,
+              });
+            }
+          }
+
+          if (window.google.accounts.oauth2) {
+            tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
+              client_id: clientId,
+              scope: 'email profile openid',
+              callback: handleOAuthTokenSuccess,
+              error_callback: (err) => {
+                console.warn('[Google OAuth Error]', err);
+                if (err.type === 'popup_closed') {
+                  setErrors((prev) => ({ ...prev, api: 'Google sign-in was cancelled.' }));
+                } else if (err.type === 'access_denied') {
+                  setErrors((prev) => ({ ...prev, api: 'Google sign-in access was denied.' }));
+                } else {
+                  setErrors((prev) => ({ ...prev, api: `Google authentication: ${err.message || err.type || 'Please check your Google Client ID configuration.'}` }));
+                }
+              },
+            });
+          }
+        } catch (e) {
+          console.warn('[Google GIS Init Error]', e);
+        }
+      }
+    };
+
+    if (window.google?.accounts) {
+      initializeGoogle();
+    } else {
+      const interval = setInterval(() => {
+        if (window.google?.accounts) {
+          clearInterval(interval);
+          initializeGoogle();
+        }
+      }, 300);
+      return () => clearInterval(interval);
+    }
+  }, []);
+
+  const handleGoogleSuccess = async (response) => {
+    if (!response.credential) {
+      setErrors((prev) => ({ ...prev, api: 'Google Sign-In was cancelled.' }));
+      return;
+    }
+    setIsSubmitting(true);
+    setErrors({});
+    const result = await loginWithGoogle({ credential: response.credential });
+    setIsSubmitting(false);
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      setErrors((prev) => ({ ...prev, api: result.message || 'Google authentication failed.' }));
+    }
+  };
+
+  const handleOAuthTokenSuccess = async (tokenResponse) => {
+    if (tokenResponse && tokenResponse.access_token) {
+      setIsSubmitting(true);
+      setErrors({});
+      const result = await loginWithGoogle({ accessToken: tokenResponse.access_token });
+      setIsSubmitting(false);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setErrors((prev) => ({ ...prev, api: result.message || 'Google authentication failed.' }));
+      }
+    }
+  };
+
+  const handleGoogleSignIn = () => {
+    setErrors({});
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+    if (!clientId || clientId.includes('demo') || clientId.includes('your_google_client_id')) {
+      setErrors((prev) => ({
+        ...prev,
+        api: 'Google Client ID is not configured yet. Please add your real VITE_GOOGLE_CLIENT_ID in frontend/.env (from Google Cloud Console).',
+      }));
+      return;
+    }
+
+    if (tokenClientRef.current) {
+      tokenClientRef.current.requestAccessToken({ prompt: 'select_account' });
+      return;
+    }
+
+    if (window.google?.accounts?.id) {
+      try {
+        window.google.accounts.id.prompt();
+      } catch (err) {
+        setErrors((prev) => ({ ...prev, api: 'Google authentication is initializing. Please try again.' }));
+      }
+    } else {
+      setErrors((prev) => ({ ...prev, api: 'Google authentication service is unavailable. Please check your network connection.' }));
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -925,6 +1052,42 @@ const Register = () => {
                 </button>
               </div>
             </form>
+
+            <div className="divider">
+              <div className="divider-line"></div>
+              <span className="divider-text">OR</span>
+              <div className="divider-line"></div>
+            </div>
+
+            <div className="social-login">
+              <button
+                type="button"
+                className="social-btn"
+                onClick={handleGoogleSignIn}
+                disabled={isSubmitting}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                  />
+                </svg>
+                Continue with Google
+              </button>
+              <div ref={googleBtnRef} style={{ display: 'none' }}></div>
+            </div>
 
             <p className="login-prompt">
               Already have an account? <span className="login-link" onClick={() => navigate('/login')}>Sign in</span>

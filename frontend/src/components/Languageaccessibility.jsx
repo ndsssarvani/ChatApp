@@ -143,7 +143,15 @@ const Languageaccessibility = () => {
       {/* Main Content */}
       <div className="language-content">
         <div className="page-header">
-          <h1 className="page-title">{t("pageTitle")}</h1>
+          <div className="page-header-row">
+            <button className="lang-back-btn" onClick={handleBack} title="Back to Dashboard">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              <span>Back</span>
+            </button>
+            <h1 className="page-title">{t("pageTitle")}</h1>
+          </div>
           <p className="page-subtitle">{t("pageSubtitle")}</p>
         </div>
 

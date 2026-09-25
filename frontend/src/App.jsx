@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import ChatDashboard from './components/ChatDashboard';
 import Settings from './components/Settings';
 import Profile from './components/Profile';
@@ -24,6 +25,7 @@ import TemporaryChat from './pages/TemporaryChat';
 import HelpSupport from './pages/HelpSupport';
 import AboutApp from './pages/AboutApp';
 import NotFound from './pages/NotFound';
+import AIChat from './components/AIChat';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -52,6 +54,14 @@ function App() {
         element={
           <PublicRoute>
             <ForgotPassword />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/reset-password/:token"
+        element={
+          <PublicRoute>
+            <ResetPassword />
           </PublicRoute>
         }
       />
@@ -190,6 +200,14 @@ function App() {
         element={
           <ProtectedRoute>
             <TemporaryChat />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-chat"
+        element={
+          <ProtectedRoute>
+            <AIChat />
           </ProtectedRoute>
         }
       />

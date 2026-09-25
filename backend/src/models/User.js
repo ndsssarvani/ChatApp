@@ -104,6 +104,21 @@ const userSchema = new mongoose.Schema(
       privacyReadReceipts: { type: Boolean, default: true },
       privacyProfilePhoto: { type: String, enum: ['everyone', 'contacts', 'nobody'], default: 'everyone' },
     },
+    authProviders: {
+      password: { type: Boolean, default: true },
+      google: { type: Boolean, default: false },
+      emailOtp: { type: Boolean, default: true },
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: true,
+    },
+    emailVerificationToken: String,
+    emailVerificationExpire: Date,
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

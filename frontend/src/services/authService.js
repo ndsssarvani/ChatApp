@@ -16,11 +16,6 @@ export const authService = {
     return res.data;
   },
 
-  async getGoogleAccounts() {
-    const res = await api.get('/auth/google-accounts');
-    return res.data;
-  },
-
   async getMe() {
     const res = await api.get('/auth/me');
     return res.data;
@@ -36,8 +31,23 @@ export const authService = {
     return res.data;
   },
 
+  async validateResetToken(token) {
+    const res = await api.get(`/auth/reset-password/validate/${encodeURIComponent(token)}`);
+    return res.data;
+  },
+
   async resetPassword(data) {
     const res = await api.post('/auth/reset-password', data);
+    return res.data;
+  },
+
+  async sendOTP(email, purpose = 'login') {
+    const res = await api.post('/auth/send-otp', { email, purpose });
+    return res.data;
+  },
+
+  async verifyOTP(email, otp, purpose = 'login') {
+    const res = await api.post('/auth/verify-otp', { email, otp, purpose });
     return res.data;
   },
 };

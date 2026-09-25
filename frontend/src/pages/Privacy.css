@@ -530,7 +530,18 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .privacy-top-header {
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 45px;
+  }
+  .privacy-content-wrap {
+    padding: 0 12px;
+    margin-top: -30px;
+  }
+  .privacy-card {
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
   .privacy-toggle-row,
   .privacy-select-row,
   .privacy-nav-row {
@@ -540,5 +551,9 @@
   }
   .privacy-modern-select {
     width: 100%;
+  }
+  .privacy-modal-card {
+    width: 95vw;
+    padding: 20px 16px;
   }
 }

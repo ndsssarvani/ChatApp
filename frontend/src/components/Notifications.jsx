@@ -120,14 +120,19 @@ const Notifications = () => {
   };
 
   const handleClearAll = async () => {
-    if (!window.confirm('Clear all notifications?')) return;
     try {
-      await notificationService.clearAllNotifications();
+      // Instantly clear all notification lists and badge counters
       setNotifications([]);
       setUnreadCount(0);
       setCallsUnreadCount(0);
       setMessagesUnreadCount(0);
       showToastAlert('All notifications cleared');
+
+      // Broadcast global event so ChatDashboard and other pages clear badge instantly
+      window.dispatchEvent(new CustomEvent('notifications_cleared'));
+
+      // Persistently delete all notifications from backend MongoDB
+      await notificationService.clearAllNotifications();
     } catch (err) {
       console.error('Error clearing notifications:', err);
     }
@@ -165,7 +170,7 @@ const Notifications = () => {
                 ✓ Mark all read
               </button>
             )}
-            {notifications.length > 0 && (
+            {(notifications.length > 0 || unreadCount > 0) && (
               <button className="clear-all-notifs-btn" onClick={handleClearAll}>
                 🗑️ Clear All
               </button>

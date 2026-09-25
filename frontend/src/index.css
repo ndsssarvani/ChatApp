@@ -1,68 +1,144 @@
+/* ─── Global Design Tokens & Responsive Baseline ─── */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Safe Area Insets for Mobile Notches and Home Bars */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Light Theme Tokens */
+  --bg-app: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-muted: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-subtle: #94a3b8;
+  --border-subtle: #e2e8f0;
+  --primary-accent: #22c55e;
+  --primary-accent-hover: #16a34a;
 
-  font-synthesis: none;
+  /* App Dimensions */
+  --mobile-nav-height: 60px;
+}
+
+[data-theme="dark"] {
+  --bg-app: #0b0f19;
+  --bg-card: #111827;
+  --bg-card-muted: #1f2937;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --border-subtle: #1f2937;
+}
+
+/* ─── Universal Box Sizing & Mobile Touch Optimizations ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  font-family: var(--font-sans);
+  background-color: var(--bg-app);
+  color: var(--text-main);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
+#root {
+  width: 100%;
+  min-height: 100%;
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  flex-direction: column;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* ─── Smooth Touch Scrolling ─── */
+.scroll-container,
+.contacts-list,
+.chat-messages-scroll,
+.settings-content,
+.profile-content {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* ─── Modern Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* ─── Responsive Utility Classes ─── */
+.desktop-only {
+  display: flex !important;
+}
+
+.mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
   }
-  a:hover {
-    color: #747bff;
+
+  .mobile-only {
+    display: flex !important;
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+/* ─── Touch Friendly Tap Targets ─── */
+button, 
+a, 
+input, 
+select, 
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* Prevent auto-zoom on iOS when focusing inputs */
+@media screen and (max-width: 768px) {
+  input, 
+  select, 
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ─── Responsive Media Breakpoint Wrappers ─── */
+.responsive-page-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+@media (max-width: 768px) {
+  .responsive-page-container {
+    padding: 16px 12px 72px;
   }
 }

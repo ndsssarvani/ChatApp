@@ -625,24 +625,64 @@
   cursor: pointer;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .modern-settings-header {
-    padding: 20px 16px 60px;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 50px;
+  }
+  .settings-nav-bar {
+    gap: 12px;
+  }
+  .settings-header-title-wrap h1 {
+    font-size: 20px;
+  }
+  .settings-header-sub {
+    font-size: 12px;
+  }
+  .settings-content-wrap {
+    padding: 0 12px;
+    margin-top: -30px;
   }
   .settings-user-card {
     flex-direction: column;
     text-align: center;
     gap: 12px;
+    padding: 16px;
   }
   .user-card-name-row {
     justify-content: center;
   }
   .user-card-edit-btn {
     width: 100%;
+    justify-content: center;
   }
   .settings-theme-palette-box {
     flex-direction: column;
     gap: 10px;
     align-items: flex-start;
+  }
+  .settings-item-card {
+    padding: 14px 14px;
+    gap: 12px;
+  }
+  .settings-item-title {
+    font-size: 14px;
+  }
+  .settings-item-sub {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-btn-text {
+    display: none;
+  }
+  .settings-back-btn {
+    padding: 8px;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+  .color-theme-bubbles-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }

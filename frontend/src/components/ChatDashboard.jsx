@@ -8,6 +8,7 @@ import conversationService from "../services/conversationService";
 import messageService from "../services/messageService";
 import userService from "../services/userService";
 import notificationService from "../services/notificationService";
+import translationService from "../services/translationService";
 import { getMediaUrl } from "../utils/mediaUrl";
 import VoiceRecorder from "./VoiceRecorder";
 import VoiceMessagePlayer from "./VoiceMessagePlayer";
@@ -29,7 +30,7 @@ const WALLPAPER_PRESETS = [
 
 const ChatDashboard = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, currentLanguage, languages, getCurrentLanguageData } = useLanguage();
   const { user: currentUser, logout } = useAuth();
   const { socket, isUserOnline } = useSocket();
   const { startCall } = useCall();
@@ -75,6 +76,11 @@ const ChatDashboard = () => {
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [highlightedMsgId, setHighlightedMsgId] = useState(null);
   const [isRailExpanded, setIsRailExpanded] = useState(false);
+
+  // Translation State
+  const [translatedMessages, setTranslatedMessages] = useState({}); // { [msgId]: { translatedText, sourceLanguage, sourceLanguageName, targetLanguage, targetLanguageName, isHidden, loading, error } }
+  const [translateLanguageModal, setTranslateLanguageModal] = useState(null); // message object or null
+  const [translateSearchQuery, setTranslateSearchQuery] = useState("");
 
   const menuRef = useRef(null);
   const groupModalRef = useRef(null);
@@ -187,6 +193,14 @@ const ChatDashboard = () => {
   useEffect(() => {
     fetchConversations();
     fetchNotifCounts();
+
+    const handleNotifsCleared = () => {
+      setUnreadNotifCount(0);
+    };
+    window.addEventListener('notifications_cleared', handleNotifsCleared);
+    return () => {
+      window.removeEventListener('notifications_cleared', handleNotifsCleared);
+    };
   }, []);
 
   // Fetch users for group creation or starting direct chats
@@ -317,6 +331,12 @@ const ChatDashboard = () => {
       setMessages((prev) =>
         prev.map((m) => (m._id === updatedMsg._id ? updatedMsg : m))
       );
+      setTranslatedMessages((prev) => {
+        if (!prev[updatedMsg._id]) return prev;
+        const copy = { ...prev };
+        delete copy[updatedMsg._id];
+        return copy;
+      });
     };
 
     const handleMessageDeleted = ({ messageId }) => {
@@ -328,6 +348,12 @@ const ChatDashboard = () => {
           return m;
         })
       );
+      setTranslatedMessages((prev) => {
+        if (!prev[messageId]) return prev;
+        const copy = { ...prev };
+        delete copy[messageId];
+        return copy;
+      });
     };
 
     const handleMessagesRead = ({ conversationId, userId }) => {
@@ -445,6 +471,12 @@ const ChatDashboard = () => {
           setMessages((prev) =>
             prev.map((m) => (m._id === editingMessage._id ? res.message : m))
           );
+          setTranslatedMessages((prev) => {
+            if (!prev[editingMessage._id]) return prev;
+            const copy = { ...prev };
+            delete copy[editingMessage._id];
+            return copy;
+          });
           if (socket) {
             socket.emit("message_updated", {
               conversationId: selectedChat._id,
@@ -514,6 +546,76 @@ const ChatDashboard = () => {
     } finally {
       setIsSending(false);
     }
+  };
+
+  // ─── Real Message Translation Handlers ───
+  const handleTranslateMessage = async (msg, targetLangOverride = null) => {
+    if (!msg || !msg.text || !msg.text.trim()) return;
+
+    const targetLang = targetLangOverride || currentLanguage || "en";
+    const targetLangObj = languages.find((l) => l.code === targetLang) || { nativeName: targetLang };
+
+    // Set loading state for this message
+    setTranslatedMessages((prev) => ({
+      ...prev,
+      [msg._id]: {
+        ...(prev[msg._id] || {}),
+        loading: true,
+        error: null,
+        targetLanguage: targetLang,
+        targetLanguageName: targetLangObj.nativeName || targetLang,
+        isHidden: false,
+      },
+    }));
+
+    try {
+      const res = await translationService.translateMessage({
+        messageId: msg._id,
+        text: msg.text,
+        targetLanguage: targetLang,
+      });
+
+      if (res.success) {
+        setTranslatedMessages((prev) => ({
+          ...prev,
+          [msg._id]: {
+            translatedText: res.translatedText,
+            sourceLanguage: res.sourceLanguage,
+            sourceLanguageName: res.sourceLanguageName || res.sourceLanguage,
+            targetLanguage: res.targetLanguage,
+            targetLanguageName: res.targetLanguageName || targetLangObj.nativeName || res.targetLanguage,
+            isHidden: false,
+            loading: false,
+            error: null,
+          },
+        }));
+      } else {
+        throw new Error(res.message || "Translation failed");
+      }
+    } catch (err) {
+      console.error("[Translation Error]:", err);
+      setTranslatedMessages((prev) => ({
+        ...prev,
+        [msg._id]: {
+          ...(prev[msg._id] || {}),
+          loading: false,
+          error: t("translationFailed") || "Translation failed. Please try again.",
+        },
+      }));
+    }
+  };
+
+  const handleToggleHideTranslation = (msgId) => {
+    setTranslatedMessages((prev) => {
+      if (!prev[msgId]) return prev;
+      return {
+        ...prev,
+        [msgId]: {
+          ...prev[msgId],
+          isHidden: !prev[msgId].isHidden,
+        },
+      };
+    });
   };
 
   // Send Voice Message
@@ -893,6 +995,16 @@ const ChatDashboard = () => {
           <button
             type="button"
             className="rail-btn"
+            onClick={() => navigate("/ai-chat")}
+            title="AI Chat"
+          >
+            <span>🤖</span>
+            <span className="rail-btn-text">AI Chat</span>
+          </button>
+
+          <button
+            type="button"
+            className="rail-btn"
             onClick={() => navigate("/analytics")}
             title="Analytics"
           >
@@ -1153,15 +1265,17 @@ const ChatDashboard = () => {
                 {/* Mobile Back Button */}
                 <button
                   type="button"
-                  className="sidebar-icon-btn mobile-only"
-                  style={{ display: "none" }}
+                  className="mobile-back-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedChat(null);
                   }}
                   title="Back to conversations"
+                  aria-label="Back to conversations"
                 >
-                  ←
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                  </svg>
                 </button>
 
                 <div className="chat-header-avatar">
@@ -1351,6 +1465,16 @@ const ChatDashboard = () => {
                           >
                             ↗️
                           </button>
+                          {msg.text && (
+                            <button
+                              type="button"
+                              className="dock-btn"
+                              title={`${t("translate") || "Translate"} (${getCurrentLanguageData()?.nativeName || currentLanguage})`}
+                              onClick={() => handleTranslateMessage(msg)}
+                            >
+                              🌐
+                            </button>
+                          )}
                           {isMe && !msg.isDeletedForEveryone && (
                             <button
                               type="button"
@@ -1427,11 +1551,86 @@ const ChatDashboard = () => {
                         {/* Text Bubble */}
                         {msg.text && (
                           <div className="message-bubble">
-                            {msg.text}
-                            {msg.isEdited && (
-                              <span style={{ fontSize: "10px", marginLeft: "6px", opacity: 0.7 }}>
-                                (edited)
-                              </span>
+                            <div className="message-original-text">
+                              {msg.text}
+                              {msg.isEdited && (
+                                <span style={{ fontSize: "10px", marginLeft: "6px", opacity: 0.7 }}>
+                                  (edited)
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Inline Message Translation Box */}
+                            {translatedMessages[msg._id] && !msg.isDeletedForEveryone && (
+                              <div className="message-translation-box">
+                                {translatedMessages[msg._id].loading ? (
+                                  <div className="translation-loading-row">
+                                    <span className="translation-spinner">⏳</span>
+                                    <span>{t("translating") || "Translating..."}</span>
+                                  </div>
+                                ) : translatedMessages[msg._id].error ? (
+                                  <div className="translation-error-row">
+                                    <span>⚠️ {translatedMessages[msg._id].error}</span>
+                                    <button
+                                      type="button"
+                                      className="translation-retry-btn"
+                                      onClick={() => handleTranslateMessage(msg, translatedMessages[msg._id].targetLanguage)}
+                                    >
+                                      Retry
+                                    </button>
+                                  </div>
+                                ) : translatedMessages[msg._id].isHidden ? (
+                                  <div className="translation-hidden-row">
+                                    <button
+                                      type="button"
+                                      className="translation-action-link"
+                                      onClick={() => handleToggleHideTranslation(msg._id)}
+                                    >
+                                      🌐 {t("translated") || "Translated"} ({translatedMessages[msg._id].targetLanguageName || translatedMessages[msg._id].targetLanguage}) • {t("showOriginal") || "Show Translation"}
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="translation-content">
+                                    <div className="translation-header-row">
+                                      <div className="translation-badge">
+                                        <span className="translation-icon">🌐</span>
+                                        <span className="translation-label">
+                                          {t("translatedTo") || "Translated to"} {translatedMessages[msg._id].targetLanguageName || translatedMessages[msg._id].targetLanguage}
+                                        </span>
+                                        {translatedMessages[msg._id].sourceLanguage && translatedMessages[msg._id].sourceLanguage !== "auto" && (
+                                          <span className="translation-source-chip">
+                                            ({t("detectedLanguage") || "Detected"}: {translatedMessages[msg._id].sourceLanguageName || translatedMessages[msg._id].sourceLanguage})
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="translation-actions">
+                                        <button
+                                          type="button"
+                                          className="translation-action-link"
+                                          onClick={() => handleToggleHideTranslation(msg._id)}
+                                          title={t("hideTranslation") || "Hide translation"}
+                                        >
+                                          {t("hideTranslation") || "Hide"}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="translation-action-link"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setTranslateLanguageModal(msg);
+                                          }}
+                                          title={t("translateTo") || "Translate to..."}
+                                        >
+                                          ⇄
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <div className="translation-text">
+                                      {translatedMessages[msg._id].translatedText}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
@@ -1680,6 +1879,15 @@ const ChatDashboard = () => {
       {selectedChat && (
         <aside className={`profile-sidebar ${!showProfile ? "hidden" : ""}`}>
           <div className="profile-header-card">
+            <button
+              type="button"
+              className="profile-close-btn"
+              onClick={() => setShowProfile(false)}
+              title="Close panel"
+              aria-label="Close panel"
+            >
+              ✕
+            </button>
             <img
               src={activeChatDisplay.avatar}
               alt={activeChatDisplay.name}
@@ -2117,16 +2325,40 @@ const ChatDashboard = () => {
             <span>↩️</span> Reply
           </button>
           {contextMenu.message.text && (
-            <button
-              type="button"
-              className="context-menu-item"
-              onClick={() => {
-                navigator.clipboard.writeText(contextMenu.message.text);
-                setContextMenu(null);
-              }}
-            >
-              <span>📋</span> Copy Text
-            </button>
+            <>
+              <button
+                type="button"
+                className="context-menu-item"
+                onClick={() => {
+                  const msgToTranslate = contextMenu.message;
+                  setContextMenu(null);
+                  handleTranslateMessage(msgToTranslate);
+                }}
+              >
+                <span>🌐</span> {t("translate") || "Translate"} ({getCurrentLanguageData()?.nativeName || currentLanguage})
+              </button>
+              <button
+                type="button"
+                className="context-menu-item"
+                onClick={() => {
+                  const msgToTranslate = contextMenu.message;
+                  setContextMenu(null);
+                  setTranslateLanguageModal(msgToTranslate);
+                }}
+              >
+                <span>🔤</span> {t("translateTo") || "Translate to..."}
+              </button>
+              <button
+                type="button"
+                className="context-menu-item"
+                onClick={() => {
+                  navigator.clipboard.writeText(contextMenu.message.text);
+                  setContextMenu(null);
+                }}
+              >
+                <span>📋</span> Copy Text
+              </button>
+            </>
           )}
           <button
             type="button"
@@ -2294,6 +2526,75 @@ const ChatDashboard = () => {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 12. TRANSLATE TO LANGUAGE MODAL ─── */}
+      {translateLanguageModal && (
+        <div className="translate-modal-overlay" onClick={() => setTranslateLanguageModal(null)}>
+          <div className="translate-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="translate-modal-header">
+              <h3 className="translate-modal-title">
+                <span>🌐</span> {t("translateTo") || "Translate to..."}
+              </h3>
+              <button
+                type="button"
+                className="translate-modal-close"
+                onClick={() => {
+                  setTranslateLanguageModal(null);
+                  setTranslateSearchQuery("");
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="translate-search-wrap">
+              <input
+                type="text"
+                className="translate-search-input"
+                placeholder="Search language..."
+                value={translateSearchQuery}
+                onChange={(e) => setTranslateSearchQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="translate-languages-list">
+              {languages
+                .filter(
+                  (l) =>
+                    l.nativeName.toLowerCase().includes(translateSearchQuery.toLowerCase()) ||
+                    l.name.toLowerCase().includes(translateSearchQuery.toLowerCase()) ||
+                    l.code.toLowerCase().includes(translateSearchQuery.toLowerCase())
+                )
+                .map((lang) => {
+                  const currentActiveTarget = translatedMessages[translateLanguageModal._id]?.targetLanguage;
+                  const isSelected =
+                    currentActiveTarget === lang.code || (!currentActiveTarget && currentLanguage === lang.code);
+
+                  return (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      className={`translate-lang-item ${isSelected ? "active" : ""}`}
+                      onClick={() => {
+                        const targetMsg = translateLanguageModal;
+                        setTranslateLanguageModal(null);
+                        setTranslateSearchQuery("");
+                        handleTranslateMessage(targetMsg, lang.code);
+                      }}
+                    >
+                      <div className="translate-lang-left">
+                        <span className="translate-lang-flag">{lang.flag}</span>
+                        <span className="translate-lang-native">{lang.nativeName}</span>
+                      </div>
+                      <span className="translate-lang-code">{lang.code}</span>
+                    </button>
+                  );
+                })}
+            </div>
           </div>
         </div>
       )}

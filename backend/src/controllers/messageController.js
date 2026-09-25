@@ -1,6 +1,7 @@
 import Message from '../models/Message.js';
 import Conversation from '../models/Conversation.js';
 import User from '../models/User.js';
+import { clearTranslationCacheForMessage } from '../services/translationService.js';
 
 // @desc    Get messages for a conversation
 // @route   GET /api/messages/:conversationId
@@ -219,6 +220,8 @@ export const editMessage = async (req, res) => {
     message.text = text;
     message.isEdited = true;
     message.editedAt = new Date();
+    message.translations = [];
+    clearTranslationCacheForMessage(message._id.toString());
     await message.save();
 
     const updated = await Message.findById(message._id)

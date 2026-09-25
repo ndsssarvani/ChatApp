@@ -93,6 +93,14 @@ const messageSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
     },
+    translations: [
+      {
+        language: { type: String, required: true },
+        translatedText: { type: String, required: true },
+        sourceLanguage: { type: String, default: '' },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,

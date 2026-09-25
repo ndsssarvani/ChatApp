@@ -90,10 +90,23 @@ const GroupManagement = () => {
       background: 'var(--bg-primary, #ffffff)',
       color: 'var(--text-primary, #1a1a1a)',
       fontFamily: 'Inter, sans-serif',
-      padding: '24px 20px',
+      padding: '24px 16px calc(40px + env(safe-area-inset-bottom, 0px))',
       maxWidth: '850px',
       margin: '0 auto',
     }}>
+      <style>{`
+        .group-layout-grid {
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: 20px;
+        }
+        @media (max-width: 768px) {
+          .group-layout-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+        }
+      `}</style>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <button
@@ -138,7 +151,7 @@ const GroupManagement = () => {
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
+        <div className="group-layout-grid">
           {/* Groups list */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <h3 style={{ fontSize: '14px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '1px' }}>Your Groups</h3>

@@ -12,6 +12,8 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import supportRoutes from './routes/supportRoutes.js';
 import callRoutes from './routes/callRoutes.js';
+import translateRoutes from './routes/translateRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -83,6 +85,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/calls', callRoutes);
+app.use('/api/translate', translateRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
@@ -92,6 +96,8 @@ app.use('/notifications', notificationRoutes);
 app.use('/analytics', analyticsRoutes);
 app.use('/support', supportRoutes);
 app.use('/calls', callRoutes);
+app.use('/translate', translateRoutes);
+app.use('/ai', aiRoutes);
 
 // Error Middlewares
 app.use(notFound);

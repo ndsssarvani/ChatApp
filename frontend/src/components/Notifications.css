@@ -466,3 +466,41 @@
   from { transform: translate(-50%, 20px); opacity: 0; }
   to { transform: translate(-50%, 0); opacity: 1; }
 }
+
+/* ─── Mobile Responsiveness ─── */
+@media (max-width: 768px) {
+  .notification-header {
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 20px;
+  }
+  .header-top {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-action-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .mark-all-read-btn,
+  .clear-all-notifs-btn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .notification-filters-bar {
+    padding: 12px 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .notification-content {
+    padding: 16px 12px calc(40px + env(safe-area-inset-bottom, 0px));
+  }
+  .notification-card {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+  .notif-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+}

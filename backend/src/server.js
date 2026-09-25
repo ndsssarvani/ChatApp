@@ -4,6 +4,8 @@ import { Server } from 'socket.io';
 import app from './app.js';
 import { connectDB } from './config/db.js';
 import { setupSocketHandlers } from './sockets/socketHandler.js';
+import { verifyEmailTransport } from './services/emailService.js';
+import { checkGeminiConfig } from './services/geminiService.js';
 
 // Load env
 dotenv.config();
@@ -12,6 +14,12 @@ const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
 connectDB();
+
+// Verify Email transport
+verifyEmailTransport();
+
+// Verify Gemini AI configuration
+checkGeminiConfig();
 
 const server = http.createServer(app);
 

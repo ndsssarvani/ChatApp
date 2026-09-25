@@ -55,6 +55,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithOTP = async (email, otp) => {
+    setLoading(true);
+    try {
+      const res = await authService.verifyOTP(email, otp, 'login');
+      if (res.success && res.token) {
+        localStorage.setItem('chatify_token', res.token);
+        localStorage.setItem('chatify_user', JSON.stringify(res.user));
+        setToken(res.token);
+        setUser(res.user);
+        return { success: true, user: res.user };
+      }
+      return { success: false, message: res.message || 'OTP verification failed' };
+    } catch (err) {
+      const message = err.response?.data?.message || err.message || 'OTP verification failed';
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const register = async (name, email, password) => {
     setLoading(true);
     try {
@@ -124,6 +144,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!user && !!token,
         loading,
         login,
+        loginWithOTP,
         register,
         loginWithGoogle,
         logout,
