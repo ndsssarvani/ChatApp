@@ -14,6 +14,43 @@ import VoiceRecorder from "./VoiceRecorder";
 import VoiceMessagePlayer from "./VoiceMessagePlayer";
 import CallHistory from "./CallHistory";
 import ForwardModal from "./ForwardModal";
+import {
+  AppLogo,
+  IconChats,
+  IconContacts,
+  IconNewGroup,
+  IconCalls,
+  IconNotifications,
+  IconStarred,
+  IconAIChat,
+  IconAnalytics,
+  IconSettings,
+  IconSun,
+  IconMoon,
+  IconSearch,
+  IconPhone,
+  IconVideo,
+  IconPalette,
+  IconLock,
+  IconShieldCheck,
+  IconInfo,
+  IconTrash,
+  IconPaperclip,
+  IconSmile,
+  IconMic,
+  IconSend,
+  IconReply,
+  IconForward,
+  IconTranslate,
+  IconEdit,
+  IconCopy,
+  IconFile,
+  IconCheck,
+  IconCheckDouble,
+  IconClose,
+  IconWaveform,
+  IconAddressBook,
+} from "./Icons";
 import "./ChatDashboard.css";
 
 const WALLPAPER_PRESETS = [
@@ -918,11 +955,15 @@ const ChatDashboard = () => {
       <nav className={`nav-rail ${isRailExpanded ? "expanded" : ""}`}>
         <div className="rail-top">
           <div className="rail-header-toggle">
-            <div className="rail-logo" onClick={() => navigate("/dashboard")} title="Chatify">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-              </svg>
+            <div className="rail-logo-btn" onClick={() => navigate("/dashboard")} title="Chatify">
+              <AppLogo size={32} />
             </div>
+            {isRailExpanded && (
+              <div className="rail-brand-meta">
+                <span className="rail-brand-title">Chatify</span>
+                <span className="rail-brand-badge">PRO</span>
+              </div>
+            )}
             <button
               type="button"
               className="rail-expand-btn"
@@ -953,9 +994,7 @@ const ChatDashboard = () => {
             title="Chats"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
+              <IconChats size={20} />
             </span>
             <span className="rail-btn-text">Chats</span>
           </button>
@@ -967,12 +1006,7 @@ const ChatDashboard = () => {
             title="Contacts"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+              <IconContacts size={20} />
             </span>
             <span className="rail-btn-text">Contacts</span>
           </button>
@@ -984,12 +1018,7 @@ const ChatDashboard = () => {
             title="Create Group"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="8.5" cy="7" r="4" />
-                <line x1="20" y1="8" x2="20" y2="14" />
-                <line x1="23" y1="11" x2="17" y2="11" />
-              </svg>
+              <IconNewGroup size={20} />
             </span>
             <span className="rail-btn-text">New Group</span>
           </button>
@@ -1001,9 +1030,7 @@ const ChatDashboard = () => {
             title="Calls History"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-              </svg>
+              <IconCalls size={20} />
             </span>
             <span className="rail-btn-text">Call Logs</span>
           </button>
@@ -1015,10 +1042,7 @@ const ChatDashboard = () => {
             title="Notifications"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
+              <IconNotifications size={20} />
             </span>
             <span className="rail-btn-text">Notifications</span>
             {unreadNotifCount > 0 && <span className="rail-badge">{unreadNotifCount}</span>}
@@ -1031,29 +1055,22 @@ const ChatDashboard = () => {
             title="Starred Messages"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
+              <IconStarred size={20} />
             </span>
             <span className="rail-btn-text">Starred</span>
           </button>
 
           <button
             type="button"
-            className="rail-btn"
+            className="rail-btn ai-rail-btn"
             onClick={() => navigate("/ai-chat")}
             title="AI Chat"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="10" rx="2" />
-                <circle cx="12" cy="5" r="2" />
-                <path d="M12 7v4" />
-                <line x1="8" y1="16" x2="8.01" y2="16" strokeWidth="3" />
-                <line x1="16" y1="16" x2="16.01" y2="16" strokeWidth="3" />
-              </svg>
+              <IconAIChat size={20} />
             </span>
             <span className="rail-btn-text">AI Chat</span>
+            <span className="rail-ai-spark-dot" />
           </button>
 
           <button
@@ -1063,11 +1080,7 @@ const ChatDashboard = () => {
             title="Analytics"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
+              <IconAnalytics size={20} />
             </span>
             <span className="rail-btn-text">Analytics</span>
           </button>
@@ -1081,23 +1094,7 @@ const ChatDashboard = () => {
             title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             <span className="rail-icon-wrap">
-              {isDarkMode ? (
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="1" x2="12" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="23" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                  <line x1="1" y1="12" x2="3" y2="12" />
-                  <line x1="21" y1="12" x2="23" y2="12" />
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
-              )}
+              {isDarkMode ? <IconSun size={20} /> : <IconMoon size={20} />}
             </span>
             <span className="rail-btn-text">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
           </button>
@@ -1109,10 +1106,7 @@ const ChatDashboard = () => {
             title="Settings"
           >
             <span className="rail-icon-wrap">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
+              <IconSettings size={20} />
             </span>
             <span className="rail-btn-text">Settings</span>
           </button>
@@ -1146,7 +1140,7 @@ const ChatDashboard = () => {
                 onClick={() => setShowCreateGroup(true)}
                 title="New Group"
               >
-                👥
+                <IconNewGroup size={18} />
               </button>
               <button
                 type="button"
@@ -1154,14 +1148,14 @@ const ChatDashboard = () => {
                 onClick={() => navigate("/contacts")}
                 title="Find Contacts"
               >
-                📇
+                <IconAddressBook size={18} />
               </button>
             </div>
           </div>
 
           {/* Search */}
           <div className="search-wrapper">
-            <span className="search-icon-inside">🔍</span>
+            <span className="search-icon-inside"><IconSearch size={16} /></span>
             <input
               type="text"
               className="search-input-modern"
@@ -1241,16 +1235,24 @@ const ChatDashboard = () => {
               const display = getChatDisplay(conv);
               const isActive = selectedChat?._id === conv._id;
 
-              let lastMsgText = "No messages yet";
+              let lastMsgContent = <span>No messages yet</span>;
               if (conv.lastMessage) {
                 if (conv.lastMessage.isDeletedForEveryone) {
-                  lastMsgText = "This message was deleted";
+                  lastMsgContent = <span style={{ fontStyle: "italic", opacity: 0.7 }}>This message was deleted</span>;
                 } else if (conv.lastMessage.messageType === "voice") {
-                  lastMsgText = "🎤 Voice message";
+                  lastMsgContent = (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "var(--accent-primary)" }}>
+                      <IconWaveform size={14} /> Voice note
+                    </span>
+                  );
                 } else if (conv.lastMessage.attachments?.length) {
-                  lastMsgText = "📎 Attachment";
+                  lastMsgContent = (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <IconPaperclip size={13} /> Attachment
+                    </span>
+                  );
                 } else {
-                  lastMsgText = conv.lastMessage.text || "Message";
+                  lastMsgContent = <span>{conv.lastMessage.text || "Message"}</span>;
                 }
               }
 
@@ -1279,7 +1281,7 @@ const ChatDashboard = () => {
                     </div>
 
                     <div className="chat-item-preview-line">
-                      <span className="chat-item-last-msg">{lastMsgText}</span>
+                      <span className="chat-item-last-msg">{lastMsgContent}</span>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         {conv.unreadCount > 0 && (
                           <span className="unread-count-pill">{conv.unreadCount}</span>
@@ -1293,7 +1295,7 @@ const ChatDashboard = () => {
                           }}
                           title="Delete Chat"
                         >
-                          🗑️
+                          <IconTrash size={14} />
                         </button>
                       </div>
                     </div>
@@ -1388,7 +1390,7 @@ const ChatDashboard = () => {
                       onClick={() => startCall(activeChatDisplay.participant, "audio", selectedChat._id)}
                       title="Start Audio Call"
                     >
-                      📞
+                      <IconPhone size={18} />
                     </button>
                     <button
                       type="button"
@@ -1396,7 +1398,7 @@ const ChatDashboard = () => {
                       onClick={() => startCall(activeChatDisplay.participant, "video", selectedChat._id)}
                       title="Start Video Call"
                     >
-                      📹
+                      <IconVideo size={18} />
                     </button>
                   </>
                 )}
@@ -1407,7 +1409,7 @@ const ChatDashboard = () => {
                   onClick={() => setShowWallpaperModal(true)}
                   title="Change Chat Wallpaper"
                 >
-                  🎨
+                  <IconPalette size={18} />
                 </button>
 
                 <button
@@ -1416,7 +1418,7 @@ const ChatDashboard = () => {
                   onClick={() => setShowEncryptionModal(true)}
                   title="Encryption Info"
                 >
-                  🔐
+                  <IconShieldCheck size={18} />
                 </button>
 
                 <button
@@ -1425,7 +1427,7 @@ const ChatDashboard = () => {
                   onClick={() => setShowProfile(!showProfile)}
                   title={showProfile ? "Close Info" : "Conversation Info"}
                 >
-                  ℹ️
+                  <IconInfo size={18} />
                 </button>
 
                 <button
@@ -1434,7 +1436,7 @@ const ChatDashboard = () => {
                   onClick={() => handleDeleteConversation(selectedChat._id)}
                   title="Delete this Conversation"
                 >
-                  🗑️
+                  <IconTrash size={18} />
                 </button>
               </div>
             </header>
@@ -1506,7 +1508,7 @@ const ChatDashboard = () => {
                             title="Message Info (Delivered & Seen Times)"
                             onClick={() => setMessageInfoModal(msg)}
                           >
-                            ℹ️
+                            <IconInfo size={14} />
                           </button>
                           <button
                             type="button"
@@ -1514,11 +1516,11 @@ const ChatDashboard = () => {
                             title="Reply"
                             onClick={() => setReplyingTo(msg)}
                           >
-                            ↩️
+                            <IconReply size={14} />
                           </button>
                           <button
                             type="button"
-                            className="dock-btn"
+                            className="dock-btn reaction-btn"
                             title="React ❤️"
                             onClick={() => handleAddReaction(msg._id, "❤️")}
                           >
@@ -1526,7 +1528,7 @@ const ChatDashboard = () => {
                           </button>
                           <button
                             type="button"
-                            className="dock-btn"
+                            className="dock-btn reaction-btn"
                             title="React 👍"
                             onClick={() => handleAddReaction(msg._id, "👍")}
                           >
@@ -1538,7 +1540,7 @@ const ChatDashboard = () => {
                             title={isStarred ? "Unstar" : "Star"}
                             onClick={() => handleToggleStar(msg._id)}
                           >
-                            {isStarred ? "⭐" : "☆"}
+                            <IconStarred size={14} filled={isStarred} />
                           </button>
                           <button
                             type="button"
@@ -1546,7 +1548,7 @@ const ChatDashboard = () => {
                             title="Forward"
                             onClick={() => setForwardingMessage(msg)}
                           >
-                            ↗️
+                            <IconForward size={14} />
                           </button>
                           {msg.text && (
                             <button
@@ -1555,7 +1557,7 @@ const ChatDashboard = () => {
                               title={`${t("translate") || "Translate"} (${getCurrentLanguageData()?.nativeName || currentLanguage})`}
                               onClick={() => handleTranslateMessage(msg)}
                             >
-                              🌐
+                              <IconTranslate size={14} />
                             </button>
                           )}
                           {isMe && !msg.isDeletedForEveryone && (
@@ -1568,16 +1570,16 @@ const ChatDashboard = () => {
                                 setMessageInput(msg.text);
                               }}
                             >
-                              ✏️
+                              <IconEdit size={14} />
                             </button>
                           )}
                           <button
                             type="button"
-                            className="dock-btn"
+                            className="dock-btn delete-dock-btn"
                             title="Delete"
                             onClick={() => handleDeleteMessage(msg._id, isMe)}
                           >
-                            🗑️
+                            <IconTrash size={14} />
                           </button>
                         </div>
 
@@ -1619,7 +1621,7 @@ const ChatDashboard = () => {
                                     rel="noreferrer"
                                     className="message-attachment-file"
                                   >
-                                    📄 {att.name || "Download file"}
+                                    <IconFile size={16} /> {att.name || "Download file"}
                                   </a>
                                 ) : null}
                               </div>
@@ -1669,14 +1671,14 @@ const ChatDashboard = () => {
                                       className="translation-action-link"
                                       onClick={() => handleToggleHideTranslation(msg._id)}
                                     >
-                                      🌐 {t("translated") || "Translated"} ({translatedMessages[msg._id].targetLanguageName || translatedMessages[msg._id].targetLanguage}) • {t("showOriginal") || "Show Translation"}
+                                      <IconTranslate size={14} /> {t("translated") || "Translated"} ({translatedMessages[msg._id].targetLanguageName || translatedMessages[msg._id].targetLanguage}) • {t("showOriginal") || "Show Translation"}
                                     </button>
                                   </div>
                                 ) : (
                                   <div className="translation-content">
                                     <div className="translation-header-row">
                                       <div className="translation-badge">
-                                        <span className="translation-icon">🌐</span>
+                                        <span className="translation-icon"><IconTranslate size={14} /></span>
                                         <span className="translation-label">
                                           {t("translatedTo") || "Translated to"} {translatedMessages[msg._id].targetLanguageName || translatedMessages[msg._id].targetLanguage}
                                         </span>
@@ -1735,7 +1737,7 @@ const ChatDashboard = () => {
 
                         {/* Footer Meta with Sent Time and Single / Double Ticks */}
                         <div className="message-meta-footer">
-                          {isStarred && <span className="message-starred-icon" title="Starred">⭐</span>}
+                          {isStarred && <span className="message-starred-icon" title="Starred"><IconStarred size={11} filled={true} /></span>}
                           <span className="message-sent-time" title={`Sent at ${time}`}>
                             {time}
                           </span>
@@ -1748,7 +1750,7 @@ const ChatDashboard = () => {
                                   : `Sent at ${time}`
                               }
                             >
-                              {isRead ? "✓✓" : "✓"}
+                              {isRead ? <IconCheckDouble size={14} /> : <IconCheck size={13} />}
                             </span>
                           )}
                         </div>
@@ -1791,7 +1793,7 @@ const ChatDashboard = () => {
                     className="banner-close-btn"
                     onClick={() => setReplyingTo(null)}
                   >
-                    ✕
+                    <IconClose size={14} />
                   </button>
                 </div>
               )}
@@ -1800,11 +1802,11 @@ const ChatDashboard = () => {
               {attachment && (
                 <div className="composer-preview-banner">
                   <div className="banner-content">
-                    <span className="banner-sender">📎 Attached file:</span>
+                    <span className="banner-sender"><IconPaperclip size={14} /> Attached file:</span>
                     <span className="banner-text">{attachment.name}</span>
                   </div>
                   <button type="button" className="banner-close-btn" onClick={clearAttachment}>
-                    ✕
+                    <IconClose size={14} />
                   </button>
                 </div>
               )}
@@ -1813,7 +1815,7 @@ const ChatDashboard = () => {
               {editingMessage && (
                 <div className="composer-preview-banner">
                   <div className="banner-content">
-                    <span className="banner-sender">✏️ Editing message</span>
+                    <span className="banner-sender"><IconEdit size={14} /> Editing message</span>
                   </div>
                   <button
                     type="button"
@@ -1823,7 +1825,7 @@ const ChatDashboard = () => {
                       setMessageInput("");
                     }}
                   >
-                    ✕
+                    <IconClose size={14} />
                   </button>
                 </div>
               )}
@@ -1852,7 +1854,7 @@ const ChatDashboard = () => {
                     onClick={() => fileInputRef.current?.click()}
                     title="Attach Image or File"
                   >
-                    📎
+                    <IconPaperclip size={19} />
                   </button>
 
                   <button
@@ -1861,7 +1863,7 @@ const ChatDashboard = () => {
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     title="Emoji Picker"
                   >
-                    😊
+                    <IconSmile size={19} />
                   </button>
 
                   {/* Emoji Picker Popover */}
@@ -1923,12 +1925,11 @@ const ChatDashboard = () => {
                   {!messageInput.trim() && !attachment ? (
                     <button
                       type="button"
-                      className="composer-action-btn"
+                      className="composer-action-btn voice-btn"
                       onClick={() => setShowVoiceRecorder(true)}
                       title="Record Voice Note"
-                      style={{ color: "#22c55e", fontSize: "20px" }}
                     >
-                      🎤
+                      <IconMic size={20} />
                     </button>
                   ) : (
                     <button
@@ -1938,7 +1939,7 @@ const ChatDashboard = () => {
                       disabled={isSending}
                       title="Send Message"
                     >
-                      {isSending ? "..." : "➤"}
+                      {isSending ? "..." : <IconSend size={18} />}
                     </button>
                   )}
                 </div>
@@ -1946,14 +1947,21 @@ const ChatDashboard = () => {
             </div>
           </>
         ) : (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "var(--text-tertiary)", padding: "20px" }}>
-            <div style={{ fontSize: "4rem", marginBottom: "16px" }}>💬</div>
-            <h2 style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", marginBottom: "6px" }}>
+          <div className="dashboard-welcome-empty">
+            <div className="welcome-brand-badge">
+              <AppLogo size={54} />
+            </div>
+            <h2 className="welcome-heading">
               Welcome to Chatify
             </h2>
-            <p style={{ fontSize: "14px", maxWidth: "340px", textAlign: "center" }}>
-              Select a conversation from the sidebar or start a new chat to begin messaging with real-time audio and video calls.
+            <p className="welcome-desc">
+              Select a conversation from the sidebar or start a new chat to begin real-time messaging, crisp WebRTC audio & video calls, and intelligent AI assistance.
             </p>
+            <div className="welcome-feature-pills">
+              <span className="welcome-pill"><IconShieldCheck size={14} /> End-to-End Encrypted</span>
+              <span className="welcome-pill"><IconAIChat size={14} /> AI Assistant Ready</span>
+              <span className="welcome-pill"><IconVideo size={14} /> Ultra-HD Video Calls</span>
+            </div>
           </div>
         )}
       </main>
@@ -1969,7 +1977,7 @@ const ChatDashboard = () => {
               title="Close panel"
               aria-label="Close panel"
             >
-              ✕
+              <IconClose size={18} />
             </button>
             <img
               src={activeChatDisplay.avatar}
@@ -2081,7 +2089,7 @@ const ChatDashboard = () => {
                           gap: "8px",
                         }}
                       >
-                        📄 {item.name || "Document"}
+                        <IconFile size={16} /> {item.name || "Document"}
                       </a>
                     );
                   })}
@@ -2111,7 +2119,7 @@ const ChatDashboard = () => {
                 transition: "all 0.2s",
               }}
             >
-              <span>🗑️</span> Delete Entire Conversation
+              <IconTrash size={16} /> Delete Entire Conversation
             </button>
           </div>
         </aside>
@@ -2223,8 +2231,10 @@ const ChatDashboard = () => {
       {/* ─── 6. ENCRYPTION MODAL ─── */}
       {showEncryptionModal && (
         <div className="call-history-modal-overlay" onClick={() => setShowEncryptionModal(false)}>
-          <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px", textAlign: "center", padding: "24px" }}>
-            <div style={{ fontSize: "3rem", marginBottom: "12px" }}>🔐</div>
+          <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px", textAlign: "center", padding: "28px 24px" }}>
+            <div style={{ display: "inline-flex", padding: "16px", borderRadius: "20px", background: "rgba(34, 197, 94, 0.12)", color: "#22c55e", marginBottom: "16px" }}>
+              <IconShieldCheck size={44} />
+            </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "8px" }}>
               End-to-End Encryption
             </h2>
@@ -2277,7 +2287,9 @@ const ChatDashboard = () => {
           <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px", padding: "24px" }}>
             <div className="history-modal-header" style={{ marginBottom: "16px" }}>
               <div className="history-title-wrap">
-                <span style={{ fontSize: "24px" }}>🎨</span>
+                <div style={{ display: "inline-flex", color: "var(--accent-primary)", marginRight: "10px" }}>
+                  <IconPalette size={24} />
+                </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>Chat Wallpaper</h3>
                   <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--text-tertiary)" }}>
@@ -2286,7 +2298,7 @@ const ChatDashboard = () => {
                 </div>
               </div>
               <button type="button" className="history-close-btn" onClick={() => setShowWallpaperModal(false)}>
-                ✕
+                <IconClose size={18} />
               </button>
             </div>
 
@@ -2394,7 +2406,7 @@ const ChatDashboard = () => {
               setContextMenu(null);
             }}
           >
-            <span>ℹ️</span> View Message Info (Delivered & Seen Time)
+            <IconInfo size={15} /> View Message Info
           </button>
           <div className="context-menu-divider" />
           <button
@@ -2405,7 +2417,7 @@ const ChatDashboard = () => {
               setContextMenu(null);
             }}
           >
-            <span>↩️</span> Reply
+            <IconReply size={15} /> Reply
           </button>
           {contextMenu.message.text && (
             <>
@@ -2418,7 +2430,7 @@ const ChatDashboard = () => {
                   handleTranslateMessage(msgToTranslate);
                 }}
               >
-                <span>🌐</span> {t("translate") || "Translate"} ({getCurrentLanguageData()?.nativeName || currentLanguage})
+                <IconTranslate size={15} /> {t("translate") || "Translate"} ({getCurrentLanguageData()?.nativeName || currentLanguage})
               </button>
               <button
                 type="button"
@@ -2429,7 +2441,7 @@ const ChatDashboard = () => {
                   setTranslateLanguageModal(msgToTranslate);
                 }}
               >
-                <span>🔤</span> {t("translateTo") || "Translate to..."}
+                <IconTranslate size={15} /> {t("translateTo") || "Translate to..."}
               </button>
               <button
                 type="button"
@@ -2439,7 +2451,7 @@ const ChatDashboard = () => {
                   setContextMenu(null);
                 }}
               >
-                <span>📋</span> Copy Text
+                <IconCopy size={15} /> Copy Text
               </button>
             </>
           )}
@@ -2451,7 +2463,7 @@ const ChatDashboard = () => {
               setContextMenu(null);
             }}
           >
-            <span>⭐</span> Star / Unstar
+            <IconStarred size={15} /> Star / Unstar
           </button>
           <button
             type="button"
@@ -2461,7 +2473,7 @@ const ChatDashboard = () => {
               setContextMenu(null);
             }}
           >
-            <span>↗️</span> Forward Message
+            <IconForward size={15} /> Forward Message
           </button>
           <div className="context-menu-divider" />
           <button
@@ -2475,7 +2487,7 @@ const ChatDashboard = () => {
               handleDeleteMessage(msgToDelete._id, senderId === myId);
             }}
           >
-            <span>🗑️</span> Delete Message
+            <IconTrash size={15} /> Delete Message
           </button>
         </div>
       )}
@@ -2486,7 +2498,9 @@ const ChatDashboard = () => {
           <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px", padding: "24px" }}>
             <div className="history-modal-header" style={{ marginBottom: "16px" }}>
               <div className="history-title-wrap">
-                <span style={{ fontSize: "24px" }}>ℹ️</span>
+                <div style={{ display: "inline-flex", color: "var(--accent-primary)", marginRight: "10px" }}>
+                  <IconInfo size={22} />
+                </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800 }}>Message Info</h3>
                   <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--text-tertiary)" }}>
@@ -2495,7 +2509,7 @@ const ChatDashboard = () => {
                 </div>
               </div>
               <button type="button" className="history-close-btn" onClick={() => setMessageInfoModal(null)}>
-                ✕
+                <IconClose size={18} />
               </button>
             </div>
 
@@ -2528,7 +2542,9 @@ const ChatDashboard = () => {
                 border: "1px solid var(--border-color)"
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ fontSize: "18px" }}>📤</span>
+                  <div style={{ display: "inline-flex", color: "var(--accent-primary)" }}>
+                    <IconSend size={18} />
+                  </div>
                   <div>
                     <div style={{ fontSize: "13px", fontWeight: 700 }}>Sent Time</div>
                     <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>Dispatched from device</div>
@@ -2550,7 +2566,9 @@ const ChatDashboard = () => {
                 border: "1px solid var(--border-color)"
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ fontSize: "18px" }}>📥</span>
+                  <div style={{ display: "inline-flex", color: "var(--accent-blue)" }}>
+                    <IconCheck size={18} />
+                  </div>
                   <div>
                     <div style={{ fontSize: "13px", fontWeight: 700 }}>Delivered Time</div>
                     <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>Delivered to recipient server</div>
@@ -2581,9 +2599,9 @@ const ChatDashboard = () => {
                     border: isRead ? "1px solid rgba(56, 189, 248, 0.3)" : "1px solid var(--border-color)"
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span style={{ fontSize: "18px", color: isRead ? "#38bdf8" : "inherit" }}>
-                        {isRead ? "✓✓" : "✓"}
-                      </span>
+                      <div style={{ display: "inline-flex", color: isRead ? "#38bdf8" : "inherit" }}>
+                        <IconCheckDouble size={18} />
+                      </div>
                       <div>
                         <div style={{ fontSize: "13px", fontWeight: 700, color: isRead ? "#38bdf8" : "inherit" }}>
                           Seen / Read Time
@@ -2619,7 +2637,7 @@ const ChatDashboard = () => {
           <div className="translate-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="translate-modal-header">
               <h3 className="translate-modal-title">
-                <span>🌐</span> {t("translateTo") || "Translate to..."}
+                <IconTranslate size={20} /> {t("translateTo") || "Translate to..."}
               </h3>
               <button
                 type="button"
@@ -2629,7 +2647,7 @@ const ChatDashboard = () => {
                   setTranslateSearchQuery("");
                 }}
               >
-                ✕
+                <IconClose size={18} />
               </button>
             </div>
 

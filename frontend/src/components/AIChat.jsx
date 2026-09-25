@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import aiService from "../services/aiService";
+import { AppLogo, IconAIChat } from "./Icons";
 import "./AIChat.css";
 
 // ─── Safe Markdown & Code Block Renderer ───
@@ -718,7 +719,9 @@ const AIChat = () => {
             ☰ History
           </button>
           <div className="aichat-brand">
-            <div className="aichat-brand-icon">🤖</div>
+            <div className="aichat-brand-icon">
+              <AppLogo size={32} />
+            </div>
             <div className="aichat-brand-info">
               <h1 className="aichat-title">AI Chat</h1>
               <p className="aichat-subtitle">Your Chatify AI Assistant</p>

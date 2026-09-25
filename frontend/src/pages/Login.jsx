@@ -293,21 +293,21 @@ const Login = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
         :root {
-          --primary-green: #10b981;
-          --primary-dark: #0f172a;
-          --secondary-gray: #f1f5f9;
-          --text-primary: #0f172a;
-          --text-secondary: #64748b;
-          --accent-purple: #8b5cf6;
-          --accent-blue: #3b82f6;
-          --white: #ffffff;
-          --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-          --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-          --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
-          --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          --cf-bg: #efece4;
+          --cf-surface: #ffffff;
+          --cf-surface-card: #f7f5ef;
+          --cf-ink: #14120f;
+          --cf-ink-muted: #55524a;
+          --cf-vermilion: #e0521c;
+          --cf-vermilion-hover: #ff5a22;
+          --cf-border: rgba(20, 18, 15, 0.12);
+          --cf-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.04);
+          --cf-shadow-md: 0 14px 36px rgba(0, 0, 0, 0.08);
+          --cf-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.12);
+          --cf-transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
@@ -317,17 +317,18 @@ const Login = () => {
         }
 
         body {
-          font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-          color: var(--text-primary);
-          background: var(--white);
+          font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          color: var(--cf-ink);
+          background: var(--cf-bg);
           overflow-x: hidden;
         }
 
         .login-container {
           min-height: 100vh;
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+          grid-template-columns: 1fr 1.05fr;
+          background: var(--cf-bg);
+          position: relative;
         }
 
         .login-form-side {
@@ -335,9 +336,12 @@ const Login = () => {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          padding: 3rem 2.5rem;
-          background: var(--white);
+          padding: 3.5rem 2.5rem;
+          background: #ffffff;
+          border-right: 1px solid var(--cf-border);
           position: relative;
+          z-index: 5;
+          box-shadow: 10px 0 35px rgba(0, 0, 0, 0.03);
         }
 
         .back-to-home {
@@ -348,28 +352,28 @@ const Login = () => {
           align-items: center;
           gap: 0.5rem;
           text-decoration: none;
-          color: var(--text-secondary);
-          font-weight: 600;
-          font-size: 0.9rem;
-          transition: var(--transition-smooth);
+          color: var(--cf-ink-muted);
+          font-weight: 700;
+          font-size: 0.88rem;
+          transition: var(--cf-transition);
           cursor: pointer;
         }
 
         .back-to-home:hover {
-          color: var(--primary-green);
-          transform: translateX(-3px);
+          color: var(--cf-vermilion);
+          transform: translateX(-4px);
         }
 
         .login-form-wrapper {
           width: 100%;
           max-width: 440px;
-          animation: fadeInUp 0.6s ease-out;
+          animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes fadeInUp {
           from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(24px);
           }
           to {
             opacity: 1;
@@ -382,50 +386,53 @@ const Login = () => {
           text-align: center;
         }
 
-        .logo {
-          font-family: 'Poppins', sans-serif;
-          font-size: 2.25rem;
+        .cf-logo-brand-wrap {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 1.8rem;
           font-weight: 800;
-          letter-spacing: -1px;
-          margin-bottom: 0.25rem;
-          background: linear-gradient(135deg, #0f172a 0%, #10b981 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          letter-spacing: -0.03em;
+          color: var(--cf-ink);
+          margin-bottom: 0.6rem;
+          text-decoration: none;
         }
 
         .welcome-text {
-          font-family: 'Poppins', sans-serif;
-          font-size: 1.6rem;
-          font-weight: 700;
-          color: var(--text-primary);
+          font-size: 1.65rem;
+          font-weight: 800;
+          color: var(--cf-ink);
+          letter-spacing: -0.025em;
           margin-bottom: 0.25rem;
         }
 
         .subtitle {
-          color: var(--text-secondary);
-          font-size: 0.9rem;
+          color: var(--cf-ink-muted);
+          font-size: 0.92rem;
+          font-weight: 500;
         }
 
         /* Auth Mode Switcher */
         .auth-mode-tabs {
           display: flex;
-          background: #f1f5f9;
+          background: #f4f2ec;
           padding: 4px;
-          border-radius: 14px;
+          border-radius: 999px;
           margin-bottom: 1.5rem;
+          border: 1px solid var(--cf-border);
         }
 
         .auth-tab-btn {
           flex: 1;
-          padding: 0.65rem 0.75rem;
+          padding: 0.7rem 0.85rem;
           border: none;
           background: transparent;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: #64748b;
-          border-radius: 10px;
+          font-size: 0.88rem;
+          font-weight: 700;
+          color: #7d7768;
+          border-radius: 999px;
           cursor: pointer;
-          transition: var(--transition-smooth);
+          transition: var(--cf-transition);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -433,20 +440,20 @@ const Login = () => {
         }
 
         .auth-tab-btn.active {
-          background: #ffffff;
-          color: #0f172a;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          background: var(--cf-ink);
+          color: #ffffff;
+          box-shadow: 0 4px 14px rgba(20, 18, 15, 0.22);
         }
 
         .alert-box {
-          padding: 0.75rem 1rem;
+          padding: 0.85rem 1.1rem;
           border-radius: 10px;
           margin-bottom: 1.25rem;
-          font-size: 0.875rem;
-          font-weight: 500;
+          font-size: 0.88rem;
+          font-weight: 600;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.6rem;
         }
 
         .alert-error {
@@ -474,9 +481,9 @@ const Login = () => {
         }
 
         .form-label {
-          font-weight: 600;
-          color: #334155;
-          font-size: 0.875rem;
+          font-weight: 700;
+          color: var(--cf-ink);
+          font-size: 0.88rem;
         }
 
         .input-wrapper {
@@ -485,45 +492,47 @@ const Login = () => {
 
         .form-input {
           width: 100%;
-          padding: 0.85rem 1rem 0.85rem 2.5rem;
-          border: 1.5px solid #e2e8f0;
-          border-radius: 12px;
+          padding: 0.9rem 1rem 0.9rem 2.6rem;
+          border: 1.5px solid var(--cf-border);
+          border-radius: 999px;
           font-size: 0.95rem;
           font-family: inherit;
-          transition: var(--transition-smooth);
-          background: #ffffff;
-          color: var(--text-primary);
+          transition: var(--cf-transition);
+          background: #fbf9f5;
+          color: var(--cf-ink);
           outline: none;
         }
 
         .form-input:focus {
-          border-color: var(--primary-green);
-          box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+          border-color: var(--cf-ink);
+          background: #ffffff;
+          box-shadow: 0 0 0 4px rgba(224, 82, 28, 0.15);
         }
 
         .input-icon-left {
           position: absolute;
-          left: 0.85rem;
+          left: 1rem;
           top: 50%;
           transform: translateY(-50%);
-          color: #94a3b8;
+          color: #8c8577;
           font-size: 1.1rem;
           pointer-events: none;
         }
 
         .input-icon-right {
           position: absolute;
-          right: 0.85rem;
+          right: 1rem;
           top: 50%;
           transform: translateY(-50%);
-          color: #94a3b8;
+          color: #8c8577;
           font-size: 1.1rem;
           cursor: pointer;
           user-select: none;
+          transition: color 0.2s;
         }
 
         .input-icon-right:hover {
-          color: var(--primary-green);
+          color: var(--cf-vermilion);
         }
 
         .form-options {
@@ -543,47 +552,48 @@ const Login = () => {
           width: 16px;
           height: 16px;
           cursor: pointer;
-          accent-color: var(--primary-green);
+          accent-color: var(--cf-vermilion);
         }
 
         .checkbox-label {
-          font-size: 0.85rem;
-          color: var(--text-secondary);
+          font-size: 0.86rem;
+          color: var(--cf-ink-muted);
+          font-weight: 500;
           cursor: pointer;
           user-select: none;
         }
 
         .forgot-password {
-          color: #475569;
-          font-size: 0.85rem;
-          font-weight: 600;
+          color: var(--cf-ink-muted);
+          font-size: 0.86rem;
+          font-weight: 700;
           cursor: pointer;
-          transition: var(--transition-smooth);
+          transition: var(--cf-transition);
         }
 
         .forgot-password:hover {
-          color: var(--primary-green);
+          color: var(--cf-vermilion);
           text-decoration: underline;
         }
 
         .btn-login {
           width: 100%;
-          padding: 0.9rem;
-          background: #0f172a;
-          color: var(--white);
+          padding: 0.95rem;
+          background: var(--cf-ink);
+          color: #ffffff;
           border: none;
-          border-radius: 12px;
+          border-radius: 999px;
           font-size: 1rem;
-          font-weight: 700;
+          font-weight: 800;
           cursor: pointer;
-          transition: var(--transition-smooth);
-          box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+          transition: var(--cf-transition);
+          box-shadow: 0 8px 24px rgba(20, 18, 15, 0.28);
         }
 
         .btn-login:hover:not(:disabled) {
-          background: var(--primary-green);
-          transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+          background: var(--cf-vermilion);
+          transform: translateY(-2px);
+          box-shadow: 0 12px 30px rgba(224, 82, 28, 0.45);
         }
 
         .btn-login:disabled {
@@ -596,7 +606,7 @@ const Login = () => {
           display: grid;
           grid-template-columns: repeat(6, 1fr);
           gap: 8px;
-          margin: 1rem 0;
+          margin: 1.25rem 0;
         }
 
         .otp-box {
@@ -604,38 +614,38 @@ const Login = () => {
           height: 52px;
           text-align: center;
           font-size: 1.4rem;
-          font-weight: 700;
-          border: 2px solid #e2e8f0;
+          font-weight: 800;
+          border: 1.5px solid var(--cf-border);
           border-radius: 12px;
-          background: #f8fafc;
-          color: #0f172a;
+          background: #fbf9f5;
+          color: var(--cf-ink);
           outline: none;
-          transition: var(--transition-smooth);
+          transition: var(--cf-transition);
           font-family: monospace;
         }
 
         .otp-box:focus {
-          border-color: var(--primary-green);
+          border-color: var(--cf-ink);
           background: #ffffff;
-          box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+          box-shadow: 0 0 0 4px rgba(224, 82, 28, 0.15);
         }
 
         .resend-section {
           text-align: center;
           margin: 1rem 0 0.5rem;
-          font-size: 0.875rem;
-          color: #64748b;
+          font-size: 0.88rem;
+          color: var(--cf-ink-muted);
         }
 
         .resend-link {
-          color: var(--primary-green);
-          font-weight: 600;
+          color: var(--cf-vermilion);
+          font-weight: 700;
           cursor: pointer;
           text-decoration: underline;
         }
 
         .resend-link.disabled {
-          color: #94a3b8;
+          color: #8c8577;
           cursor: not-allowed;
           text-decoration: none;
         }
@@ -650,14 +660,14 @@ const Login = () => {
         .divider-line {
           flex: 1;
           height: 1px;
-          background: #e2e8f0;
+          background: var(--cf-border);
         }
 
         .divider-text {
-          color: #94a3b8;
+          color: #8c8577;
           font-size: 0.8rem;
-          font-weight: 600;
-          letter-spacing: 0.5px;
+          font-weight: 700;
+          letter-spacing: 0.8px;
         }
 
         .social-login {
@@ -672,23 +682,23 @@ const Login = () => {
           justify-content: center;
           gap: 0.75rem;
           width: 100%;
-          padding: 0.85rem 1rem;
-          border: 1.5px solid #e2e8f0;
-          border-radius: 12px;
-          background: #ffffff;
+          padding: 0.9rem 1rem;
+          border: 1.5px solid var(--cf-border);
+          border-radius: 999px;
+          background: #fbf9f5;
           cursor: pointer;
-          transition: var(--transition-smooth);
-          font-weight: 600;
+          transition: var(--cf-transition);
+          font-weight: 700;
           font-size: 0.95rem;
-          color: #1e293b;
+          color: var(--cf-ink);
           font-family: inherit;
         }
 
         .social-btn:hover:not(:disabled) {
-          border-color: #cbd5e1;
-          background: #f8fafc;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          border-color: var(--cf-ink);
+          background: #ffffff;
+          transform: translateY(-2px);
+          box-shadow: var(--cf-shadow-sm);
         }
 
         .social-btn:disabled {
@@ -699,13 +709,13 @@ const Login = () => {
         .signup-prompt {
           text-align: center;
           margin-top: 1.75rem;
-          color: var(--text-secondary);
-          font-size: 0.9rem;
+          color: var(--cf-ink-muted);
+          font-size: 0.92rem;
         }
 
         .signup-link {
-          color: var(--primary-green);
-          font-weight: 700;
+          color: var(--cf-vermilion);
+          font-weight: 800;
           cursor: pointer;
         }
 
@@ -713,7 +723,7 @@ const Login = () => {
           text-decoration: underline;
         }
 
-        /* Right Side - Visual with Subtle Floating Animations */
+        /* Right Side - Luxury Showcase */
         .login-visual-side {
           display: flex;
           flex-direction: column;
@@ -722,39 +732,37 @@ const Login = () => {
           padding: 4rem;
           position: relative;
           overflow: hidden;
+          background: linear-gradient(135deg, #efece4 0%, #e6e0d2 100%);
         }
 
         .visual-content {
           text-align: center;
           position: relative;
           z-index: 2;
+          max-width: 520px;
         }
 
         .visual-title {
-          font-family: 'Poppins', sans-serif;
-          font-size: 3rem;
+          font-size: 3.2rem;
           font-weight: 800;
-          line-height: 1.2;
-          letter-spacing: -1.5px;
+          line-height: 1.1;
+          letter-spacing: -0.035em;
           margin-bottom: 1rem;
-          color: var(--text-primary);
+          color: var(--cf-ink);
         }
 
         .visual-description {
           font-size: 1.1rem;
-          line-height: 1.7;
-          color: #475569;
+          line-height: 1.65;
+          color: var(--cf-ink-muted);
           margin-bottom: 2.5rem;
-          max-width: 480px;
-          margin-left: auto;
-          margin-right: auto;
         }
 
         .floating-cards {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 1.25rem;
-          max-width: 460px;
+          max-width: 480px;
           margin: 0 auto;
         }
 
@@ -763,7 +771,7 @@ const Login = () => {
             transform: translateY(0px) rotate(0deg);
           }
           50% {
-            transform: translateY(-7px) rotate(0.4deg);
+            transform: translateY(-8px) rotate(0.6deg);
           }
           100% {
             transform: translateY(0px) rotate(0deg);
@@ -771,57 +779,59 @@ const Login = () => {
         }
 
         .floating-card {
-          background: var(--white);
-          border-radius: 18px;
-          padding: 1.5rem;
-          box-shadow: var(--shadow-md);
-          border: 1px solid rgba(0,0,0,0.04);
+          background: #ffffff;
+          border-radius: 14px;
+          padding: 1.6rem;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+          border: 1px solid var(--cf-border);
           text-align: left;
-          animation: subtleFloat 4.2s ease-in-out infinite;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          animation: subtleFloat 4.6s ease-in-out infinite;
+          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
         }
 
         .floating-card:nth-child(1) {
-          animation-duration: 4.2s;
+          animation-duration: 4.6s;
           animation-delay: 0s;
         }
 
         .floating-card:nth-child(2) {
-          animation-duration: 5s;
-          animation-delay: 0.7s;
+          animation-duration: 5.2s;
+          animation-delay: 0.8s;
         }
 
         .floating-card:nth-child(3) {
-          animation-duration: 4.6s;
-          animation-delay: 1.3s;
+          animation-duration: 4.8s;
+          animation-delay: 1.4s;
         }
 
         .floating-card:nth-child(4) {
-          animation-duration: 5.3s;
-          animation-delay: 0.3s;
+          animation-duration: 5.5s;
+          animation-delay: 0.4s;
         }
 
         .floating-card:hover {
-          transform: translateY(-9px) scale(1.02);
-          box-shadow: var(--shadow-lg);
+          transform: translateY(-10px) scale(1.03);
+          box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12);
+          border-color: var(--cf-ink);
         }
 
         .card-icon {
           font-size: 2rem;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.6rem;
           display: block;
         }
 
         .card-title {
-          font-weight: 700;
-          font-size: 1rem;
-          margin-bottom: 0.25rem;
-          color: var(--text-primary);
+          font-weight: 800;
+          font-size: 1.05rem;
+          margin-bottom: 0.3rem;
+          color: var(--cf-ink);
         }
 
         .card-text {
-          font-size: 0.85rem;
-          color: var(--text-secondary);
+          font-size: 0.86rem;
+          color: var(--cf-ink-muted);
+          line-height: 1.45;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -839,7 +849,7 @@ const Login = () => {
             display: none;
           }
           .login-form-side {
-            padding: 3.5rem 1.5rem;
+            padding: 4rem 1.5rem;
           }
           .back-to-home {
             left: 1.5rem;
@@ -857,9 +867,16 @@ const Login = () => {
 
           <div className="login-form-wrapper">
             <div className="logo-section">
-              <h1 className="logo">ChatApp</h1>
+              <div className="cf-logo-brand-wrap">
+                <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
+                  <rect width="36" height="36" rx="10" fill="#14120f" />
+                  <path d="M10 12C10 9.79086 11.7909 8 14 8H22C24.2091 8 26 9.79086 26 12V18C26 20.2091 24.2091 22 22 22H15L11 25.5V22H10C8.89543 22 8 21.1046 8 20V14C8 12.8954 8.89543 12 10 12Z" fill="#efece4" />
+                  <path d="M19 16C19 14.8954 19.8954 14 21 14H25C26.1046 14 27 14.8954 27 16V21C27 22.1046 26.1046 23 25 23H23.5L21 25V23H21C19.8954 23 19 22.1046 19 21V16Z" fill="#e0521c" />
+                </svg>
+                <span>Chatify</span>
+              </div>
               <h2 className="welcome-text">Welcome Back</h2>
-              <p className="subtitle">Sign in with your password or secure email code</p>
+              <p className="subtitle">Sign in to your team workspace and AI Copilot</p>
             </div>
 
             {/* Mode Switcher Tabs */}
@@ -884,7 +901,7 @@ const Login = () => {
                   setSuccess('');
                 }}
               >
-                ✉️ Continue with Email
+                ✉️ Email Code
               </button>
             </div>
 
@@ -990,7 +1007,7 @@ const Login = () => {
                   className="btn-login"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Signing In...' : 'Sign In'}
+                  {isLoading ? 'Signing In...' : 'Sign In to Workspace →'}
                 </button>
               </form>
             )}
@@ -1020,7 +1037,7 @@ const Login = () => {
                       </div>
                     </div>
 
-                    <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
+                    <p style={{ fontSize: '0.86rem', color: '#55524a', lineHeight: 1.5 }}>
                       We will send a 6-digit cryptographic verification code to your email. No password required.
                     </p>
 
@@ -1029,16 +1046,16 @@ const Login = () => {
                       className="btn-login"
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Sending Verification Code...' : 'Send Verification Code'}
+                      {isLoading ? 'Sending Verification Code...' : 'Send Verification Code →'}
                     </button>
                   </form>
                 ) : (
                   <form className="login-form" onSubmit={handleVerifyOTP}>
                     <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
-                      <p style={{ fontSize: '0.9rem', color: '#475569' }}>
+                      <p style={{ fontSize: '0.9rem', color: '#55524a' }}>
                         Enter the 6-digit verification code sent to:
                       </p>
-                      <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>{otpEmail}</strong>
+                      <strong style={{ fontSize: '0.95rem', color: '#14120f' }}>{otpEmail}</strong>
                     </div>
 
                     <div className="otp-inputs-grid">
@@ -1062,7 +1079,7 @@ const Login = () => {
                       className="btn-login"
                       disabled={isLoading || otpDigits.join('').length !== 6}
                     >
-                      {isLoading ? 'Verifying...' : 'Verify & Sign In'}
+                      {isLoading ? 'Verifying...' : 'Verify & Sign In →'}
                     </button>
 
                     <div className="resend-section">
@@ -1083,7 +1100,7 @@ const Login = () => {
 
                     <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                       <span
-                        style={{ fontSize: '0.85rem', color: '#64748b', cursor: 'pointer', textDecoration: 'underline' }}
+                        style={{ fontSize: '0.85rem', color: '#55524a', cursor: 'pointer', textDecoration: 'underline' }}
                         onClick={() => {
                           setOtpStep(1);
                           setOtpDigits(['', '', '', '', '', '']);
@@ -1138,7 +1155,7 @@ const Login = () => {
             <p className="signup-prompt">
               Don't have an account?{' '}
               <span className="signup-link" onClick={() => navigate('/register')}>
-                Sign up
+                Sign up free
               </span>
             </p>
           </div>
@@ -1148,33 +1165,33 @@ const Login = () => {
         <div className="login-visual-side">
           <div className="visual-content">
             <h2 className="visual-title">
-              Fast, Secure<br />
-              <span style={{ color: '#10b981' }}>Messaging</span>
+              Team & AI Chat<br />
+              <span style={{ color: '#e0521c' }}>Unified</span>
             </h2>
             <p className="visual-description">
-              Experience seamless real-time chat with multi-factor verification and end-to-end privacy.
+              Experience seamless sub-11ms messaging with integrated Chatify AI Copilot and end-to-end privacy.
             </p>
 
             <div className="floating-cards">
               <div className="floating-card">
                 <span className="card-icon">⚡</span>
                 <h3 className="card-title">Instant Delivery</h3>
-                <p className="card-text">Ultra low-latency socket messaging</p>
+                <p className="card-text">Sub-11ms live WebSocket sync</p>
               </div>
               <div className="floating-card">
-                <span className="card-icon">🛡️</span>
-                <h3 className="card-title">OTP Security</h3>
-                <p className="card-text">Cryptographic email verification</p>
+                <span className="card-icon">🤖</span>
+                <h3 className="card-title">AI Copilot</h3>
+                <p className="card-text">Deep assistant inside every chat</p>
               </div>
               <div className="floating-card">
-                <span className="card-icon">🌐</span>
-                <h3 className="card-title">Multi-Language</h3>
-                <p className="card-text">Live translation inside chat</p>
+                <span className="card-icon">🔒</span>
+                <h3 className="card-title">E2E Privacy</h3>
+                <p className="card-text">256-bit client-side cryptography</p>
               </div>
               <div className="floating-card">
                 <span className="card-icon">📱</span>
                 <h3 className="card-title">Multi-Device</h3>
-                <p className="card-text">Synced across desktop and mobile</p>
+                <p className="card-text">Live continuity across all screens</p>
               </div>
             </div>
           </div>
