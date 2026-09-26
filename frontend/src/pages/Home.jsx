@@ -1004,27 +1004,27 @@ export default function Home() {
         /* Hero Right Visual Cluster with Parallax & Floating */
         .cf-hero-right {
           position: relative;
-          height: 440px;
+          height: 480px;
           width: 100%;
         }
 
         .cf-downloads-badge {
           position: absolute;
-          right: 36px;
+          right: 28px;
           top: 0;
           text-align: right;
           z-index: 3;
           animation: floatBadge1 7s ease-in-out infinite;
         }
         .cf-downloads-badge .num {
-          font-size: 30px;
+          font-size: 34px;
           font-weight: 800;
           color: #14120f;
           letter-spacing: -0.03em;
           line-height: 1;
         }
         .cf-downloads-badge .lbl {
-          font-size: 13px;
+          font-size: 13.5px;
           color: #55524a;
           margin-top: 3px;
           font-weight: 700;
@@ -1033,13 +1033,13 @@ export default function Home() {
         /* Tip Matrix Card */
         .cf-tip-matrix {
           position: absolute;
-          left: 10px;
-          top: 20px;
-          width: 144px;
-          height: 144px;
+          left: 0px;
+          top: 16px;
+          width: 156px;
+          height: 156px;
           background: #a49a89;
           border-radius: 8px;
-          padding: 18px;
+          padding: 20px;
           box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
           z-index: 2;
           transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1052,13 +1052,13 @@ export default function Home() {
         .cf-tip-grid {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
-          gap: 5px;
-          width: 80px;
-          margin-bottom: 20px;
+          gap: 5.5px;
+          width: 86px;
+          margin-bottom: 22px;
         }
         .cf-tip-grid span {
-          width: 6.5px;
-          height: 6.5px;
+          width: 7px;
+          height: 7px;
           background: #14120f;
           opacity: 0.6;
           border-radius: 1.5px;
@@ -1070,7 +1070,7 @@ export default function Home() {
           transform: scale(1.2);
         }
         .cf-tip-matrix p {
-          font-size: 13px;
+          font-size: 13.5px;
           line-height: 1.35;
           color: #14120f;
           font-weight: 800;
@@ -1079,17 +1079,17 @@ export default function Home() {
         /* Radiant Orange Action Button */
         .cf-orange-orb {
           position: absolute;
-          left: 120px;
-          top: -8px;
-          width: 80px;
-          height: 80px;
+          left: 100px;
+          top: -14px;
+          width: 90px;
+          height: 90px;
           border-radius: 50%;
           background: #e0521c;
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 8;
-          box-shadow: 0 14px 36px rgba(224, 82, 28, 0.45);
+          box-shadow: 0 16px 40px rgba(224, 82, 28, 0.48);
           cursor: pointer;
           transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           animation: pulseGlow 3s ease-in-out infinite;
@@ -1102,21 +1102,21 @@ export default function Home() {
         /* Central Floating Photo / Live Chat Showcase Card */
         .cf-photo-card {
           position: absolute;
-          left: 160px;
-          top: 24px;
-          width: 290px;
-          height: 310px;
-          border-radius: 8px;
+          left: 140px;
+          top: 20px;
+          width: 340px;
+          height: 360px;
+          border-radius: 10px;
           background: #dcd6c7;
           border: 1px solid rgba(20, 18, 15, 0.12);
-          box-shadow: 0 28px 70px -15px rgba(0, 0, 0, 0.26);
+          box-shadow: 0 32px 80px -15px rgba(0, 0, 0, 0.28);
           z-index: 5;
           overflow: hidden;
           animation: floatHeroCard 6.5s ease-in-out infinite;
           transition: box-shadow 0.4s ease, transform 0.4s ease;
         }
         .cf-photo-card:hover {
-          box-shadow: 0 42px 90px -15px rgba(0, 0, 0, 0.4);
+          box-shadow: 0 44px 96px -15px rgba(0, 0, 0, 0.4);
           transform: translateY(-8px) scale(1.02);
         }
         .cf-photo-bg {
@@ -1126,15 +1126,15 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 20px;
+          padding: 24px;
         }
         .cf-live-badge {
           align-self: flex-start;
           background: rgba(20, 18, 15, 0.92);
           color: #ffffff;
-          font-size: 11px;
+          font-size: 11.5px;
           font-weight: 700;
-          padding: 5px 12px;
+          padding: 6px 14px;
           border-radius: 999px;
           display: flex;
           align-items: center;
@@ -1142,8 +1142,8 @@ export default function Home() {
           box-shadow: 0 4px 14px rgba(0,0,0,0.22);
         }
         .cf-live-badge span {
-          width: 7px;
-          height: 7px;
+          width: 7.5px;
+          height: 7.5px;
           border-radius: 50%;
           background: #10b981;
           box-shadow: 0 0 10px #10b981;
@@ -1152,11 +1152,11 @@ export default function Home() {
         }
         .cf-floating-chat-bubble {
           background: #efece4;
-          padding: 14px 16px;
-          border-radius: 10px;
-          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
-          font-size: 12.5px;
-          line-height: 1.4;
+          padding: 16px 18px;
+          border-radius: 12px;
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+          font-size: 13.5px;
+          line-height: 1.45;
           color: #14120f;
           border: 1px solid rgba(20, 18, 15, 0.08);
           transition: transform 0.25s ease;
@@ -1167,8 +1167,8 @@ export default function Home() {
         }
         .cf-floating-chat-bubble b {
           display: block;
-          margin-bottom: 3px;
-          font-size: 11.5px;
+          margin-bottom: 4px;
+          font-size: 12px;
           color: #e0521c;
           font-weight: 800;
         }
@@ -1176,13 +1176,13 @@ export default function Home() {
         /* Floating reaction mini-pill */
         .cf-mini-reaction-pill {
           position: absolute;
-          right: -12px;
-          top: 120px;
+          right: -16px;
+          top: 135px;
           background: #ffffff;
           border: 1px solid rgba(20,18,15,0.12);
-          padding: 6px 14px;
+          padding: 7px 16px;
           border-radius: 999px;
-          font-size: 13px;
+          font-size: 13.5px;
           font-weight: 800;
           box-shadow: 0 8px 24px rgba(0,0,0,0.14);
           display: flex;
@@ -1202,10 +1202,10 @@ export default function Home() {
         /* Right Panel Behind */
         .cf-backdrop-panel {
           position: absolute;
-          right: 36px;
-          top: 110px;
-          width: 96px;
-          height: 190px;
+          right: 28px;
+          top: 100px;
+          width: 110px;
+          height: 220px;
           background: #d6cfbe;
           border-radius: 8px;
           z-index: 1;
@@ -1214,27 +1214,27 @@ export default function Home() {
         /* Sunburst Vector */
         .cf-sunburst {
           position: absolute;
-          left: 10px;
-          bottom: 40px;
-          width: 88px;
-          height: 88px;
+          left: 0px;
+          bottom: 30px;
+          width: 96px;
+          height: 96px;
           z-index: 2;
           animation: burstSpin 28s linear infinite;
         }
 
         .cf-down-badge {
           position: absolute;
-          left: 130px;
-          bottom: 66px;
-          width: 32px;
-          height: 32px;
+          left: 120px;
+          bottom: 56px;
+          width: 34px;
+          height: 34px;
           border-radius: 50%;
           border: 1.5px solid #14120f;
           background: #efece4;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 800;
           z-index: 6;
           box-shadow: 0 6px 14px rgba(0,0,0,0.08);
