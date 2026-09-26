@@ -2211,8 +2211,43 @@ export default function Home() {
           .cf-hero-foot-row {
             grid-template-columns: 1fr;
             gap: 16px;
-            margin-top: 40px;
-            padding-top: 28px;
+            margin-top: 28px;
+            padding-top: 24px;
+          }
+          .cf-hero-marquee-wrapper {
+            margin-top: 24px;
+            margin-bottom: 24px;
+            gap: 10px;
+          }
+          .cf-marquee-badge-card {
+            padding: 7px 14px;
+            gap: 8px;
+          }
+          .cf-marquee-badge-icon {
+            width: 26px;
+            height: 26px;
+            font-size: 13px;
+          }
+          .cf-marquee-badge-title {
+            font-size: 12px;
+          }
+          .cf-marquee-badge-desc {
+            font-size: 11px;
+          }
+          .cf-marquee-badge-tag {
+            font-size: 8.5px;
+            padding: 1px 5px;
+          }
+          .cf-stat-card-wrap {
+            width: 100%;
+            max-width: 100%;
+            margin-top: 18px;
+          }
+          .cf-stat-pill-floating {
+            position: relative;
+            bottom: auto;
+            margin-top: 10px;
+            width: 100%;
           }
           .cf-pillars-grid, .cf-steps-row, .cf-reviews-grid {
             grid-template-columns: 1fr;
@@ -2293,7 +2328,26 @@ export default function Home() {
             font-size: 32px;
           }
           .cf-sec-main-title {
-            font-size: 27px;
+            font-size: 26px;
+          }
+          .cf-marquee-badge-card {
+            padding: 6px 12px;
+            gap: 7px;
+          }
+          .cf-marquee-badge-title {
+            font-size: 11.5px;
+          }
+          .cf-marquee-badge-desc {
+            font-size: 10.5px;
+          }
+          .cf-marquee-badge-tag {
+            font-size: 8px;
+            padding: 1px 4px;
+          }
+          .cf-hero-foot-row {
+            margin-top: 20px;
+            padding-top: 18px;
+            gap: 12px;
           }
           .cf-modal-window {
             padding: 28px 20px;
