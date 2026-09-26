@@ -134,7 +134,7 @@ const DeviceLoginHistory = () => {
                 </span>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '15px' }}>
-                    {session.browser} on {session.os} {idx === 0 && <span style={{ color: '#22c55e', fontSize: '12px' }}>(Current Session)</span>}
+                    {session.browser} on {session.os} {idx === 0 && <span style={{ color: '#e0521c', fontSize: '12px' }}>(Current Session)</span>}
                   </div>
                   <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
                     IP: {session.ip} • Last active: {new Date(session.lastActive).toLocaleString()}
@@ -145,7 +145,7 @@ const DeviceLoginHistory = () => {
                 width: '8px',
                 height: '8px',
                 borderRadius: '50%',
-                background: session.isActive ? '#22c55e' : '#9ca3af',
+                background: session.isActive ? '#10b981' : '#9ca3af',
               }} />
             </div>
           ))}

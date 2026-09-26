@@ -83,7 +83,7 @@ const MessageSearch = () => {
           type="submit"
           style={{
             padding: '12px 24px',
-            background: '#22c55e',
+            background: '#e0521c',
             color: 'white',
             border: 'none',
             borderRadius: '12px',
@@ -120,7 +120,7 @@ const MessageSearch = () => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 600, fontSize: '14px', color: '#22c55e' }}>
+                <span style={{ fontWeight: 600, fontSize: '14px', color: '#e0521c' }}>
                   {msg.sender?.name || 'User'}
                 </span>
                 <span style={{ fontSize: '12px', color: '#9ca3af' }}>

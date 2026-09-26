@@ -1,47 +1,52 @@
 /* ─── Global Design Tokens & Responsive Baseline ─── */
 :root {
   --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
+
   /* Safe Area Insets for Mobile Notches and Home Bars */
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
 
-  /* Light Theme Tokens */
-  --bg-app: #f8fafc;
+  /* Light Theme Tokens - Home Page Warm Aesthetic */
+  --bg-app: #efece4;
   --bg-card: #ffffff;
-  --bg-card-muted: #f1f5f9;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-subtle: #94a3b8;
-  --border-subtle: #e2e8f0;
-  --primary-accent: #22c55e;
-  --primary-accent-hover: #16a34a;
+  --bg-card-muted: #f7f5f0;
+  --text-main: #14120f;
+  --text-muted: #5c564c;
+  --text-subtle: #999083;
+  --border-subtle: rgba(20, 18, 15, 0.08);
+  --primary-accent: #e0521c;
+  --primary-accent-hover: #ff6b35;
 
   /* App Dimensions */
   --mobile-nav-height: 60px;
 }
 
 [data-theme="dark"] {
-  --bg-app: #0b0f19;
-  --bg-card: #111827;
-  --bg-card-muted: #1f2937;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-subtle: #64748b;
-  --border-subtle: #1f2937;
+  --bg-app: #14120f;
+  --bg-card: #1c1915;
+  --bg-card-muted: #24201b;
+  --text-main: #f7f5f0;
+  --text-muted: #b8b0a5;
+  --text-subtle: #7d7467;
+  --border-subtle: rgba(247, 245, 240, 0.09);
+  --primary-accent: #e0521c;
+  --primary-accent-hover: #ff7a3c;
 }
 
 /* ─── Universal Box Sizing & Mobile Touch Optimizations ─── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   min-height: 100%;
@@ -111,10 +116,10 @@ html, body {
 }
 
 /* ─── Touch Friendly Tap Targets ─── */
-button, 
-a, 
-input, 
-select, 
+button,
+a,
+input,
+select,
 textarea,
 [role="button"] {
   touch-action: manipulation;
@@ -122,8 +127,9 @@ textarea,
 
 /* Prevent auto-zoom on iOS when focusing inputs */
 @media screen and (max-width: 768px) {
-  input, 
-  select, 
+
+  input,
+  select,
   textarea {
     font-size: 16px !important;
   }

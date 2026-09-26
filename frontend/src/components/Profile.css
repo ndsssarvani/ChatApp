@@ -4,23 +4,23 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
-  --bg-primary: #f5f5f5;
+  --bg-primary: #efece4;
   --bg-secondary: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #666666;
-  --border-color: #e0e0e0;
-  --accent-color: #4CAF50;
-  --hover-bg: #f0f0f0;
+  --text-primary: #14120f;
+  --text-secondary: #5c564c;
+  --border-color: rgba(20, 18, 15, 0.08);
+  --accent-color: #e0521c;
+  --hover-bg: #e7e3d9;
 }
 
 .profile-page-wrapper[data-theme="dark"] {
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
-  --text-primary: #ffffff;
-  --text-secondary: #b0b0b0;
-  --border-color: #404040;
-  --accent-color: #66BB6A;
-  --hover-bg: #383838;
+  --bg-primary: #14120f;
+  --bg-secondary: #1c1915;
+  --text-primary: #f7f5f0;
+  --text-secondary: #b8b0a5;
+  --border-color: rgba(247, 245, 240, 0.08);
+  --accent-color: #e0521c;
+  --hover-bg: #2e2923;
 }
 
 /* Sidebar Navigation */

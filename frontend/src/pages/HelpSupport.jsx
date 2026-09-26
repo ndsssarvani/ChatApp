@@ -104,7 +104,7 @@ const HelpSupport = () => {
                   }}
                 >
                   <span>{faq.question}</span>
-                  <span style={{ fontSize: '18px', color: '#22c55e' }}>{isOpen ? '−' : '+'}</span>
+                  <span style={{ fontSize: '18px', color: '#e0521c' }}>{isOpen ? '−' : '+'}</span>
                 </div>
                 {isOpen && (
                   <div style={{ padding: '0 18px 16px 18px', color: '#6b7280', fontSize: '13px', lineHeight: 1.6 }}>
@@ -196,7 +196,7 @@ const HelpSupport = () => {
             disabled={submitting}
             style={{
               padding: '12px 24px',
-              background: '#22c55e',
+              background: '#e0521c',
               color: 'white',
               border: 'none',
               borderRadius: '10px',

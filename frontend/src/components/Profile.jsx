@@ -230,7 +230,7 @@ const Profile = () => {
                   padding: "6px 14px",
                   borderRadius: "8px",
                   border: "none",
-                  background: "#22c55e",
+                  background: "#e0521c",
                   color: "#ffffff",
                   fontSize: "12px",
                   fontWeight: 600,
@@ -274,7 +274,7 @@ const Profile = () => {
                   <>
                     <button
                       className="edit-button"
-                      style={{ background: "#22c55e", color: "white" }}
+                      style={{ background: "#e0521c", color: "white" }}
                       title="Save Changes"
                       onClick={handleSaveProfile}
                       disabled={saving}

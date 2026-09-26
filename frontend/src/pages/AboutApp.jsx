@@ -42,15 +42,15 @@ const AboutApp = () => {
         marginBottom: '28px',
       }}>
         <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>💬</div>
-        <h2 style={{ fontSize: '28px', fontWeight: 800, color: '#14532d', margin: '0 0 8px 0' }}>Chatify App</h2>
-        <p style={{ color: '#166534', fontSize: '15px', maxWidth: '480px', margin: '0 auto' }}>
+        <h2 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>Chatify App</h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '15px', maxWidth: '480px', margin: '0 auto' }}>
           A modern, full-stack real-time messaging platform built with MERN architecture, Socket.IO, and MongoDB Atlas.
         </p>
         <div style={{
           display: 'inline-block',
           marginTop: '16px',
           padding: '6px 16px',
-          background: '#22c55e',
+          background: '#e0521c',
           color: '#ffffff',
           borderRadius: '20px',
           fontSize: '13px',

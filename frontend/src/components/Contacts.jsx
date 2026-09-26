@@ -182,7 +182,7 @@ const Contacts = () => {
             padding: '10px 14px',
             borderRadius: '10px',
             border: 'none',
-            background: activeTab === 'online' ? '#22c55e' : 'transparent',
+            background: activeTab === 'online' ? '#e0521c' : 'transparent',
             color: activeTab === 'online' ? '#ffffff' : '#94a3b8',
             fontWeight: 700,
             fontSize: '13.5px',
@@ -194,7 +194,7 @@ const Contacts = () => {
             transition: 'all 0.2s',
           }}
         >
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', border: '1.5px solid white' }}></span>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', border: '1.5px solid white' }}></span>
           Online Now ({onlineContacts.length})
         </button>
         <button
@@ -204,7 +204,7 @@ const Contacts = () => {
             padding: '10px 14px',
             borderRadius: '10px',
             border: 'none',
-            background: activeTab === 'directory' ? '#818cf8' : 'transparent',
+            background: activeTab === 'directory' ? '#e0521c' : 'transparent',
             color: activeTab === 'directory' ? '#ffffff' : '#94a3b8',
             fontWeight: 700,
             fontSize: '13.5px',
@@ -397,9 +397,9 @@ const Contacts = () => {
                     style={{
                       width: '38px',
                       height: '38px',
-                      background: 'rgba(34, 197, 94, 0.15)',
-                      color: '#22c55e',
-                      border: '1px solid rgba(34, 197, 94, 0.25)',
+                      background: 'rgba(224, 82, 28, 0.15)',
+                      color: '#e0521c',
+                      border: '1px solid rgba(224, 82, 28, 0.25)',
                       borderRadius: '10px',
                       fontSize: '16px',
                       display: 'flex',

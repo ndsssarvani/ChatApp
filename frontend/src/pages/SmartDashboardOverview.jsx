@@ -126,7 +126,7 @@ const SmartDashboardOverview = () => {
                 style={{
                   padding: '12px',
                   borderRadius: '12px',
-                  background: '#22c55e',
+                  background: '#e0521c',
                   color: 'white',
                   border: 'none',
                   fontWeight: 600,

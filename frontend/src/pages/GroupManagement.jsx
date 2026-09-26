@@ -139,7 +139,7 @@ const GroupManagement = () => {
             style={{
               marginTop: '16px',
               padding: '10px 20px',
-              background: '#22c55e',
+              background: '#e0521c',
               color: 'white',
               border: 'none',
               borderRadius: '10px',
@@ -162,7 +162,7 @@ const GroupManagement = () => {
                 style={{
                   padding: '12px 14px',
                   borderRadius: '12px',
-                  background: selectedGroup?._id === g._id ? '#22c55e' : 'var(--bg-secondary, #f8f9fa)',
+                  background: selectedGroup?._id === g._id ? '#e0521c' : 'var(--bg-secondary, #f8f9fa)',
                   color: selectedGroup?._id === g._id ? '#ffffff' : 'inherit',
                   cursor: 'pointer',
                   fontWeight: 600,
@@ -231,7 +231,7 @@ const GroupManagement = () => {
                       disabled={!addMemberId}
                       style={{
                         padding: '10px 16px',
-                        background: '#22c55e',
+                        background: '#e0521c',
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
@@ -279,7 +279,7 @@ const GroupManagement = () => {
                             {member.name || 'Member'} {isSelf && '(You)'}
                           </div>
                           {memberIsAdmin && (
-                            <div style={{ fontSize: '11px', color: '#22c55e', fontWeight: 600 }}>Group Admin</div>
+                            <div style={{ fontSize: '11px', color: '#e0521c', fontWeight: 600 }}>Group Admin</div>
                           )}
                         </div>
                       </div>

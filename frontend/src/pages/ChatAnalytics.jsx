@@ -75,7 +75,7 @@ const ChatAnalytics = () => {
               border: '1px solid var(--border-color, #dee2e6)',
             }}>
               <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: 600 }}>Total Sent</div>
-              <div style={{ fontSize: '28px', fontWeight: 800, marginTop: '8px', color: '#22c55e' }}>
+              <div style={{ fontSize: '28px', fontWeight: 800, marginTop: '8px', color: '#e0521c' }}>
                 {data?.totalSent || 0}
               </div>
               <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>All-time messages</div>
@@ -150,7 +150,7 @@ const ChatAnalytics = () => {
                         width: '100%',
                         maxWidth: '36px',
                         height: `${heightPercent}%`,
-                        background: 'linear-gradient(180deg, #22c55e 0%, #16a34a 100%)',
+                        background: 'linear-gradient(180deg, #e0521c 0%, #ff6b35 100%)',
                         borderRadius: '8px 8px 0 0',
                         transition: 'height 0.4s ease',
                       }}

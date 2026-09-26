@@ -184,8 +184,8 @@ const ReportBlockUser = () => {
                     style={{
                       padding: '6px 14px',
                       background: 'transparent',
-                      color: '#22c55e',
-                      border: '1px solid #22c55e',
+                      color: '#e0521c',
+                      border: '1px solid #e0521c',
                       borderRadius: '8px',
                       fontWeight: 600,
                       fontSize: '13px',

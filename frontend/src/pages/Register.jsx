@@ -201,7 +201,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -703,7 +703,7 @@ const Register = () => {
         <div className="register-visual-side">
           <div className="visual-content">
             <h2 className="visual-title">
-              Team & AI Chat<br/>
+              Team & AI Chat<br />
               <span className="highlight-green">Unified</span>
             </h2>
             <p className="visual-description">
@@ -814,8 +814,8 @@ const Register = () => {
                     onChange={handleChange}
                     required
                   />
-                  <span 
-                    className="input-icon" 
+                  <span
+                    className="input-icon"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? '👁️' : '🔒'}
@@ -842,8 +842,8 @@ const Register = () => {
                     onChange={handleChange}
                     required
                   />
-                  <span 
-                    className="input-icon" 
+                  <span
+                    className="input-icon"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? '👁️' : '🔒'}
@@ -872,8 +872,8 @@ const Register = () => {
               {errors.terms && <div className="error-message">{errors.terms}</div>}
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className={`btn-register ${isSubmitting ? 'loading' : ''}`}
                   disabled={isSubmitting}
                   style={{ flex: 2 }}

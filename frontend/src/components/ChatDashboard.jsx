@@ -1332,7 +1332,7 @@ const ChatDashboard = () => {
                     <div className="chat-item-name">{u.name}</div>
                     <div className="chat-item-last-msg">{u.email}</div>
                   </div>
-                  <span style={{ color: "#22c55e", fontSize: "20px", fontWeight: "bold" }}>+</span>
+                  <span style={{ color: "var(--accent-primary)", fontSize: "20px", fontWeight: "bold" }}>+</span>
                 </div>
               ))}
             </div>
@@ -2017,7 +2017,7 @@ const ChatDashboard = () => {
                     <div style={{ flex: 1, fontSize: "13px", fontWeight: 600 }}>
                       {member.name}
                       {selectedChat.admins?.some((a) => (a._id || a) === member._id) && (
-                        <span style={{ fontSize: "11px", color: "#22c55e", marginLeft: "6px" }}>
+                        <span style={{ fontSize: "11px", color: "var(--accent-primary)", marginLeft: "6px" }}>
                           (Admin)
                         </span>
                       )}
@@ -2185,9 +2185,9 @@ const ChatDashboard = () => {
                             gap: "10px",
                             padding: "8px 12px",
                             borderRadius: "10px",
-                            background: isSelected ? "rgba(34, 197, 94, 0.15)" : "var(--bg-secondary)",
+                            background: isSelected ? "rgba(224, 82, 28, 0.15)" : "var(--bg-secondary)",
                             cursor: "pointer",
-                            border: isSelected ? "1px solid #22c55e" : "1px solid transparent",
+                            border: isSelected ? "1px solid #e0521c" : "1px solid transparent",
                           }}
                         >
                           <img
@@ -2199,7 +2199,7 @@ const ChatDashboard = () => {
                             <div style={{ fontSize: "13px", fontWeight: 700 }}>{userItem.name}</div>
                             <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>{userItem.email}</div>
                           </div>
-                          {isSelected && <span style={{ color: "#22c55e", fontWeight: "bold" }}>✓</span>}
+                          {isSelected && <span style={{ color: "#e0521c", fontWeight: "bold" }}>✓</span>}
                         </div>
                       );
                     })}
@@ -2232,7 +2232,7 @@ const ChatDashboard = () => {
       {showEncryptionModal && (
         <div className="call-history-modal-overlay" onClick={() => setShowEncryptionModal(false)}>
           <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px", textAlign: "center", padding: "28px 24px" }}>
-            <div style={{ display: "inline-flex", padding: "16px", borderRadius: "20px", background: "rgba(34, 197, 94, 0.12)", color: "#22c55e", marginBottom: "16px" }}>
+            <div style={{ display: "inline-flex", padding: "16px", borderRadius: "20px", background: "rgba(224, 82, 28, 0.12)", color: "#e0521c", marginBottom: "16px" }}>
               <IconShieldCheck size={44} />
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "8px" }}>
@@ -2241,7 +2241,7 @@ const ChatDashboard = () => {
             <p style={{ color: "var(--text-secondary)", fontSize: "13px", lineHeight: "1.5", marginBottom: "20px" }}>
               Messages, media, and WebRTC calls in this conversation are protected with transport-layer encryption and SHA-256 integrity verification.
             </p>
-            <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "12px", fontFamily: "monospace", letterSpacing: "2px", fontSize: "15px", color: "#22c55e", fontWeight: "bold", marginBottom: "20px" }}>
+            <div style={{ background: "var(--bg-secondary)", padding: "14px", borderRadius: "12px", fontFamily: "monospace", letterSpacing: "2px", fontSize: "15px", color: "#e0521c", fontWeight: "bold", marginBottom: "20px" }}>
               {selectedChat?._id
                 ? selectedChat._id.toString().toUpperCase().match(/.{1,4}/g)?.join(" ")
                 : "SECURE-E2EE-TLS256"}

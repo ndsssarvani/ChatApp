@@ -84,7 +84,7 @@ const ChatPersonalization = () => {
             style={{
               padding: '20px',
               borderRadius: '16px',
-              border: theme === 'light' ? '2px solid #22c55e' : '1px solid var(--border-color)',
+              border: theme === 'light' ? '2px solid #e0521c' : '1px solid var(--border-color)',
               background: '#ffffff',
               color: '#111827',
               cursor: 'pointer',
@@ -105,7 +105,7 @@ const ChatPersonalization = () => {
             style={{
               padding: '20px',
               borderRadius: '16px',
-              border: theme === 'dark' ? '2px solid #22c55e' : '1px solid var(--border-color)',
+              border: theme === 'dark' ? '2px solid #e0521c' : '1px solid var(--border-color)',
               background: '#1a1d29',
               color: '#e9ecef',
               cursor: 'pointer',
@@ -134,7 +134,7 @@ const ChatPersonalization = () => {
               style={{
                 height: '80px',
                 borderRadius: '12px',
-                border: wallpaper === wp.id ? '3px solid #22c55e' : '1px solid var(--border-color)',
+                border: wallpaper === wp.id ? '3px solid #e0521c' : '1px solid var(--border-color)',
                 background: wp.bg,
                 cursor: 'pointer',
                 display: 'flex',
@@ -163,8 +163,8 @@ const ChatPersonalization = () => {
                 flex: 1,
                 padding: '12px',
                 borderRadius: '12px',
-                border: fontSize === size ? '2px solid #22c55e' : '1px solid var(--border-color)',
-                background: fontSize === size ? '#22c55e' : 'var(--bg-secondary, #f8f9fa)',
+                border: fontSize === size ? '2px solid #e0521c' : '1px solid var(--border-color)',
+                background: fontSize === size ? '#e0521c' : 'var(--bg-secondary, #f8f9fa)',
                 color: fontSize === size ? '#ffffff' : 'inherit',
                 fontWeight: 600,
                 textTransform: 'capitalize',
@@ -182,14 +182,14 @@ const ChatPersonalization = () => {
         style={{
           width: '100%',
           padding: '14px',
-          background: '#22c55e',
+          background: '#e0521c',
           color: 'white',
           border: 'none',
           borderRadius: '14px',
           fontSize: '16px',
           fontWeight: 700,
           cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+          boxShadow: '0 4px 12px rgba(224, 82, 28, 0.3)',
         }}
       >
         Save Personalization

@@ -2,31 +2,31 @@
 
 :root {
   --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  --bg-hover: #e2e8f0;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #94a3b8;
-  --border-color: #e2e8f0;
-  --accent-green: #22c55e;
+  --bg-secondary: #efece4;
+  --bg-tertiary: #e7e3d9;
+  --bg-hover: #dfdad0;
+  --text-primary: #14120f;
+  --text-secondary: #5c564c;
+  --text-tertiary: #999083;
+  --border-color: rgba(20, 18, 15, 0.08);
+  --accent-green: #e0521c;
   --accent-blue: #3b82f6;
   --accent-danger: #ef4444;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
-  --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+  --shadow-sm: 0 1px 3px rgba(20, 18, 15, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(20, 18, 15, 0.08);
+  --shadow-lg: 0 12px 32px -4px rgba(20, 18, 15, 0.12);
 }
 
 [data-theme="dark"] {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --bg-hover: #475569;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-tertiary: #94a3b8;
-  --border-color: #334155;
-  --accent-green: #22c55e;
+  --bg-primary: #181512;
+  --bg-secondary: #14120f;
+  --bg-tertiary: #221e1a;
+  --bg-hover: #2e2923;
+  --text-primary: #f7f5f0;
+  --text-secondary: #b8b0a5;
+  --text-tertiary: #7d7467;
+  --border-color: rgba(247, 245, 240, 0.08);
+  --accent-green: #e0521c;
   --accent-blue: #3b82f6;
   --accent-danger: #ef4444;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
@@ -126,7 +126,7 @@
 }
 
 .notif-total-badge {
-  background: #22c55e;
+  background: #e0521c;
   color: #ffffff;
   font-size: 12px;
   font-weight: 700;
@@ -162,10 +162,10 @@
 }
 
 .notif-tab.active {
-  background: #22c55e;
-  border-color: #22c55e;
+  background: #e0521c;
+  border-color: #e0521c;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+  box-shadow: 0 4px 12px rgba(224, 82, 28, 0.35);
 }
 
 .tab-pill {
@@ -216,7 +216,7 @@
 
 .notif-card.unread {
   background: var(--bg-primary);
-  border-left: 4px solid #22c55e;
+  border-left: 4px solid #e0521c;
 }
 
 .notif-card.call-card.unread {
@@ -301,12 +301,12 @@
 }
 
 .notif-action-btn.audio-call {
-  background: #22c55e;
+  background: #e0521c;
   color: #ffffff;
 }
 
 .notif-action-btn.audio-call:hover {
-  background: #16a34a;
+  background: #ff6b35;
 }
 
 .notif-action-btn.video-call {
@@ -330,8 +330,8 @@
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
+  background: rgba(224, 82, 28, 0.15);
+  color: #e0521c;
   font-size: 14px;
   cursor: pointer;
   display: flex;
@@ -341,7 +341,7 @@
 }
 
 .notif-mark-read-icon:hover {
-  background: #22c55e;
+  background: #e0521c;
   color: #ffffff;
 }
 
