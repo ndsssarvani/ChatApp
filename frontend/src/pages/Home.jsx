@@ -10,18 +10,13 @@ export default function Home() {
   const [cursorHovered, setCursorHovered] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Typewriter animated phrases for luxury hero
-  const phrases = [
-    "Team Messaging",
-    "AI Intelligence",
-    "Encrypted Threads",
-    "Global Channels",
-  ];
+  // Typewriter animated phrases
+  const phrases = ["Team Messaging", "AI Intelligence", "Encrypted Threads", "Global Channels"];
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Demo messages state for interactive platform
+  // Demo messages state
   const [demoMessages, setDemoMessages] = useState([
     {
       id: 1,
@@ -65,7 +60,6 @@ export default function Home() {
       reactions: ["🚀 8"],
     },
   ]);
-
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [demoModalOpen, setDemoModalOpen] = useState(false);
@@ -79,40 +73,19 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollTop;
-      const windowHeight =
-        document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scroll = windowHeight > 0 ? (totalScroll / windowHeight) * 100 : 0;
-      setScrollProgress(scroll);
+      const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scroll = `${(totalScroll / windowHeight) * 100}`;
+      setScrollProgress(Number(scroll));
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Counter animation on load
-  useEffect(() => {
-    let start = 0;
-    const end = 1000000;
-    const duration = 1800;
-    const increment = end / (duration / 16);
-
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= end) {
-        setStatCount(end);
-        clearInterval(timer);
-      } else {
-        setStatCount(Math.floor(start));
-      }
-    }, 16);
-
-    return () => clearInterval(timer);
-  }, []);
-
   // Typewriter Loop
   useEffect(() => {
     const currentPhrase = phrases[phraseIndex];
-    const speed = isDeleting ? 45 : 100;
+    const speed = isDeleting ? 45 : 110;
 
     const timer = setTimeout(() => {
       if (!isDeleting && charIndex < currentPhrase.length) {
@@ -120,7 +93,7 @@ export default function Home() {
       } else if (isDeleting && charIndex > 0) {
         setCharIndex((prev) => prev - 1);
       } else if (!isDeleting && charIndex === currentPhrase.length) {
-        setTimeout(() => setIsDeleting(true), 1800);
+        setTimeout(() => setIsDeleting(true), 1600);
       } else if (isDeleting && charIndex === 0) {
         setIsDeleting(false);
         setPhraseIndex((prev) => (prev + 1) % phrases.length);
@@ -138,8 +111,8 @@ export default function Home() {
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
     setMousePos({
-      x: (clientX - centerX) / 45,
-      y: (clientY - centerY) / 45,
+      x: (clientX - centerX) / 40,
+      y: (clientY - centerY) / 40,
     });
   };
 
@@ -160,29 +133,29 @@ export default function Home() {
     };
     window.addEventListener("resize", handleResize);
 
-    const particles = Array.from({ length: 42 }).map(() => ({
+    const particles = Array.from({ length: 38 }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
-      radius: Math.random() * 1.8 + 0.8,
-      color: Math.random() > 0.4 ? "rgba(216, 182, 106, 0.45)" : "rgba(245, 239, 228, 0.2)",
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: (Math.random() - 0.5) * 0.45,
+      radius: Math.random() * 2 + 1,
+      color: Math.random() > 0.4 ? "rgba(224, 82, 28, 0.4)" : "rgba(20, 18, 15, 0.2)",
     }));
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Connect near particles with delicate gold drafting lines
+      // Connect near particles with delicate drafting lines
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 120) {
+          if (dist < 110) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(216, 182, 106, ${0.15 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.75;
+            ctx.strokeStyle = `rgba(20, 18, 15, ${0.12 * (1 - dist / 110)})`;
+            ctx.lineWidth = 0.8;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.stroke();
@@ -190,7 +163,7 @@ export default function Home() {
         }
       }
 
-      // Draw particles
+      // Draw and update particle positions
       particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
@@ -203,10 +176,7 @@ export default function Home() {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = "rgba(216, 182, 106, 0.6)";
         ctx.fill();
-        ctx.shadowBlur = 0;
       });
 
       animationFrameId = requestAnimationFrame(render);
@@ -220,18 +190,53 @@ export default function Home() {
     };
   }, []);
 
+  // Floating reaction animation
   const triggerReaction = (emoji) => {
-    const newHeart = {
-      id: Date.now() + Math.random(),
-      emoji,
-      x: cursorPos.x + (Math.random() * 40 - 20),
-      y: cursorPos.y + (Math.random() * 20 - 10),
-    };
-    setFloatingHearts((prev) => [...prev, newHeart]);
+    const id = Date.now() + Math.random();
+    setFloatingHearts((prev) => [...prev, { id, emoji, x: Math.random() * 80 + 10 }]);
     setTimeout(() => {
-      setFloatingHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
-    }, 1200);
+      setFloatingHearts((prev) => prev.filter((h) => h.id !== id));
+    }, 1800);
   };
+
+  // Animated counter for stat
+  useEffect(() => {
+    let start = 0;
+    const end = 1000000;
+    const duration = 2200;
+    const increment = end / (duration / 16);
+
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        setStatCount(end);
+        clearInterval(timer);
+      } else {
+        setStatCount(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Intersection observer for staggered scroll reveals
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("cf-in-view");
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    const elements = document.querySelectorAll(".cf-anim");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleSendDemoMessage = (e) => {
     e.preventDefault();
@@ -241,7 +246,7 @@ export default function Home() {
       id: Date.now(),
       sender: "You",
       role: "Product Lead",
-      text: inputMessage,
+      text: inputMessage.trim(),
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       avatar: "⚡",
       isMe: true,
@@ -340,7 +345,7 @@ export default function Home() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-        /* ---------- GLOBAL RESET & LUXURY CINEMATIC BASE ---------- */
+        /* ---------- GLOBAL RESET & FULLSCREEN CANVAS ---------- */
         *, *::before, *::after {
           box-sizing: border-box;
           margin: 0;
@@ -350,9 +355,9 @@ export default function Home() {
         html, body {
           width: 100%;
           min-height: 100%;
-          background: #120D08;
-          color: #F5EFE4;
-          font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          background: #efece4;
+          color: #14120f;
+          font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
           overflow-x: hidden;
           scroll-behavior: smooth;
         }
@@ -360,23 +365,22 @@ export default function Home() {
         .cf-app-root {
           width: 100%;
           min-height: 100vh;
-          background: #120D08;
-          color: #F5EFE4;
+          background: #efece4;
+          color: #14120f;
           display: flex;
           flex-direction: column;
           position: relative;
-          overflow-x: hidden;
         }
 
-        /* Top Golden Scroll Progress Bar */
+        /* Top Orange Scroll Progress Bar */
         .cf-scroll-bar {
           position: fixed;
           top: 0;
           left: 0;
-          height: 3px;
-          background: linear-gradient(90deg, #C9A45C, #D8B66A, #E0C27A);
+          height: 3.5px;
+          background: linear-gradient(90deg, #e0521c, #ff7a3c);
           z-index: 9999;
-          box-shadow: 0 0 12px rgba(216, 182, 106, 0.7);
+          box-shadow: 0 0 10px rgba(224, 82, 28, 0.6);
           transition: width 0.1s ease-out;
         }
 
@@ -388,8 +392,8 @@ export default function Home() {
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          border: 1.5px solid rgba(216, 182, 106, 0.45);
-          background: rgba(216, 182, 106, 0.05);
+          border: 1.5px solid rgba(224, 82, 28, 0.45);
+          background: rgba(224, 82, 28, 0.05);
           pointer-events: none;
           z-index: 9998;
           transform: translate(-50%, -50%);
@@ -402,352 +406,141 @@ export default function Home() {
         .cf-custom-cursor.hovered {
           width: 56px;
           height: 56px;
-          border-color: #D8B66A;
-          background: rgba(216, 182, 106, 0.15);
+          border-color: #e0521c;
+          background: rgba(224, 82, 28, 0.12);
         }
 
-        /* Ambient floating blurred backdrop orbs - Luxury Espresso & Gold */
+        /* Ambient floating blurred backdrop orbs */
         .cf-ambient-orb-1 {
           position: absolute;
-          top: 60px;
-          left: -100px;
-          width: 580px;
-          height: 580px;
+          top: 100px;
+          left: -80px;
+          width: 480px;
+          height: 480px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(201, 164, 92, 0.16) 0%, rgba(36, 23, 13, 0.4) 50%, transparent 70%);
-          filter: blur(80px);
+          background: radial-gradient(circle, rgba(224, 82, 28, 0.15) 0%, rgba(224, 82, 28, 0) 70%);
+          filter: blur(60px);
           pointer-events: none;
           z-index: 0;
-          animation: floatOrb 16s ease-in-out infinite alternate;
+          animation: floatOrb 14s ease-in-out infinite alternate;
         }
 
         .cf-ambient-orb-2 {
           position: absolute;
-          top: 300px;
-          right: -80px;
-          width: 620px;
-          height: 620px;
+          top: 320px;
+          right: -60px;
+          width: 540px;
+          height: 540px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(216, 182, 106, 0.12) 0%, rgba(43, 27, 13, 0.4) 50%, transparent 70%);
-          filter: blur(80px);
+          background: radial-gradient(circle, rgba(20, 18, 15, 0.09) 0%, rgba(20, 18, 15, 0) 70%);
+          filter: blur(60px);
           pointer-events: none;
           z-index: 0;
-          animation: floatOrb2 18s ease-in-out infinite alternate;
+          animation: floatOrb2 16s ease-in-out infinite alternate;
         }
 
         @keyframes floatOrb {
           0% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(60px, 40px) scale(1.12); }
-          100% { transform: translate(20px, 80px) scale(0.96); }
+          50% { transform: translate(60px, 40px) scale(1.15); }
+          100% { transform: translate(20px, 80px) scale(0.95); }
         }
 
         @keyframes floatOrb2 {
           0% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(-50px, 60px) scale(1.1); }
-          100% { transform: translate(-20px, -40px) scale(0.95); }
+          50% { transform: translate(-50px, 60px) scale(1.12); }
+          100% { transform: translate(-30px, 20px) scale(1); }
         }
 
-        /* Container */
         .cf-container {
           width: 100%;
-          max-width: 1280px;
+          max-width: 1260px;
           margin: 0 auto;
-          padding: 0 24px;
+          padding: 0 48px;
           position: relative;
           z-index: 2;
         }
 
-        /* ---------- 1. ELEGANT NAVBAR ---------- */
-        .cf-navbar {
-          position: sticky;
-          top: 0;
-          width: 100%;
-          z-index: 1000;
-          background: rgba(18, 13, 8, 0.78);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-          border-bottom: 1px solid rgba(212, 174, 96, 0.16);
-          transition: all 0.3s ease;
-        }
-
-        .cf-nav-inner {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 76px;
-          gap: 20px;
-        }
-
-        .cf-brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-family: 'Playfair Display', serif;
-          font-size: 24px;
-          font-weight: 700;
-          color: #F5EFE4;
-          text-decoration: none;
-          letter-spacing: -0.01em;
-          flex-shrink: 0;
-        }
-
-        .cf-logo-icon-svg {
-          width: 38px;
-          height: 38px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #24170D 0%, #1A120B 100%);
-          border: 1px solid rgba(212, 174, 96, 0.35);
-          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-        }
-
-        .cf-nav-menu {
-          display: flex;
-          align-items: center;
-          gap: 32px;
-          list-style: none;
-        }
-
-        .cf-nav-menu a {
-          color: #E8E1D6;
-          text-decoration: none;
-          font-size: 14.5px;
-          font-weight: 500;
-          transition: color 0.25s ease;
-          position: relative;
-        }
-
-        .cf-nav-menu a:hover {
-          color: #D8B66A;
-        }
-
-        .cf-nav-menu a::after {
-          content: '';
-          position: absolute;
-          bottom: -4px;
-          left: 0;
-          width: 0;
-          height: 1.5px;
-          background: #D8B66A;
-          transition: width 0.25s ease;
-        }
-
-        .cf-nav-menu a:hover::after {
-          width: 100%;
-        }
-
-        .cf-nav-ai-pill {
-          background: rgba(216, 182, 106, 0.12) !important;
-          border: 1px solid rgba(216, 182, 106, 0.35) !important;
-          padding: 6px 14px;
-          border-radius: 999px;
-          font-size: 13.5px !important;
-          font-weight: 600 !important;
-          color: #D8B66A !important;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          transition: all 0.25s ease !important;
-        }
-
-        .cf-nav-ai-pill:hover {
-          background: rgba(216, 182, 106, 0.22) !important;
-          border-color: #D8B66A !important;
-          transform: translateY(-1px);
-        }
-
-        .cf-nav-buttons {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-        }
-
-        .cf-btn-login-nav {
-          color: #F5EFE4;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 600;
-          padding: 9px 18px;
-          border-radius: 999px;
-          border: 1px solid rgba(212, 174, 96, 0.25);
-          background: rgba(255, 255, 255, 0.03);
-          transition: all 0.25s ease;
-        }
-
-        .cf-btn-login-nav:hover {
-          background: rgba(212, 174, 96, 0.12);
-          border-color: #D8B66A;
-          color: #D8B66A;
-        }
-
-        .cf-btn-signup-nav {
-          background: linear-gradient(135deg, #D8B66A 0%, #C9A45C 100%);
-          color: #120D08;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 700;
-          padding: 10px 22px;
-          border-radius: 999px;
-          box-shadow: 0 4px 16px rgba(216, 182, 106, 0.3);
-          transition: all 0.25s ease;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .cf-btn-signup-nav:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(216, 182, 106, 0.45);
-          filter: brightness(1.06);
-        }
-
-        .cf-hamburger {
-          display: none;
-          background: none;
-          border: none;
-          cursor: pointer;
-          flex-direction: column;
-          gap: 5px;
-          padding: 6px;
-        }
-
-        .cf-hamburger span {
-          width: 22px;
-          height: 2px;
-          background: #F5EFE4;
-          border-radius: 2px;
-        }
-
-        /* Mobile Slide Drawer */
-        .cf-mobile-menu {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100vh;
-          background: #1A120B;
-          z-index: 2000;
-          padding: 30px 24px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          transform: translateX(-100%);
-          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .cf-mobile-menu.active {
-          transform: translateX(0);
-        }
-
-        /* ---------- 2. CINEMATIC HERO SECTION ---------- */
-        .cf-hero {
-          position: relative;
-          padding: 60px 0 80px;
-          min-height: calc(100vh - 76px);
-          display: flex;
-          align-items: center;
-          overflow: hidden;
-          background: radial-gradient(ellipse at 50% 20%, #24170D 0%, #1A120B 45%, #120D08 100%);
-        }
-
+        /* Canvas Particle Field in Hero */
         .cf-hero-particle-canvas {
           position: absolute;
-          top: 0;
-          left: 0;
+          inset: 0;
           width: 100%;
           height: 100%;
           pointer-events: none;
           z-index: 1;
         }
 
-        .cf-hero-grid {
-          display: grid;
-          grid-template-columns: 1fr 1.15fr;
-          gap: 48px;
-          align-items: center;
-          position: relative;
-          z-index: 2;
+        /* ---------- ENHANCED ANIMATIONS & SHADOWS ---------- */
+        .cf-anim {
+          opacity: 0;
+          transform: translateY(32px);
+          transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: transform, opacity;
+        }
+        .cf-anim.cf-in-view {
+          opacity: 1;
+          transform: translateY(0);
         }
 
-        /* Left Hero Content */
-        .cf-hero-left {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
+        .cf-delay-1 { transition-delay: 0.1s; }
+        .cf-delay-2 { transition-delay: 0.2s; }
+        .cf-delay-3 { transition-delay: 0.3s; }
+        .cf-delay-4 { transition-delay: 0.4s; }
+
+        /* Floating elements animation suite */
+        @keyframes floatHeroCard {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-14px) rotate(1deg); }
         }
 
-        .cf-trial-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          background: rgba(216, 182, 106, 0.08);
-          border: 1px solid rgba(216, 182, 106, 0.25);
-          border-radius: 999px;
-          padding: 6px 16px;
-          font-size: 13px;
-          color: #E8E1D6;
-          margin-bottom: 24px;
-          cursor: pointer;
-          transition: all 0.25s ease;
+        @keyframes floatBadge1 {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(-10px) translateX(5px); }
         }
 
-        .cf-trial-badge:hover {
-          background: rgba(216, 182, 106, 0.16);
-          border-color: #D8B66A;
+        @keyframes floatBadge2 {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(-12px) translateX(-6px); }
         }
 
-        .cf-trial-badge b {
-          color: #D8B66A;
+        @keyframes floatBadge3 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-8px) rotate(-3deg); }
         }
 
-        .cf-trial-circle {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: #D8B66A;
-          color: #120D08;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 11px;
-          font-weight: 800;
+        @keyframes pulseGlow {
+          0%, 100% {
+            box-shadow: 0 12px 32px rgba(224, 82, 28, 0.4), 0 0 0 0 rgba(224, 82, 28, 0.4);
+          }
+          50% {
+            box-shadow: 0 20px 52px rgba(224, 82, 28, 0.7), 0 0 0 14px rgba(224, 82, 28, 0);
+          }
         }
 
-        .cf-hero-headline {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(40px, 5.2vw, 68px);
-          font-weight: 700;
-          line-height: 1.1;
-          letter-spacing: -0.02em;
-          color: #F5EFE4;
-          margin-bottom: 22px;
-          max-width: 640px;
+        @keyframes waveFloat {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(8px); }
         }
 
-        .cf-headline-accent {
-          display: block;
-          background: linear-gradient(135deg, #F5EFE4 0%, #D8B66A 50%, #C9A45C 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          font-style: italic;
-          font-family: 'Cormorant Garamond', serif;
+        @keyframes burstSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
 
-        .cf-typewriter-text {
-          color: #D8B66A;
-          display: inline;
+        @keyframes liveDotPulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.4); opacity: 0.7; }
         }
 
-        .cf-typewriter-cursor {
-          display: inline-block;
-          width: 3.5px;
-          height: 0.85em;
-          background: #D8B66A;
-          margin-left: 6px;
-          vertical-align: middle;
-          animation: cursorBlink 0.9s infinite;
+        @keyframes popFloatingHeart {
+          0% { opacity: 1; transform: translateY(0) scale(0.6); }
+          50% { opacity: 1; transform: translateY(-60px) scale(1.25); }
+          100% { opacity: 0; transform: translateY(-120px) scale(0.9); }
+        }
+
+        @keyframes soundWaveBar {
+          0%, 100% { height: 4px; }
+          50% { height: 20px; }
         }
 
         @keyframes cursorBlink {
@@ -755,1303 +548,1840 @@ export default function Home() {
           50% { opacity: 0; }
         }
 
-        .cf-hero-desc {
-          font-size: 16.5px;
-          line-height: 1.65;
-          color: #AFA69A;
+        /* Floating reaction particles */
+        .cf-floating-pop {
+          position: fixed;
+          bottom: 120px;
+          right: 80px;
+          font-size: 32px;
+          pointer-events: none;
+          z-index: 3000;
+          animation: popFloatingHeart 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* ---------- PROFESSIONAL CHATIFY LOGO ICON ---------- */
+        .cf-logo-icon-svg {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          filter: drop-shadow(0 4px 12px rgba(224, 82, 28, 0.4));
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cf-brand:hover .cf-logo-icon-svg {
+          transform: scale(1.15) rotate(8deg);
+        }
+
+        /* ---------- NAVIGATION ---------- */
+        .cf-navbar {
+          position: sticky;
+          top: 0;
+          width: 100%;
+          height: 102px;
+          background: rgba(239, 236, 228, 0.94);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+          border-bottom: 1px solid rgba(20, 18, 15, 0.08);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          transition: all 0.3s ease;
+        }
+        .cf-navbar:hover {
+          background: rgba(239, 236, 228, 0.98);
+        }
+
+        .cf-nav-inner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+        }
+
+        .cf-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 24px;
+          font-weight: 800;
+          color: #14120f;
+          letter-spacing: -0.03em;
+          text-decoration: none;
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cf-brand:hover {
+          transform: translateY(-2px);
+        }
+
+        .cf-nav-menu {
+          display: flex;
+          align-items: center;
+          gap: 36px;
+          list-style: none;
+        }
+        .cf-nav-menu a {
+          font-size: 15px;
+          font-weight: 600;
+          color: #14120f;
+          text-decoration: none;
+          position: relative;
+          padding: 6px 0;
+          transition: color 0.2s ease;
+        }
+        .cf-nav-menu a::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 0%;
+          height: 2px;
+          background: #e0521c;
+          border-radius: 2px;
+          transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cf-nav-menu a:hover {
+          color: #e0521c;
+        }
+        .cf-nav-menu a:hover::after {
+          width: 100%;
+        }
+
+        .cf-nav-ai-pill {
+          background: #14120f;
+          color: #ffffff !important;
+          padding: 7px 16px !important;
+          border-radius: 999px;
+          font-size: 13.5px !important;
+          font-weight: 700 !important;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          box-shadow: 0 4px 14px rgba(20,18,15,0.22);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .cf-nav-ai-pill::after { display: none !important; }
+        .cf-nav-ai-pill:hover {
+          background: #e0521c !important;
+          transform: translateY(-2px) scale(1.04);
+          box-shadow: 0 8px 22px rgba(224,82,28,0.45);
+        }
+
+        .cf-nav-buttons {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .cf-btn-login-nav {
+          background: transparent;
+          color: #14120f;
+          border: 1.5px solid rgba(20, 18, 15, 0.22);
+          border-radius: 999px;
+          padding: 11px 26px;
+          font-size: 14.5px;
+          font-weight: 700;
+          text-decoration: none;
+          cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .cf-btn-login-nav:hover {
+          background: rgba(20, 18, 15, 0.06);
+          border-color: #14120f;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        .cf-btn-signup-nav {
+          background: #14120f;
+          color: #ffffff;
+          border: none;
+          border-radius: 999px;
+          padding: 12px 28px;
+          font-size: 14.5px;
+          font-weight: 700;
+          text-decoration: none;
+          cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 8px 24px rgba(20, 18, 15, 0.3);
+          position: relative;
+          overflow: hidden;
+        }
+        .cf-btn-signup-nav:hover {
+          background: #e0521c;
+          transform: translateY(-2px) scale(1.03);
+          box-shadow: 0 12px 30px rgba(224, 82, 28, 0.45);
+        }
+
+        .cf-hamburger {
+          display: none;
+          width: 32px;
+          height: 22px;
+          flex-direction: column;
+          justify-content: space-between;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          z-index: 1100;
+        }
+        .cf-hamburger span {
+          width: 100%;
+          height: 2.2px;
+          background: #14120f;
+          border-radius: 2px;
+          transition: all 0.3s ease;
+        }
+
+        /* Mobile Drawer */
+        .cf-mobile-menu {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(239, 236, 228, 0.98);
+          backdrop-filter: blur(20px);
+          z-index: 1050;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 40px 32px;
+          transform: translateX(100%);
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cf-mobile-menu.active {
+          transform: translateX(0);
+        }
+
+        /* ---------- HERO SECTION ---------- */
+        .cf-hero {
+          position: relative;
+          padding: 24px 0 32px;
+          border-bottom: 1px solid rgba(20, 18, 15, 0.08);
+          overflow: hidden;
+        }
+
+        .cf-hero-grid {
+          display: grid;
+          grid-template-columns: 1.05fr 1fr;
+          gap: 32px;
+          align-items: flex-start;
+          position: relative;
+          min-height: auto;
           margin-bottom: 32px;
-          max-width: 520px;
+          padding-bottom: 12px;
+        }
+
+        /* Hero Left Column */
+        .cf-hero-left {
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          z-index: 5;
+        }
+
+        .cf-trial-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(224, 82, 28, 0.08);
+          border: 1px solid rgba(224, 82, 28, 0.25);
+          border-radius: 999px;
+          padding: 6px 18px;
+          font-size: 13.5px;
+          color: #14120f;
+          margin-bottom: 22px;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          width: fit-content;
+        }
+        .cf-trial-badge:hover {
+          background: rgba(224, 82, 28, 0.15);
+          border-color: #e0521c;
+          transform: translateY(-2px);
+        }
+        .cf-trial-circle {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: #e0521c;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 800;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cf-trial-badge:hover .cf-trial-circle {
+          transform: rotate(45deg) scale(1.08);
+        }
+        .cf-trial-badge b {
+          color: #e0521c;
+          font-weight: 700;
+        }
+
+        /* Typewriter Headline with Elegant Serif Display */
+        .cf-hero-headline {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: clamp(44px, 5.2vw, 72px);
+          line-height: 1.06;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: #14120f;
+          margin-bottom: 22px;
+          min-height: 120px;
+        }
+        .cf-headline-accent {
+          display: block;
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-style: italic;
+          font-weight: 600;
+          color: #e0521c;
+        }
+        .cf-typewriter-text {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-weight: 700;
+          display: inline;
+          color: #e0521c;
+          position: relative;
+        }
+        .cf-typewriter-cursor {
+          display: inline-block;
+          width: 4px;
+          height: 0.85em;
+          background: #e0521c;
+          margin-left: 6px;
+          vertical-align: middle;
+          animation: cursorBlink 0.9s infinite;
         }
 
         .cf-hero-cta-group {
           display: flex;
           align-items: center;
-          gap: 18px;
-          margin-bottom: 36px;
-          flex-wrap: wrap;
+          gap: 24px;
+          margin-bottom: 32px;
         }
 
         .cf-btn-primary-hero {
-          background: linear-gradient(135deg, #D8B66A 0%, #C9A45C 100%);
-          color: #120D08;
+          background: #14120f;
+          color: #ffffff;
           border: none;
           border-radius: 999px;
-          padding: 16px 36px;
-          font-size: 15.5px;
-          font-weight: 700;
+          padding: 18px 42px;
+          font-size: 16px;
+          font-weight: 800;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
           gap: 10px;
           cursor: pointer;
-          box-shadow: 0 10px 28px rgba(216, 182, 106, 0.3);
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 12px 32px rgba(20, 18, 15, 0.3);
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          position: relative;
+          overflow: hidden;
         }
-
         .cf-btn-primary-hero:hover {
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 16px 36px rgba(216, 182, 106, 0.45);
-          filter: brightness(1.06);
+          background: #e0521c;
+          transform: translateY(-3px) scale(1.03);
+          box-shadow: 0 18px 44px rgba(224, 82, 28, 0.48);
         }
 
         .cf-demo-trigger {
           display: flex;
           align-items: center;
           gap: 12px;
-          font-size: 15.5px;
-          font-weight: 600;
-          color: #F5EFE4;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(212, 174, 96, 0.25);
+          font-size: 16px;
+          font-weight: 800;
+          color: #14120f;
+          background: none;
+          border: none;
           cursor: pointer;
-          padding: 14px 24px;
+          padding: 8px 14px;
           border-radius: 999px;
           transition: all 0.25s ease;
         }
-
         .cf-demo-trigger span.circ {
-          width: 26px;
-          height: 26px;
+          width: 34px;
+          height: 34px;
           border-radius: 50%;
-          background: rgba(216, 182, 106, 0.2);
-          color: #D8B66A;
+          border: 1.5px solid #14120f;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 11px;
-          transition: all 0.25s ease;
+          font-size: 12px;
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          background: #efece4;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
-
-        .cf-demo-trigger:hover {
-          background: rgba(216, 182, 106, 0.12);
-          border-color: #D8B66A;
-        }
-
         .cf-demo-trigger:hover span.circ {
-          background: #D8B66A;
-          color: #120D08;
-          transform: scale(1.1);
+          background: #14120f;
+          color: #efece4;
+          transform: scale(1.15) rotate(15deg);
+        }
+        .cf-demo-trigger u {
+          text-decoration: underline;
+          text-underline-offset: 4px;
+        }
+        .cf-demo-trigger:hover u {
+          color: #e0521c;
         }
 
-        /* Hero Stat Box */
+        /* Hero Stat Box & Pulsing Waveform */
         .cf-hero-stats-wrap {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 16px 20px;
-          background: rgba(36, 23, 13, 0.6);
-          border: 1px solid rgba(212, 174, 96, 0.2);
-          border-radius: 14px;
-          backdrop-filter: blur(12px);
-          max-width: 480px;
-        }
-
-        .cf-stat-big-num {
-          font-family: 'Playfair Display', serif;
-          font-size: 26px;
-          font-weight: 700;
-          color: #D8B66A;
-          line-height: 1;
-          white-space: nowrap;
-        }
-
-        .cf-stat-description {
-          font-size: 12.5px;
-          color: #AFA69A;
-          line-height: 1.4;
-        }
-
-        /* ---------- 3. REALISTIC CHATAPP PRODUCT SHOWCASE (RIGHT COLUMN) ---------- */
-        .cf-hero-right {
           position: relative;
-          display: flex;
-          justify-content: center;
+          width: 300px;
+          margin-top: 14px;
         }
-
-        .cf-product-frame {
-          width: 100%;
-          max-width: 620px;
-          background: #1A120B;
-          border-radius: 18px;
-          border: 1px solid rgba(212, 174, 96, 0.25);
-          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(216, 182, 106, 0.12);
-          overflow: hidden;
-          position: relative;
-          animation: floatProduct 6s ease-in-out infinite alternate;
-        }
-
-        @keyframes floatProduct {
-          0% { transform: translateY(0px); }
-          100% { transform: translateY(-10px); }
-        }
-
-        /* Browser/App Window Header */
-        .cf-frame-header {
-          height: 42px;
-          background: #24170D;
-          border-bottom: 1px solid rgba(212, 174, 96, 0.15);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 16px;
-        }
-
-        .cf-frame-dots {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .cf-frame-dots span {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-        }
-
-        .cf-frame-title {
-          font-size: 12px;
-          font-weight: 600;
-          color: #AFA69A;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .cf-frame-latency {
-          font-size: 11px;
-          color: #10b981;
-          font-weight: 600;
-          background: rgba(16, 185, 129, 0.12);
-          padding: 2px 8px;
-          border-radius: 999px;
-          border: 1px solid rgba(16, 185, 129, 0.25);
-        }
-
-        /* App Mockup Layout */
-        .cf-frame-body {
-          display: grid;
-          grid-template-columns: 190px 1fr;
-          height: 420px;
-          background: #140E09;
-        }
-
-        /* Sidebar in Mockup */
-        .cf-mock-sidebar {
-          background: #1A120B;
-          border-right: 1px solid rgba(212, 174, 96, 0.12);
-          padding: 12px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .cf-mock-user-card {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px;
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: 10px;
-          border: 1px solid rgba(212, 174, 96, 0.15);
-        }
-
-        .cf-mock-avatar {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #D8B66A, #C9A45C);
-          color: #120D08;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: 800;
-        }
-
-        .cf-mock-user-info {
-          display: flex;
-          flex-direction: column;
-          min-width: 0;
-        }
-
-        .cf-mock-user-name {
-          font-size: 12px;
-          font-weight: 700;
-          color: #F5EFE4;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .cf-mock-user-status {
-          font-size: 10px;
-          color: #10b981;
-        }
-
-        .cf-mock-section-title {
-          font-size: 10px;
-          font-weight: 700;
-          text-transform: uppercase;
-          color: #AFA69A;
-          letter-spacing: 0.05em;
-          padding: 0 4px;
-        }
-
-        .cf-mock-channels {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .cf-mock-channel-item {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 7px 10px;
+        .cf-stat-box {
+          background: #a49a89;
           border-radius: 8px;
-          font-size: 12px;
-          color: #E8E1D6;
-          background: transparent;
+          padding: 26px;
+          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
           cursor: pointer;
         }
-
-        .cf-mock-channel-item.active {
-          background: rgba(216, 182, 106, 0.15);
-          color: #D8B66A;
-          font-weight: 600;
-          border: 1px solid rgba(216, 182, 106, 0.3);
+        .cf-stat-box:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 24px 52px rgba(0, 0, 0, 0.18);
         }
-
-        .cf-mock-badge {
-          font-size: 10px;
-          background: #D8B66A;
-          color: #120D08;
+        .cf-stat-big-num {
+          font-size: 34px;
           font-weight: 800;
-          padding: 1px 6px;
-          border-radius: 999px;
+          color: #14120f;
+          margin-bottom: 6px;
+          letter-spacing: -0.03em;
         }
-
-        /* Mockup Main Chat Area */
-        .cf-mock-chat-main {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          background: #120D08;
-          padding: 14px;
-        }
-
-        .cf-mock-chat-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding-bottom: 10px;
-          border-bottom: 1px solid rgba(212, 174, 96, 0.12);
-        }
-
-        .cf-mock-chat-title {
-          font-size: 13px;
-          font-weight: 700;
-          color: #F5EFE4;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .cf-mock-e2e-pill {
-          font-size: 10.5px;
-          color: #D8B66A;
-          background: rgba(216, 182, 106, 0.1);
-          padding: 3px 8px;
-          border-radius: 6px;
-          border: 1px solid rgba(216, 182, 106, 0.2);
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-
-        /* Mock Messages Feed */
-        .cf-mock-messages {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 10px 0;
-          overflow: hidden;
-        }
-
-        .cf-mock-msg-row {
-          display: flex;
-          gap: 8px;
-          align-items: flex-start;
-        }
-
-        .cf-mock-msg-bubble {
-          max-width: 86%;
-          border-radius: 12px;
-          padding: 8px 12px;
-          font-size: 12px;
+        .cf-stat-description {
+          font-size: 13.5px;
+          color: #2b2822;
+          font-weight: 600;
           line-height: 1.45;
         }
 
-        .cf-mock-msg-bubble.peer {
-          background: #1E150D;
-          border: 1px solid rgba(212, 174, 96, 0.15);
-          color: #F5EFE4;
+        .cf-stat-pill-floating {
+          position: absolute;
+          left: 0;
+          bottom: -24px;
+          width: 100%;
+          height: 48px;
+          background: #f7f5ef;
+          border-radius: 40px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 0 20px;
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(20, 18, 15, 0.08);
+          z-index: 6;
+          animation: waveFloat 4s ease-in-out infinite;
+        }
+        .cf-stat-pill-floating .dots {
+          font-size: 13.5px;
+          font-weight: 800;
+          color: #14120f;
+        }
+        .cf-audio-bars {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          height: 20px;
+        }
+        .cf-audio-bar {
+          width: 3.5px;
+          background: #e0521c;
+          border-radius: 2px;
+          animation: soundWaveBar 1.2s ease-in-out infinite alternate;
+        }
+        .cf-audio-bar:nth-child(1) { animation-delay: 0.1s; height: 6px; }
+        .cf-audio-bar:nth-child(2) { animation-delay: 0.3s; height: 16px; }
+        .cf-audio-bar:nth-child(3) { animation-delay: 0.2s; height: 11px; }
+        .cf-audio-bar:nth-child(4) { animation-delay: 0.45s; height: 18px; }
+        .cf-audio-bar:nth-child(5) { animation-delay: 0.15s; height: 8px; }
+
+        /* Hero Right Visual Cluster with Parallax & Floating */
+        .cf-hero-right {
+          position: relative;
+          height: 440px;
+          width: 100%;
         }
 
-        .cf-mock-msg-bubble.ai {
-          background: rgba(216, 182, 106, 0.1);
-          border: 1px solid rgba(216, 182, 106, 0.35);
-          color: #F5EFE4;
+        .cf-downloads-badge {
+          position: absolute;
+          right: 36px;
+          top: 0;
+          text-align: right;
+          z-index: 3;
+          animation: floatBadge1 7s ease-in-out infinite;
         }
-
-        .cf-mock-msg-bubble.me {
-          background: linear-gradient(135deg, #D8B66A 0%, #C9A45C 100%);
-          color: #120D08;
-          font-weight: 600;
-          margin-left: auto;
+        .cf-downloads-badge .num {
+          font-size: 30px;
+          font-weight: 800;
+          color: #14120f;
+          letter-spacing: -0.03em;
+          line-height: 1;
         }
-
-        .cf-mock-msg-author {
-          font-size: 10.5px;
+        .cf-downloads-badge .lbl {
+          font-size: 13px;
+          color: #55524a;
+          margin-top: 3px;
           font-weight: 700;
-          color: #D8B66A;
-          margin-bottom: 2px;
         }
 
-        .cf-mock-msg-author.ai {
-          color: #E0C27A;
-          display: flex;
-          align-items: center;
-          gap: 4px;
+        /* Tip Matrix Card */
+        .cf-tip-matrix {
+          position: absolute;
+          left: 10px;
+          top: 20px;
+          width: 144px;
+          height: 144px;
+          background: #a49a89;
+          border-radius: 8px;
+          padding: 18px;
+          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+          z-index: 2;
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: floatBadge2 8s ease-in-out infinite;
         }
-
-        /* Mock Input Box */
-        .cf-mock-input-box {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: #1A120B;
-          border: 1px solid rgba(212, 174, 96, 0.25);
-          border-radius: 10px;
-          padding: 6px 12px;
+        .cf-tip-matrix:hover {
+          transform: translateY(-8px) rotate(-2.5deg) scale(1.04);
+          box-shadow: 0 26px 54px rgba(0, 0, 0, 0.22);
         }
-
-        .cf-mock-placeholder {
-          font-size: 12px;
-          color: #AFA69A;
-          flex: 1;
+        .cf-tip-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 5px;
+          width: 80px;
+          margin-bottom: 20px;
         }
-
-        .cf-mock-send-btn {
-          width: 26px;
-          height: 26px;
-          border-radius: 6px;
-          background: #D8B66A;
-          color: #120D08;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
+        .cf-tip-grid span {
+          width: 6.5px;
+          height: 6.5px;
+          background: #14120f;
+          opacity: 0.6;
+          border-radius: 1.5px;
+          transition: all 0.25s ease;
+        }
+        .cf-tip-matrix:hover .cf-tip-grid span {
+          background: #e0521c;
+          opacity: 1;
+          transform: scale(1.2);
+        }
+        .cf-tip-matrix p {
+          font-size: 13px;
+          line-height: 1.35;
+          color: #14120f;
           font-weight: 800;
         }
 
-        /* Floating Overlap Badges */
-        .cf-float-badge-1 {
+        /* Radiant Orange Action Button */
+        .cf-orange-orb {
           position: absolute;
-          top: -16px;
-          right: 20px;
-          background: rgba(36, 23, 13, 0.9);
-          border: 1px solid rgba(216, 182, 106, 0.4);
-          backdrop-filter: blur(10px);
-          padding: 8px 14px;
-          border-radius: 10px;
-          font-size: 12px;
-          font-weight: 700;
-          color: #D8B66A;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+          left: 120px;
+          top: -8px;
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: #e0521c;
           display: flex;
           align-items: center;
-          gap: 6px;
-          z-index: 10;
+          justify-content: center;
+          z-index: 8;
+          box-shadow: 0 14px 36px rgba(224, 82, 28, 0.45);
+          cursor: pointer;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: pulseGlow 3s ease-in-out infinite;
+        }
+        .cf-orange-orb:hover {
+          transform: scale(1.18) rotate(20deg);
+          background: #ff5a22;
         }
 
-        .cf-float-badge-2 {
+        /* Central Floating Photo / Live Chat Showcase Card */
+        .cf-photo-card {
           position: absolute;
-          bottom: -16px;
-          left: 20px;
-          background: rgba(36, 23, 13, 0.9);
-          border: 1px solid rgba(216, 182, 106, 0.4);
-          backdrop-filter: blur(10px);
-          padding: 8px 14px;
-          border-radius: 10px;
-          font-size: 12px;
-          font-weight: 700;
-          color: #F5EFE4;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          z-index: 10;
-        }
-
-        /* ---------- 4. MARQUEE TICKER ---------- */
-        .cf-hero-marquee-wrapper {
-          width: 100%;
-          margin: 60px 0 0;
+          left: 160px;
+          top: 24px;
+          width: 290px;
+          height: 310px;
+          border-radius: 8px;
+          background: #dcd6c7;
+          border: 1px solid rgba(20, 18, 15, 0.12);
+          box-shadow: 0 28px 70px -15px rgba(0, 0, 0, 0.26);
+          z-index: 5;
           overflow: hidden;
+          animation: floatHeroCard 6.5s ease-in-out infinite;
+          transition: box-shadow 0.4s ease, transform 0.4s ease;
+        }
+        .cf-photo-card:hover {
+          box-shadow: 0 42px 90px -15px rgba(0, 0, 0, 0.4);
+          transform: translateY(-8px) scale(1.02);
+        }
+        .cf-photo-bg {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(180deg, #c5baa7 0%, #a49a89 100%);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 20px;
+        }
+        .cf-live-badge {
+          align-self: flex-start;
+          background: rgba(20, 18, 15, 0.92);
+          color: #ffffff;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 5px 12px;
+          border-radius: 999px;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+        }
+        .cf-live-badge span {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 10px #10b981;
+          display: block;
+          animation: liveDotPulse 2s ease-in-out infinite;
+        }
+        .cf-floating-chat-bubble {
+          background: #efece4;
+          padding: 14px 16px;
+          border-radius: 10px;
+          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+          font-size: 12.5px;
+          line-height: 1.4;
+          color: #14120f;
+          border: 1px solid rgba(20, 18, 15, 0.08);
+          transition: transform 0.25s ease;
+          cursor: pointer;
+        }
+        .cf-floating-chat-bubble:hover {
+          transform: translateY(-3px) scale(1.02);
+        }
+        .cf-floating-chat-bubble b {
+          display: block;
+          margin-bottom: 3px;
+          font-size: 11.5px;
+          color: #e0521c;
+          font-weight: 800;
+        }
+
+        /* Floating reaction mini-pill */
+        .cf-mini-reaction-pill {
+          position: absolute;
+          right: -12px;
+          top: 120px;
+          background: #ffffff;
+          border: 1px solid rgba(20,18,15,0.12);
+          padding: 6px 14px;
+          border-radius: 999px;
+          font-size: 13px;
+          font-weight: 800;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          z-index: 7;
+          animation: floatBadge3 5.5s ease-in-out infinite;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        }
+        .cf-mini-reaction-pill:hover {
+          transform: scale(1.18);
+          background: #14120f;
+          color: #ffffff;
+        }
+
+        /* Right Panel Behind */
+        .cf-backdrop-panel {
+          position: absolute;
+          right: 36px;
+          top: 110px;
+          width: 96px;
+          height: 190px;
+          background: #d6cfbe;
+          border-radius: 8px;
+          z-index: 1;
+        }
+
+        /* Sunburst Vector */
+        .cf-sunburst {
+          position: absolute;
+          left: 10px;
+          bottom: 40px;
+          width: 88px;
+          height: 88px;
+          z-index: 2;
+          animation: burstSpin 28s linear infinite;
+        }
+
+        .cf-down-badge {
+          position: absolute;
+          left: 130px;
+          bottom: 66px;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 1.5px solid #14120f;
+          background: #efece4;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: 800;
+          z-index: 6;
+          box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+          transition: all 0.25s ease;
+          cursor: pointer;
+        }
+        .cf-down-badge:hover {
+          transform: scale(1.2) translateY(3px);
+          background: #14120f;
+          color: #ffffff;
+        }
+
+        /* Connecting Drafting Lines with glowing flow pulse */
+        .cf-draft-line {
+          position: absolute;
+          background: #14120f;
+          opacity: 0.8;
+          pointer-events: none;
+        }
+
+        /* Auto-Scrolling Hero Feature Marquee Ticker */
+        .cf-hero-marquee-wrapper {
+          margin-top: 32px;
+          margin-bottom: 20px;
           position: relative;
+          width: 100%;
+          overflow: hidden;
+          padding: 6px 0 10px;
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 6%, rgba(0,0,0,1) 94%, transparent 100%);
+          -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 6%, rgba(0,0,0,1) 94%, transparent 100%);
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
         }
 
         .cf-marquee-track-container {
-          display: flex;
           overflow: hidden;
-          user-select: none;
-          gap: 16px;
-          margin-bottom: 16px;
+          width: 100%;
+          display: flex;
         }
 
         .cf-marquee-track {
           display: flex;
-          flex-shrink: 0;
-          gap: 16px;
-          animation: marqueeScroll 32s linear infinite;
+          gap: 12px;
+          width: max-content;
+          will-change: transform;
+        }
+
+        .cf-marquee-track.track-left {
+          animation: scrollMarqueeLeft 38s linear infinite;
         }
 
         .cf-marquee-track.track-right {
-          animation: marqueeScrollRight 34s linear infinite;
+          animation: scrollMarqueeRight 42s linear infinite;
         }
 
-        @keyframes marqueeScroll {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
+        @keyframes scrollMarqueeLeft {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
 
-        @keyframes marqueeScrollRight {
-          from { transform: translateX(-50%); }
-          to { transform: translateX(0); }
+        @keyframes scrollMarqueeRight {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
         }
 
         .cf-marquee-badge-card {
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          gap: 12px;
-          background: rgba(36, 23, 13, 0.6);
-          border: 1px solid rgba(212, 174, 96, 0.18);
-          border-radius: 12px;
-          padding: 10px 18px;
+          gap: 10px;
+          padding: 8px 16px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          border: 1px solid rgba(20, 18, 15, 0.09);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.035);
           white-space: nowrap;
-          backdrop-filter: blur(8px);
+          cursor: pointer;
+          transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+          user-select: none;
+        }
+
+        .cf-marquee-badge-card:hover {
+          background: #ffffff;
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+          border-color: rgba(224, 82, 28, 0.45);
         }
 
         .cf-marquee-badge-icon {
-          font-size: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: rgba(20, 18, 15, 0.05);
+          font-size: 14px;
+          transition: transform 0.25s ease;
+        }
+
+        .cf-marquee-badge-card:hover .cf-marquee-badge-icon {
+          transform: rotate(12deg) scale(1.15);
+          background: rgba(224, 82, 28, 0.12);
+        }
+
+        .cf-marquee-badge-body {
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
         }
 
         .cf-marquee-badge-title-row {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 7px;
         }
 
         .cf-marquee-badge-title {
-          font-size: 13.5px;
+          font-size: 13px;
           font-weight: 700;
-          color: #F5EFE4;
+          color: #14120f;
         }
 
         .cf-marquee-badge-tag {
-          font-size: 10.5px;
-          background: rgba(216, 182, 106, 0.15);
-          color: #D8B66A;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-weight: 600;
+          font-size: 9px;
+          font-weight: 800;
+          padding: 1px 6px;
+          border-radius: 999px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          background: rgba(224, 82, 28, 0.1);
+          color: #e0521c;
+          border: 1px solid rgba(224, 82, 28, 0.2);
         }
 
         .cf-marquee-badge-desc {
           font-size: 11.5px;
-          color: #AFA69A;
+          font-weight: 500;
+          color: rgba(20, 18, 15, 0.6);
         }
 
-        /* ---------- 5. SECTION HEADINGS & COMMON STYLES ---------- */
-        .cf-section {
-          padding: 90px 0;
-          position: relative;
-          border-top: 1px solid rgba(212, 174, 96, 0.12);
+        /* Hero Foot Features Row */
+        .cf-hero-foot-row {
+          margin-top: 18px;
+          padding-top: 24px;
+          border-top: 1px solid rgba(20, 18, 15, 0.1);
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 28px;
         }
-
-        .cf-tag-kicker {
-          font-size: 12px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: #D8B66A;
+        .cf-hero-feat-item {
+          padding: 24px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.4);
+          border: 1px solid rgba(20,18,15,0.08);
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cf-hero-feat-item:hover {
+          background: #ffffff;
+          transform: translateY(-6px);
+          box-shadow: 0 18px 40px rgba(0,0,0,0.09);
+        }
+        .cf-hero-feat-item h4 {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 18px;
+          font-weight: 800;
+          color: #14120f;
           margin-bottom: 10px;
+        }
+        .cf-hero-feat-item p {
+          font-size: 14.5px;
+          color: #55524a;
+          line-height: 1.6;
+        }
+        .cf-ring-symbol {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          border: 1.5px solid #14120f;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 15px;
+          font-weight: bold;
+          flex-shrink: 0;
+          background: #f7f5ef;
+          transition: all 0.3s ease;
+        }
+        .cf-hero-feat-item:hover .cf-ring-symbol {
+          background: #e0521c;
+          border-color: #e0521c;
+          color: #ffffff;
+          transform: scale(1.15) rotate(10deg);
+        }
+
+        /* ---------- SECTION 2: INTERACTIVE LIVE PLATFORM & AI DEMO ---------- */
+        .cf-section {
+          padding: 108px 0;
+          border-bottom: 1px solid rgba(20, 18, 15, 0.08);
+          position: relative;
         }
 
         .cf-sec-heading-row {
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
-          gap: 32px;
           margin-bottom: 48px;
+          gap: 32px;
+          flex-wrap: wrap;
+        }
+
+        .cf-tag-kicker {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12.5px;
+          font-weight: 800;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: #e0521c;
+          margin-bottom: 12px;
+        }
+        .cf-tag-kicker::before {
+          content: '';
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #e0521c;
+          animation: liveDotPulse 2s infinite;
         }
 
         .cf-sec-main-title {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(32px, 3.8vw, 48px);
-          font-weight: 700;
-          color: #F5EFE4;
-          line-height: 1.15;
-          letter-spacing: -0.01em;
+          font-size: 46px;
+          font-weight: 800;
+          letter-spacing: -0.03em;
+          line-height: 1.08;
+          color: #14120f;
         }
 
         .cf-sec-lead-text {
-          font-size: 15.5px;
-          line-height: 1.6;
-          color: #AFA69A;
+          font-size: 16.5px;
+          color: #55524a;
           max-width: 480px;
+          line-height: 1.6;
         }
 
-        /* ---------- 6. INTERACTIVE LIVE PLATFORM DEMO ---------- */
+        /* Interactive Live Workspace Card */
         .cf-live-workspace {
+          background: #ffffff;
+          border: 1px solid rgba(20, 18, 15, 0.12);
+          border-radius: 16px;
+          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.1);
           display: grid;
-          grid-template-columns: 260px 1fr;
-          background: #1A120B;
-          border: 1px solid rgba(212, 174, 96, 0.22);
-          border-radius: 18px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+          grid-template-columns: 300px 1fr;
+          min-height: 540px;
           overflow: hidden;
-          min-height: 480px;
+          transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+        .cf-live-workspace:hover {
+          box-shadow: 0 40px 100px rgba(0, 0, 0, 0.16);
         }
 
         .cf-workspace-sidebar {
-          background: #160F09;
-          border-right: 1px solid rgba(212, 174, 96, 0.12);
-          padding: 20px;
+          background: #f7f5ef;
+          border-right: 1px solid rgba(20, 18, 15, 0.08);
+          padding: 30px 22px;
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 22px;
         }
-
         .cf-ws-title {
           font-size: 11.5px;
-          font-weight: 700;
+          font-weight: 800;
           text-transform: uppercase;
-          color: #D8B66A;
-          letter-spacing: 0.06em;
+          letter-spacing: 0.14em;
+          color: #7d7768;
+          padding-left: 10px;
         }
-
         .cf-channel-list {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 5px;
         }
-
         .cf-channel-item {
           display: flex;
           align-items: center;
-          gap: 8px;
-          background: transparent;
-          border: 1px solid transparent;
-          color: #E8E1D6;
-          padding: 8px 12px;
+          gap: 12px;
+          padding: 12px 16px;
           border-radius: 8px;
-          font-size: 13.5px;
-          font-weight: 500;
+          border: none;
+          background: none;
+          font-size: 14.5px;
+          font-weight: 700;
+          color: #4a463c;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           text-align: left;
         }
-
         .cf-channel-item:hover {
-          background: rgba(255, 255, 255, 0.04);
+          background: rgba(20, 18, 15, 0.06);
+          color: #14120f;
+          transform: translateX(4px);
         }
-
         .cf-channel-item.active {
-          background: rgba(216, 182, 106, 0.15);
-          border-color: rgba(216, 182, 106, 0.35);
-          color: #D8B66A;
-          font-weight: 700;
+          background: #14120f;
+          color: #ffffff;
+          box-shadow: 0 6px 16px rgba(20, 18, 15, 0.25);
+        }
+        .cf-channel-item.ai-channel {
+          background: linear-gradient(135deg, rgba(224,82,28,0.12), rgba(20,18,15,0.06));
+          border: 1px solid rgba(224,82,28,0.25);
+          color: #14120f;
+        }
+        .cf-channel-item.ai-channel.active {
+          background: linear-gradient(135deg, #e0521c, #14120f);
+          color: #ffffff;
+          border-color: transparent;
         }
 
         .cf-workspace-chat {
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          background: #120D08;
-          padding: 24px;
+          background: #ffffff;
         }
-
         .cf-ws-chat-top {
+          padding: 22px 30px;
+          border-bottom: 1px solid rgba(20, 18, 15, 0.08);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #ffffff;
+        }
+        .cf-ws-chat-title b {
+          font-size: 17px;
+          font-weight: 800;
+          color: #14120f;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          padding-bottom: 16px;
-          border-bottom: 1px solid rgba(212, 174, 96, 0.12);
+          gap: 8px;
         }
-
-        .cf-ws-chat-title b {
-          font-size: 16px;
-          color: #F5EFE4;
-          display: block;
-        }
-
         .cf-ws-chat-title span {
-          font-size: 12px;
+          font-size: 12.5px;
           color: #10b981;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .cf-ws-chat-title span::before {
+          content: '';
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 8px #10b981;
+          animation: liveDotPulse 2s infinite;
         }
 
         .cf-ws-chat-messages {
+          flex: 1;
+          padding: 30px;
+          overflow-y: auto;
           display: flex;
           flex-direction: column;
-          gap: 16px;
-          padding: 20px 0;
-          overflow-y: auto;
-          max-height: 320px;
+          gap: 20px;
+          max-height: 350px;
         }
-
         .cf-chat-bubble-row {
           display: flex;
-          gap: 12px;
-          align-items: flex-start;
+          gap: 14px;
+          max-width: 84%;
+          animation: bubbleAppear 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
+        @keyframes bubbleAppear {
+          from { opacity: 0; transform: translateY(14px) scale(0.96); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
         .cf-chat-bubble-row.me {
+          align-self: flex-end;
           flex-direction: row-reverse;
         }
-
         .cf-chat-avatar {
-          width: 34px;
-          height: 34px;
+          width: 42px;
+          height: 42px;
           border-radius: 50%;
-          background: #24170D;
-          border: 1px solid rgba(212, 174, 96, 0.3);
+          background: #efece4;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 15px;
+          font-size: 20px;
           flex-shrink: 0;
+          border: 1px solid rgba(20, 18, 15, 0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-
         .cf-chat-bubble-body {
-          max-width: 80%;
-          background: #1A120B;
-          border: 1px solid rgba(212, 174, 96, 0.15);
-          border-radius: 14px;
-          padding: 12px 16px;
+          background: #f7f5ef;
+          padding: 15px 20px;
+          border-radius: 12px;
+          border: 1px solid rgba(20, 18, 15, 0.05);
+          box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+          position: relative;
         }
-
         .cf-chat-bubble-body.is-ai-bubble {
-          background: rgba(216, 182, 106, 0.08);
-          border-color: rgba(216, 182, 106, 0.3);
+          background: linear-gradient(145deg, #fdf8f5 0%, #f7f0eb 100%);
+          border: 1.5px solid rgba(224, 82, 28, 0.22);
+          box-shadow: 0 6px 18px rgba(224, 82, 28, 0.09);
         }
-
         .cf-chat-bubble-row.me .cf-chat-bubble-body {
-          background: linear-gradient(135deg, #D8B66A 0%, #C9A45C 100%);
-          color: #120D08;
-          border: none;
+          background: #14120f;
+          color: #ffffff;
         }
-
         .cf-chat-meta {
           font-size: 11.5px;
-          color: #D8B66A;
           font-weight: 700;
+          color: #7d7768;
           margin-bottom: 4px;
         }
-
         .cf-chat-bubble-row.me .cf-chat-meta {
-          color: #3D2908;
+          color: #a49a89;
+          text-align: right;
         }
-
         .cf-chat-text {
-          font-size: 13.5px;
+          font-size: 14.5px;
           line-height: 1.5;
         }
-
         .cf-reactions-tray {
           display: flex;
           gap: 6px;
           margin-top: 8px;
         }
-
         .cf-reaction-tag {
-          font-size: 11.5px;
-          background: rgba(0, 0, 0, 0.25);
-          border: 1px solid rgba(212, 174, 96, 0.2);
-          border-radius: 6px;
-          padding: 2px 6px;
+          font-size: 11px;
+          background: rgba(255,255,255,0.85);
+          border: 1px solid rgba(20,18,15,0.08);
+          padding: 2px 8px;
+          border-radius: 999px;
+          color: #14120f;
           cursor: pointer;
+          transition: transform 0.2s;
+        }
+        .cf-reaction-tag:hover {
+          transform: scale(1.18);
+          background: #ffffff;
+        }
+        .cf-chat-bubble-row.me .cf-reaction-tag {
+          background: rgba(255,255,255,0.15);
+          color: #ffffff;
+          border-color: rgba(255,255,255,0.2);
         }
 
         .cf-typing-bar {
-          font-size: 12px;
-          color: #D8B66A;
+          font-size: 13px;
+          color: #7d7768;
+          font-style: italic;
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 8px 0;
+          padding: 6px 30px;
         }
 
         .cf-ws-chat-input-row {
+          padding: 22px 30px;
+          border-top: 1px solid rgba(20, 18, 15, 0.08);
           display: flex;
-          align-items: center;
-          gap: 10px;
-          background: #1A120B;
-          border: 1px solid rgba(212, 174, 96, 0.25);
-          border-radius: 12px;
-          padding: 6px 8px 6px 16px;
+          gap: 14px;
+          background: #ffffff;
         }
-
         .cf-ws-input {
           flex: 1;
-          background: transparent;
-          border: none;
-          color: #F5EFE4;
-          font-size: 14px;
+          border: 1.5px solid rgba(20, 18, 15, 0.16);
+          border-radius: 999px;
+          padding: 14px 24px;
+          font-size: 14.5px;
+          font-family: inherit;
           outline: none;
+          transition: all 0.25s ease;
+          background: #fbf9f5;
         }
-
-        .cf-ws-input::placeholder {
-          color: #AFA69A;
+        .cf-ws-input:focus {
+          border-color: #14120f;
+          background: #ffffff;
+          box-shadow: 0 0 0 4px rgba(20, 18, 15, 0.08);
         }
-
         .cf-ws-send-btn {
-          background: linear-gradient(135deg, #D8B66A 0%, #C9A45C 100%);
-          color: #120D08;
-          font-weight: 800;
-          font-size: 13px;
+          background: #14120f;
+          color: #ffffff;
           border: none;
-          border-radius: 8px;
-          padding: 8px 16px;
+          border-radius: 999px;
+          padding: 12px 28px;
+          font-size: 14.5px;
+          font-weight: 700;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.25s ease;
+          box-shadow: 0 6px 16px rgba(20, 18, 15, 0.25);
         }
-
         .cf-ws-send-btn:hover {
-          filter: brightness(1.1);
+          background: #e0521c;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(224, 82, 28, 0.4);
         }
 
-        /* ---------- 7. FEATURE PILLARS ---------- */
+        /* ---------- SECTION 3: 6 CORE FEATURE PILLARS ---------- */
         .cf-pillars-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 24px;
+          gap: 26px;
+          margin-top: 28px;
         }
-
         .cf-pillar-box {
-          background: #1A120B;
-          border: 1px solid rgba(212, 174, 96, 0.18);
-          border-radius: 16px;
-          padding: 32px 28px;
-          transition: all 0.3s ease;
+          background: #ffffff;
+          border: 1px solid rgba(20, 18, 15, 0.1);
+          border-radius: 14px;
+          padding: 38px 32px;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           position: relative;
+          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.04);
         }
-
         .cf-pillar-box:hover {
-          transform: translateY(-4px);
-          border-color: rgba(216, 182, 106, 0.45);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+          transform: translateY(-8px);
+          box-shadow: 0 30px 65px rgba(0, 0, 0, 0.12);
+          border-color: #14120f;
         }
-
         .cf-pillar-badge-icon {
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
-          background: rgba(216, 182, 106, 0.12);
-          border: 1px solid rgba(216, 182, 106, 0.3);
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          border: 1.5px solid #14120f;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 20px;
-          color: #D8B66A;
-          margin-bottom: 20px;
+          font-size: 22px;
+          margin-bottom: 24px;
+          background: #f7f5ef;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+          transition: all 0.35s ease;
         }
-
+        .cf-pillar-box:hover .cf-pillar-badge-icon {
+          transform: scale(1.18) rotate(12deg);
+          background: #e0521c;
+          border-color: #e0521c;
+          color: #ffffff;
+        }
         .cf-pillar-box h3 {
-          font-family: 'Playfair Display', serif;
-          font-size: 20px;
-          font-weight: 700;
-          color: #F5EFE4;
-          margin-bottom: 10px;
+          font-size: 21px;
+          font-weight: 800;
+          color: #14120f;
+          margin-bottom: 12px;
+          letter-spacing: -0.015em;
         }
-
         .cf-pillar-box p {
-          font-size: 14px;
-          line-height: 1.6;
-          color: #AFA69A;
+          font-size: 14.5px;
+          color: #55524a;
+          line-height: 1.65;
         }
 
-        /* ---------- 8. HOW IT WORKS & SECURITY ---------- */
+        /* ---------- SECTION 4: 3-STEP BLUEPRINT & SPECS ---------- */
         .cf-steps-row {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 24px;
-          margin-bottom: 48px;
+          gap: 30px;
+          margin-top: 38px;
         }
-
         .cf-step-card {
-          background: #1A120B;
-          border: 1px solid rgba(212, 174, 96, 0.18);
-          border-radius: 16px;
-          padding: 32px 28px;
+          background: #ffffff;
+          border: 1.5px solid rgba(20, 18, 15, 0.1);
+          border-radius: 14px;
+          padding: 40px 34px;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          position: relative;
+          box-shadow: 0 10px 24px rgba(0,0,0,0.03);
         }
-
-        .cf-step-card.active, .cf-step-card:hover {
-          border-color: #D8B66A;
-          background: rgba(36, 23, 13, 0.8);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        .cf-step-card.active {
+          border-color: #e0521c;
+          box-shadow: 0 22px 52px rgba(224, 82, 28, 0.22);
+          transform: translateY(-6px);
         }
-
         .cf-step-number {
-          font-family: 'Playfair Display', serif;
-          font-size: 32px;
-          font-weight: 700;
-          color: #D8B66A;
-          margin-bottom: 12px;
+          font-size: 44px;
+          font-weight: 800;
+          color: #a49a89;
+          margin-bottom: 16px;
+          line-height: 1;
+          letter-spacing: -0.03em;
         }
-
+        .cf-step-card.active .cf-step-number {
+          color: #e0521c;
+        }
         .cf-step-pill-tag {
-          font-size: 11px;
-          background: rgba(216, 182, 106, 0.15);
-          color: #D8B66A;
-          padding: 3px 8px;
-          border-radius: 4px;
-          font-weight: 600;
           display: inline-block;
-          margin-bottom: 12px;
+          font-size: 11.5px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          background: #f4f2ec;
+          padding: 4px 12px;
+          border-radius: 999px;
+          margin-bottom: 16px;
+          color: #14120f;
         }
-
         .cf-step-card h3 {
-          font-family: 'Playfair Display', serif;
           font-size: 20px;
-          font-weight: 700;
-          color: #F5EFE4;
-          margin-bottom: 8px;
+          font-weight: 800;
+          margin-bottom: 10px;
         }
-
         .cf-step-card p {
-          font-size: 14px;
-          line-height: 1.55;
-          color: #AFA69A;
+          font-size: 14.5px;
+          color: #55524a;
+          line-height: 1.6;
         }
 
-        /* Dark Spec Security Card */
+        /* Dark Spec Deep-Dive Card */
         .cf-dark-spec-card {
-          background: linear-gradient(135deg, #24170D 0%, #1A120B 100%);
-          border: 1px solid rgba(212, 174, 96, 0.3);
-          border-radius: 20px;
-          padding: 48px;
+          background: #14120f;
+          color: #efece4;
+          border-radius: 16px;
+          padding: 60px;
+          margin-top: 52px;
           display: grid;
           grid-template-columns: 1.2fr 1fr;
-          gap: 48px;
+          gap: 52px;
           align-items: center;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 35px 90px rgba(0,0,0,0.35);
+          position: relative;
+          overflow: hidden;
         }
-
+        .cf-dark-spec-card::before {
+          content: '';
+          position: absolute;
+          top: -120px;
+          right: -120px;
+          width: 340px;
+          height: 340px;
+          background: radial-gradient(circle, rgba(224, 82, 28, 0.28) 0%, transparent 70%);
+          border-radius: 50%;
+          pointer-events: none;
+        }
         .cf-dark-spec-card h3 {
-          font-family: 'Playfair Display', serif;
-          font-size: 28px;
-          font-weight: 700;
-          color: #F5EFE4;
-          margin-bottom: 14px;
+          font-size: 38px;
+          font-weight: 800;
+          letter-spacing: -0.025em;
+          margin-bottom: 18px;
+          line-height: 1.15;
+          color: #ffffff;
         }
-
         .cf-dark-spec-card p {
-          font-size: 15px;
+          font-size: 15.5px;
+          color: #b7ada0;
           line-height: 1.65;
-          color: #AFA69A;
-          margin-bottom: 24px;
+          margin-bottom: 30px;
         }
-
         .cf-dark-metrics-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 20px;
+          grid-template-columns: 1fr 1fr;
+          gap: 30px;
         }
-
         .cf-metric-tile {
-          background: rgba(18, 13, 8, 0.6);
-          border: 1px solid rgba(212, 174, 96, 0.2);
-          border-radius: 12px;
-          padding: 20px;
-          text-align: center;
+          border-left: 2.5px solid #e0521c;
+          padding-left: 20px;
+          transition: transform 0.3s ease;
         }
-
+        .cf-metric-tile:hover {
+          transform: translateX(6px);
+        }
         .cf-metric-big {
-          font-family: 'Playfair Display', serif;
-          font-size: 28px;
-          font-weight: 700;
-          color: #D8B66A;
-          margin-bottom: 4px;
+          font-size: 36px;
+          font-weight: 800;
+          color: #ffffff;
+          letter-spacing: -0.02em;
         }
-
         .cf-metric-sub {
-          font-size: 12.5px;
-          color: #AFA69A;
+          font-size: 13px;
+          color: #a49a89;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-top: 4px;
+          font-weight: 700;
         }
 
-        /* ---------- 9. REVIEWS / TESTIMONIALS ---------- */
+        /* ---------- SECTION 5: REVIEWS ---------- */
         .cf-reviews-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 28px;
+          gap: 30px;
+          margin-top: 28px;
         }
-
         .cf-review-card {
-          background: #1A120B;
-          border: 1px solid rgba(212, 174, 96, 0.18);
-          border-radius: 18px;
-          padding: 36px 32px;
+          background: #ffffff;
+          border: 1px solid rgba(20, 18, 15, 0.1);
+          border-radius: 14px;
+          padding: 40px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          gap: 24px;
-          transition: all 0.3s ease;
+          box-shadow: 0 12px 34px rgba(0, 0, 0, 0.05);
+          transition: transform 0.35s ease, box-shadow 0.35s ease;
         }
-
         .cf-review-card:hover {
-          border-color: #D8B66A;
-          transform: translateY(-3px);
+          transform: translateY(-8px);
+          box-shadow: 0 28px 60px rgba(0, 0, 0, 0.12);
         }
-
         .cf-review-stars {
-          color: #D8B66A;
-          font-size: 16px;
-          margin-bottom: 12px;
-          letter-spacing: 2px;
+          color: #e0521c;
+          font-size: 17px;
+          margin-bottom: 18px;
+          letter-spacing: 3px;
         }
-
         .cf-review-quote {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 19px;
-          line-height: 1.6;
-          color: #F5EFE4;
-          font-style: italic;
+          font-size: 16.5px;
+          line-height: 1.65;
+          color: #14120f;
+          font-weight: 600;
+          margin-bottom: 30px;
         }
-
         .cf-reviewer-info {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding-top: 16px;
-          border-top: 1px solid rgba(212, 174, 96, 0.12);
+          gap: 16px;
         }
-
         .cf-reviewer-avatar {
-          width: 40px;
-          height: 40px;
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
-          background: #24170D;
-          border: 1px solid rgba(212, 174, 96, 0.3);
+          background: #efece4;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
+          font-size: 24px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-
         .cf-reviewer-meta b {
-          font-size: 14.5px;
-          color: #F5EFE4;
+          font-size: 16px;
+          color: #14120f;
           display: block;
+          font-weight: 800;
         }
-
         .cf-reviewer-meta span {
-          font-size: 12px;
-          color: #AFA69A;
+          font-size: 13.5px;
+          color: #55524a;
         }
 
-        /* ---------- 10. FINAL LUXURY CTA BANNER ---------- */
+        /* ---------- SECTION 6: CTA BANNER ---------- */
         .cf-cta-section {
-          padding: 100px 0;
-          background: radial-gradient(circle at 50% 50%, #2B1B0D 0%, #1A120B 60%, #120D08 100%);
+          background: linear-gradient(145deg, #14120f 0%, #2b2721 100%);
+          color: #ffffff;
+          padding: 104px 0;
           text-align: center;
-          border-top: 1px solid rgba(212, 174, 96, 0.2);
+          position: relative;
+          overflow: hidden;
         }
-
+        .cf-cta-section::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 600px;
+          height: 200px;
+          background: radial-gradient(circle, rgba(224,82,28,0.22) 0%, transparent 70%);
+          pointer-events: none;
+        }
         .cf-cta-title {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(34px, 4vw, 52px);
-          font-weight: 700;
-          color: #F5EFE4;
-          margin-bottom: 16px;
+          font-size: 52px;
+          font-weight: 800;
+          letter-spacing: -0.03em;
+          margin-bottom: 20px;
+          line-height: 1.08;
         }
-
         .cf-cta-subtext {
-          font-size: 16.5px;
-          color: #AFA69A;
-          max-width: 580px;
-          margin: 0 auto 36px;
+          font-size: 17.5px;
+          color: #cfc9be;
+          max-width: 600px;
+          margin: 0 auto 44px;
           line-height: 1.65;
         }
-
         .cf-cta-actions {
           display: flex;
           justify-content: center;
           align-items: center;
-          gap: 18px;
+          gap: 22px;
           flex-wrap: wrap;
         }
-
         .cf-btn-cta-white {
-          background: linear-gradient(135deg, #D8B66A 0%, #C9A45C 100%);
-          color: #120D08;
-          font-size: 15.5px;
-          font-weight: 700;
-          text-decoration: none;
-          padding: 16px 36px;
+          background: #efece4;
+          color: #14120f;
+          border: none;
           border-radius: 999px;
-          box-shadow: 0 10px 28px rgba(216, 182, 106, 0.35);
-          transition: all 0.3s ease;
+          padding: 19px 46px;
+          font-size: 16.5px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          text-decoration: none;
+          box-shadow: 0 14px 36px rgba(0,0,0,0.38);
         }
-
         .cf-btn-cta-white:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 16px 36px rgba(216, 182, 106, 0.5);
-          filter: brightness(1.08);
+          background: #ffffff;
+          transform: translateY(-3px) scale(1.03);
+          box-shadow: 0 22px 54px rgba(0,0,0,0.55);
         }
-
         .cf-btn-cta-outline {
           background: transparent;
-          color: #F5EFE4;
-          border: 1px solid rgba(212, 174, 96, 0.35);
-          font-size: 15.5px;
-          font-weight: 600;
-          text-decoration: none;
-          padding: 15px 32px;
+          color: #ffffff;
+          border: 1.5px solid rgba(255,255,255,0.35);
           border-radius: 999px;
-          transition: all 0.25s ease;
+          padding: 18px 40px;
+          font-size: 16.5px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-decoration: none;
         }
-
         .cf-btn-cta-outline:hover {
-          background: rgba(216, 182, 106, 0.12);
-          border-color: #D8B66A;
+          border-color: #ffffff;
+          background: rgba(255,255,255,0.12);
+          transform: translateY(-2px);
         }
 
-        /* ---------- 11. FOOTER ---------- */
+        /* ---------- FOOTER ---------- */
         .cf-site-footer {
-          background: #0E0A06;
-          border-top: 1px solid rgba(212, 174, 96, 0.12);
-          padding: 80px 0 40px;
+          padding: 88px 0 52px;
+          background: #efece4;
+          border-top: 1px solid rgba(20, 18, 15, 0.08);
         }
-
         .cf-footer-cols {
           display: grid;
-          grid-template-columns: 2fr 1fr 1fr 1fr;
-          gap: 48px;
-          margin-bottom: 60px;
+          grid-template-columns: 1.5fr repeat(3, 1fr);
+          gap: 52px;
+          margin-bottom: 68px;
         }
-
         .cf-footer-brand-info p {
-          font-size: 13.5px;
-          color: #AFA69A;
+          font-size: 14.5px;
+          color: #55524a;
           line-height: 1.65;
-          margin-top: 16px;
-          max-width: 320px;
+          max-width: 300px;
+          margin-top: 18px;
         }
-
         .cf-footer-col h5 {
           font-size: 13px;
-          font-weight: 700;
+          font-weight: 800;
           text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: #D8B66A;
-          margin-bottom: 20px;
+          letter-spacing: 0.12em;
+          color: #14120f;
+          margin-bottom: 22px;
         }
-
         .cf-footer-col ul {
           list-style: none;
           display: flex;
           flex-direction: column;
           gap: 12px;
         }
-
         .cf-footer-col a {
-          color: #AFA69A;
+          font-size: 14.5px;
+          color: #55524a;
           text-decoration: none;
-          font-size: 13.5px;
+          font-weight: 600;
           transition: color 0.2s ease;
         }
-
         .cf-footer-col a:hover {
-          color: #F5EFE4;
+          color: #e0521c;
         }
-
         .cf-footer-base-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding-top: 32px;
-          border-top: 1px solid rgba(212, 174, 96, 0.1);
-          font-size: 12.5px;
-          color: #AFA69A;
+          padding-top: 36px;
+          border-top: 1px solid rgba(20, 18, 15, 0.1);
+          font-size: 13.5px;
+          color: #7d7768;
+          flex-wrap: wrap;
+          gap: 20px;
         }
 
-        /* ---------- 12. MODAL & FLOATING REACTIONS ---------- */
+        /* Modal Preview */
         .cf-modal-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.85);
+          background: rgba(20, 18, 15, 0.78);
           backdrop-filter: blur(12px);
-          z-index: 3000;
+          z-index: 2000;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 20px;
+          padding: 24px;
+          animation: modalFadeIn 0.3s ease;
         }
-
+        @keyframes modalFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
         .cf-modal-window {
-          background: #1A120B;
-          border: 1px solid rgba(212, 174, 96, 0.3);
-          border-radius: 20px;
-          padding: 40px;
-          max-width: 540px;
-          width: 100%;
+          background: #efece4;
+          width: 660px;
+          max-width: 95vw;
+          border-radius: 16px;
+          padding: 48px;
           position: relative;
-          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+          box-shadow: 0 35px 90px rgba(0,0,0,0.5);
+          animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
+        @keyframes modalPop {
+          from { opacity: 0; transform: scale(0.93) translateY(24px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
         .cf-modal-x {
           position: absolute;
-          top: 20px;
-          right: 20px;
-          background: transparent;
+          top: 24px;
+          right: 24px;
+          background: none;
           border: none;
-          font-size: 22px;
-          color: #AFA69A;
-          cursor: pointer;
-        }
-
-        .cf-modal-x:hover {
-          color: #F5EFE4;
-        }
-
-        .cf-floating-heart {
-          position: fixed;
           font-size: 24px;
-          pointer-events: none;
-          z-index: 9999;
-          animation: floatUpFade 1.2s forwards ease-out;
+          cursor: pointer;
+          color: #14120f;
+          transition: transform 0.2s;
+        }
+        .cf-modal-x:hover {
+          transform: rotate(90deg);
         }
 
-        @keyframes floatUpFade {
-          0% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
+        /* Responsive Breakpoints */
+        @media (max-width: 1080px) {
+          .cf-hero-headline {
+            font-size: 60px;
           }
-          100% {
-            opacity: 0;
-            transform: translateY(-80px) scale(1.4);
-          }
-        }
-
-        /* ---------- 13. RESPONSIVENESS ---------- */
-        @media (max-width: 1024px) {
           .cf-hero-grid {
             grid-template-columns: 1fr;
-            gap: 40px;
+            gap: 60px;
           }
-
-          .cf-pillars-grid, .cf-steps-row {
-            grid-template-columns: repeat(2, 1fr);
+          .cf-hero-right {
+            height: 480px;
           }
-
+          .cf-live-workspace {
+            grid-template-columns: 1fr;
+          }
+          .cf-pillars-grid {
+            grid-template-columns: 1fr 1fr;
+          }
           .cf-dark-spec-card {
             grid-template-columns: 1fr;
-            gap: 32px;
-            padding: 36px;
           }
-
           .cf-footer-cols {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
           }
         }
 
         @media (max-width: 768px) {
-          .cf-nav-menu, .cf-btn-login-nav, .cf-btn-signup-nav {
+          .cf-container {
+            padding: 0 20px;
+          }
+          .cf-navbar {
+            height: 74px;
+          }
+          .cf-nav-menu {
             display: none;
           }
-
+          .cf-btn-login-nav, .cf-btn-signup-nav {
+            display: none;
+          }
           .cf-hamburger {
             display: flex;
           }
-
+          .cf-hero {
+            padding: 36px 0 60px;
+          }
+          .cf-hero-headline {
+            font-size: 40px;
+            letter-spacing: -0.02em;
+          }
+          .cf-hero-subhead {
+            font-size: 16px;
+            line-height: 1.55;
+          }
+          .cf-hero-foot-row {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 28px;
+            padding-top: 24px;
+          }
+          .cf-hero-marquee-wrapper {
+            margin-top: 24px;
+            margin-bottom: 24px;
+            gap: 10px;
+          }
+          .cf-marquee-badge-card {
+            padding: 7px 14px;
+            gap: 8px;
+          }
+          .cf-marquee-badge-icon {
+            width: 26px;
+            height: 26px;
+            font-size: 13px;
+          }
+          .cf-marquee-badge-title {
+            font-size: 12px;
+          }
+          .cf-marquee-badge-desc {
+            font-size: 11px;
+          }
+          .cf-marquee-badge-tag {
+            font-size: 8.5px;
+            padding: 1px 5px;
+          }
+          .cf-stat-card-wrap {
+            width: 100%;
+            max-width: 100%;
+            margin-top: 18px;
+          }
+          .cf-stat-pill-floating {
+            position: relative;
+            bottom: auto;
+            margin-top: 10px;
+            width: 100%;
+          }
           .cf-pillars-grid, .cf-steps-row, .cf-reviews-grid {
             grid-template-columns: 1fr;
+            gap: 20px;
           }
-
-          .cf-live-workspace {
-            grid-template-columns: 1fr;
-          }
-
-          .cf-workspace-sidebar {
-            border-right: none;
-            border-bottom: 1px solid rgba(212, 174, 96, 0.12);
-          }
-
           .cf-footer-cols {
             grid-template-columns: 1fr;
-            gap: 32px;
+            gap: 36px;
           }
-
-          .cf-footer-base-row {
-            flex-direction: column;
-            gap: 16px;
-            text-align: center;
-          }
-
-          .cf-frame-body {
-            grid-template-columns: 1fr;
-          }
-
-          .cf-mock-sidebar {
+          .cf-hero-right {
             display: none;
           }
-
-          .cf-sec-heading-row {
+          .cf-hero-cta-group {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            width: 100%;
+          }
+          .cf-btn-primary-hero, .cf-btn-secondary-hero {
+            text-align: center;
+            justify-content: center;
+            width: 100%;
+          }
+          .cf-section {
+            padding: 68px 0;
+          }
+          .cf-sec-main-title {
+            font-size: 32px;
+          }
+          .cf-live-workspace {
+            grid-template-columns: 1fr;
+            border-radius: 12px;
+          }
+          .cf-workspace-sidebar {
+            padding: 16px;
+            border-right: none;
+            border-bottom: 1px solid rgba(20, 18, 15, 0.08);
+          }
+          .cf-channel-list {
+            flex-direction: row;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+          }
+          .cf-channel-item {
+            white-space: nowrap;
+            padding: 8px 14px;
+            font-size: 13.5px;
+          }
+          .cf-cta-title {
+            font-size: 34px;
+          }
+          .cf-cta-subtext {
+            font-size: 15.5px;
+            margin-bottom: 32px;
+          }
+          .cf-cta-actions {
+            flex-direction: column;
+            width: 100%;
+          }
+          .cf-btn-cta-white, .cf-btn-cta-outline {
+            width: 100%;
+            text-align: center;
+            padding: 16px 24px;
+          }
+          .cf-footer-base-row {
             flex-direction: column;
             align-items: flex-start;
+            gap: 14px;
           }
         }
 
-        /* Reduced Motion */
-        @media (prefers-reduced-motion: reduce) {
-          *, ::before, ::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-            scroll-behavior: auto !important;
+        @media (max-width: 480px) {
+          .cf-container {
+            padding: 0 16px;
+          }
+          .cf-hero-headline {
+            font-size: 32px;
+          }
+          .cf-sec-main-title {
+            font-size: 26px;
+          }
+          .cf-marquee-badge-card {
+            padding: 6px 12px;
+            gap: 7px;
+          }
+          .cf-marquee-badge-title {
+            font-size: 11.5px;
+          }
+          .cf-marquee-badge-desc {
+            font-size: 10.5px;
+          }
+          .cf-marquee-badge-tag {
+            font-size: 8px;
+            padding: 1px 4px;
+          }
+          .cf-hero-foot-row {
+            margin-top: 20px;
+            padding-top: 18px;
+            gap: 12px;
+          }
+          .cf-modal-window {
+            padding: 28px 20px;
           }
         }
       `}</style>
 
-      {/* Floating Scroll Progress Bar */}
+      {/* Top Scroll Progress Indicator */}
       <div className="cf-scroll-bar" style={{ width: `${scrollProgress}%` }} />
 
-      {/* Custom Floating Cursor */}
+      {/* Custom Spring Cursor Follower */}
       <div
         className={`cf-custom-cursor ${cursorHovered ? "hovered" : ""}`}
-        style={{ left: cursorPos.x, top: cursorPos.y }}
+        style={{
+          left: `${cursorPos.x}px`,
+          top: `${cursorPos.y}px`,
+        }}
       />
 
-      {/* Floating Reaction Emojis */}
-      {floatingHearts.map((heart) => (
-        <div
-          key={heart.id}
-          className="cf-floating-heart"
-          style={{ left: heart.x, top: heart.y }}
-        >
-          {heart.emoji}
+      {/* Floating Reaction Particles on Screen */}
+      {floatingHearts.map((h) => (
+        <div key={h.id} className="cf-floating-pop" style={{ left: `${h.x}%` }}>
+          {h.emoji}
         </div>
       ))}
 
-      {/* Ambient Orbs */}
+      {/* Ambient background blur lights */}
       <div className="cf-ambient-orb-1" />
       <div className="cf-ambient-orb-2" />
 
-      {/* ==================== 1. LUXURY NAVBAR ==================== */}
+      {/* ==================== 1. FULL WIDTH STICKY NAVBAR ==================== */}
       <nav className="cf-navbar">
         <div className="cf-container">
           <div className="cf-nav-inner">
@@ -2062,16 +2392,18 @@ export default function Home() {
               onMouseLeave={() => setCursorHovered(false)}
             >
               <div className="cf-logo-icon-svg">
-                <svg width="24" height="24" viewBox="0 0 36 36" fill="none">
-                  <rect width="36" height="36" rx="8" fill="#24170D" />
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                  <rect width="36" height="36" rx="10" fill="#14120f" />
                   <path
                     d="M10 12C10 9.79086 11.7909 8 14 8H22C24.2091 8 26 9.79086 26 12V18C26 20.2091 24.2091 22 22 22H15L11 25.5V22H10C8.89543 22 8 21.1046 8 20V14C8 12.8954 8.89543 12 10 12Z"
-                    fill="#F5EFE4"
+                    fill="#efece4"
                   />
                   <path
                     d="M19 16C19 14.8954 19.8954 14 21 14H25C26.1046 14 27 14.8954 27 16V21C27 22.1046 26.1046 23 25 23H23.5L21 25V23H21C19.8954 23 19 22.1046 19 21V16Z"
-                    fill="#D8B66A"
+                    fill="#e0521c"
                   />
+                  <circle cx="15" cy="15" r="1.5" fill="#14120f" />
+                  <circle cx="21" cy="15" r="1.5" fill="#14120f" />
                 </svg>
               </div>
               Chatify
@@ -2102,7 +2434,7 @@ export default function Home() {
                   onMouseEnter={() => setCursorHovered(true)}
                   onMouseLeave={() => setCursorHovered(false)}
                 >
-                  How It Works
+                  How it works
                 </a>
               </li>
               <li>
@@ -2130,7 +2462,7 @@ export default function Home() {
                   onMouseEnter={() => setCursorHovered(true)}
                   onMouseLeave={() => setCursorHovered(false)}
                 >
-                  <span>🤖</span> AI Assistant
+                  <span>🤖</span> AI Chat
                 </Link>
               </li>
             </ul>
@@ -2150,7 +2482,7 @@ export default function Home() {
                 onMouseEnter={() => setCursorHovered(true)}
                 onMouseLeave={() => setCursorHovered(false)}
               >
-                Get Started →
+                Sign Up
               </Link>
               <button
                 className="cf-hamburger"
@@ -2172,34 +2504,28 @@ export default function Home() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 40 }}>
             <div className="cf-brand">
               <div className="cf-logo-icon-svg">
-                <svg width="24" height="24" viewBox="0 0 36 36" fill="none">
-                  <rect width="36" height="36" rx="8" fill="#24170D" />
-                  <path
-                    d="M10 12C10 9.79086 11.7909 8 14 8H22C24.2091 8 26 9.79086 26 12V18C26 20.2091 24.2091 22 22 22H15L11 25.5V22H10C8.89543 22 8 21.1046 8 20V14C8 12.8954 8.89543 12 10 12Z"
-                    fill="#F5EFE4"
-                  />
-                  <path
-                    d="M19 16C19 14.8954 19.8954 14 21 14H25C26.1046 14 27 14.8954 27 16V21C27 22.1046 26.1046 23 25 23H23.5L21 25V23H21C19.8954 23 19 22.1046 19 21V16Z"
-                    fill="#D8B66A"
-                  />
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                  <rect width="36" height="36" rx="10" fill="#14120f" />
+                  <path d="M10 12C10 9.79086 11.7909 8 14 8H22C24.2091 8 26 9.79086 26 12V18C26 20.2091 24.2091 22 22 22H15L11 25.5V22H10C8.89543 22 8 21.1046 8 20V14C8 12.8954 8.89543 12 10 12Z" fill="#efece4" />
+                  <path d="M19 16C19 14.8954 19.8954 14 21 14H25C26.1046 14 27 14.8954 27 16V21C27 22.1046 26.1046 23 25 23H23.5L21 25V23H21C19.8954 23 19 22.1046 19 21V16Z" fill="#e0521c" />
                 </svg>
               </div>
               Chatify
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              style={{ background: "none", border: "none", fontSize: 28, color: "#F5EFE4", cursor: "pointer" }}
+              style={{ background: "none", border: "none", fontSize: 28, cursor: "pointer" }}
             >
               ✕
             </button>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 24, fontSize: 18, fontWeight: 600 }}>
-            <a href="#platform" onClick={() => setMobileMenuOpen(false)} style={{ color: "#E8E1D6", textDecoration: "none" }}>Platform</a>
-            <a href="#features" onClick={() => setMobileMenuOpen(false)} style={{ color: "#E8E1D6", textDecoration: "none" }}>Features</a>
-            <a href="#how" onClick={() => setMobileMenuOpen(false)} style={{ color: "#E8E1D6", textDecoration: "none" }}>How It Works</a>
-            <a href="#security" onClick={() => setMobileMenuOpen(false)} style={{ color: "#E8E1D6", textDecoration: "none" }}>Security</a>
-            <a href="#reviews" onClick={() => setMobileMenuOpen(false)} style={{ color: "#E8E1D6", textDecoration: "none" }}>Reviews</a>
-            <Link to="/ai-chat" onClick={() => setMobileMenuOpen(false)} style={{ color: "#D8B66A", textDecoration: "none" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24, fontSize: 20, fontWeight: 700 }}>
+            <a href="#platform" onClick={() => setMobileMenuOpen(false)}>Platform</a>
+            <a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
+            <a href="#how" onClick={() => setMobileMenuOpen(false)}>How it works</a>
+            <a href="#security" onClick={() => setMobileMenuOpen(false)}>Security</a>
+            <a href="#reviews" onClick={() => setMobileMenuOpen(false)}>Reviews</a>
+            <Link to="/ai-chat" onClick={() => setMobileMenuOpen(false)} style={{ color: "#e0521c" }}>
               🤖 Chatify AI Assistant
             </Link>
           </div>
@@ -2216,30 +2542,30 @@ export default function Home() {
           <Link
             to="/register"
             className="cf-btn-signup-nav"
-            style={{ textAlign: "center", justifyContent: "center" }}
+            style={{ textAlign: "center" }}
             onClick={() => setMobileMenuOpen(false)}
           >
-            Get Started Free →
+            Sign Up & Get App
           </Link>
         </div>
       </div>
 
-      {/* ==================== 2. CINEMATIC HERO SECTION ==================== */}
+      {/* ==================== 2. HERO SECTION WITH RICH FLOAT & DEPTH ==================== */}
       <header className="cf-hero">
         <canvas ref={canvasRef} className="cf-hero-particle-canvas" />
 
         <div className="cf-container">
           <div className="cf-hero-grid">
-            {/* Left Column: Content */}
+            {/* Left Hero Column */}
             <div
               className="cf-hero-left"
               style={{
-                transform: `translate3d(${mousePos.x * 0.4}px, ${mousePos.y * 0.4}px, 0)`,
+                transform: `translate3d(${mousePos.x * 0.5}px, ${mousePos.y * 0.5}px, 0)`,
                 transition: "transform 0.15s ease-out",
               }}
             >
               <div
-                className="cf-trial-badge"
+                className="cf-trial-badge cf-anim cf-delay-1"
                 onClick={() => navigate("/register")}
                 onMouseEnter={() => setCursorHovered(true)}
                 onMouseLeave={() => setCursorHovered(false)}
@@ -2248,8 +2574,8 @@ export default function Home() {
                 Next-Gen AI Messaging Platform • <b>14-Day Free Trial</b>
               </div>
 
-              {/* Dramatic Serif Headline */}
-              <h1 className="cf-hero-headline">
+              {/* Dynamic Typewriter Headline */}
+              <h1 className="cf-hero-headline cf-anim cf-delay-2">
                 Connect with Clarity.
                 <span className="cf-headline-accent">Collaborate with AI.</span>
                 <span className="cf-typewriter-text">
@@ -2258,18 +2584,14 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="cf-hero-desc">
-                The high-performance team messaging and neural AI collaboration suite. Engineered with sub-11ms WebSockets, zero-knowledge encryption, and deep intelligence in every thread.
-              </p>
-
-              <div className="cf-hero-cta-group">
+              <div className="cf-hero-cta-group cf-anim cf-delay-3">
                 <Link
                   to="/register"
                   className="cf-btn-primary-hero"
                   onMouseEnter={() => setCursorHovered(true)}
                   onMouseLeave={() => setCursorHovered(false)}
                 >
-                  Get Started Free <span>→</span>
+                  Try for free <span>→</span>
                 </Link>
                 <button
                   className="cf-demo-trigger"
@@ -2278,164 +2600,166 @@ export default function Home() {
                   onMouseLeave={() => setCursorHovered(false)}
                 >
                   <span className="circ">▶</span>
-                  See Live Demo
+                  <u>See demo</u>
                 </button>
               </div>
 
-              {/* Hero Stat Box */}
-              <div
-                className="cf-hero-stats-wrap"
-                onClick={() => triggerReaction("📈")}
-                onMouseEnter={() => setCursorHovered(true)}
-                onMouseLeave={() => setCursorHovered(false)}
-              >
-                <div>
+              {/* Stat Box & Floating Pill */}
+              <div className="cf-hero-stats-wrap cf-anim cf-delay-4">
+                <div
+                  className="cf-stat-box"
+                  onClick={() => triggerReaction("📈")}
+                  onMouseEnter={() => setCursorHovered(true)}
+                  onMouseLeave={() => setCursorHovered(false)}
+                >
                   <p className="cf-stat-big-num">
-                    {statCount >= 1000000 ? "1,000,000 +" : `${statCount.toLocaleString()} +`}
+                    {statCount >= 1000000 ? "1 million +" : `${statCount.toLocaleString()} +`}
                   </p>
                   <p className="cf-stat-description">
-                    Encrypted team messages & neural AI queries processed monthly with &lt; 11ms latency
+                    Team messages & AI queries delivered every month with sub-11ms latency
                   </p>
+                </div>
+                <div className="cf-stat-pill-floating">
+                  <span className="dots">⟳ Live Sync</span>
+                  <div className="cf-audio-bars">
+                    <div className="cf-audio-bar" />
+                    <div className="cf-audio-bar" />
+                    <div className="cf-audio-bar" />
+                    <div className="cf-audio-bar" />
+                    <div className="cf-audio-bar" />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Realistic ChatApp Product Visual */}
+            {/* Right Hero Visual Graphic Rig with Multi-Layer Parallax */}
             <div
-              className="cf-hero-right"
+              className="cf-hero-right cf-anim cf-delay-2"
               style={{
-                transform: `translate3d(${-mousePos.x * 0.5}px, ${-mousePos.y * 0.5}px, 0)`,
+                transform: `translate3d(${-mousePos.x * 0.7}px, ${-mousePos.y * 0.7}px, 0)`,
                 transition: "transform 0.15s ease-out",
               }}
             >
+              <div className="cf-downloads-badge">
+                <div className="num">70 k</div>
+                <div className="lbl">Downloads</div>
+              </div>
+
+              {/* Precision Drafting Lines */}
+              <div className="cf-draft-line" style={{ right: 80, top: 48, width: 1.5, height: 36 }} />
+              <div className="cf-draft-line" style={{ right: 54, top: 84, width: 54, height: 1.5 }} />
+
+              {/* Tip Matrix Box */}
               <div
-                className="cf-product-frame"
+                className="cf-tip-matrix"
                 onMouseEnter={() => setCursorHovered(true)}
                 onMouseLeave={() => setCursorHovered(false)}
               >
-                {/* Floating Overlap Badges */}
-                <div className="cf-float-badge-1">
-                  <span>🔒</span> 256-Bit E2EE Active
+                <div className="cf-tip-grid">
+                  {Array.from({ length: 15 }).map((_, i) => (
+                    <span key={i} />
+                  ))}
                 </div>
-                <div className="cf-float-badge-2">
-                  <span>🤖</span> AI Neural Copilot 4.5
-                </div>
+                <p>Chat + AI Copilot under one roof</p>
+              </div>
 
-                {/* Window Bar */}
-                <div className="cf-frame-header">
-                  <div className="cf-frame-dots">
-                    <span style={{ background: "#ef4444" }} />
-                    <span style={{ background: "#f59e0b" }} />
-                    <span style={{ background: "#10b981" }} />
+              {/* Radiant Orange Action Button */}
+              <div
+                className="cf-orange-orb"
+                onClick={() => navigate("/register")}
+                title="Start Workspace Chat"
+                onMouseEnter={() => setCursorHovered(true)}
+                onMouseLeave={() => setCursorHovered(false)}
+              >
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M6 6L18 18M18 18V9M18 18H9"
+                    stroke="#fff"
+                    strokeWidth="2.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+
+              {/* Central Floating Photo / Live Chat Showcase Card */}
+              <div
+                className="cf-photo-card"
+                onMouseEnter={() => setCursorHovered(true)}
+                onMouseLeave={() => setCursorHovered(false)}
+              >
+                <div className="cf-photo-bg">
+                  <div className="cf-live-badge">
+                    <span /> Live Chat & AI Neural Engine
                   </div>
-                  <div className="cf-frame-title">
-                    <span>💬</span> Chatify Workspace • Engineering & AI
-                  </div>
-                  <div className="cf-frame-latency">
-                    ● 8.4ms
-                  </div>
-                </div>
-
-                {/* Mockup Body */}
-                <div className="cf-frame-body">
-                  {/* Left Sidebar */}
-                  <div className="cf-mock-sidebar">
-                    <div className="cf-mock-user-card">
-                      <div className="cf-mock-avatar">⚡</div>
-                      <div className="cf-mock-user-info">
-                        <span className="cf-mock-user-name">Alex Rivera</span>
-                        <span className="cf-mock-user-status">● Online</span>
-                      </div>
-                    </div>
-
-                    <div className="cf-mock-section-title">Channels</div>
-                    <div className="cf-mock-channels">
-                      <div className="cf-mock-channel-item active">
-                        <span>🤖 #ai-copilot</span>
-                        <span className="cf-mock-badge">Active</span>
-                      </div>
-                      <div className="cf-mock-channel-item">
-                        <span>💬 #general</span>
-                        <span style={{ fontSize: 10, opacity: 0.6 }}>12m</span>
-                      </div>
-                      <div className="cf-mock-channel-item">
-                        <span>💻 #engineering</span>
-                        <span style={{ fontSize: 10, opacity: 0.6 }}>2h</span>
-                      </div>
-                      <div className="cf-mock-channel-item">
-                        <span>🎨 #design-review</span>
-                      </div>
-                    </div>
-
-                    <div className="cf-mock-section-title" style={{ marginTop: 8 }}>Direct Messages</div>
-                    <div className="cf-mock-channels">
-                      <div className="cf-mock-channel-item">
-                        <span>👩‍🎨 Sarah Jenkins</span>
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
-                      </div>
-                      <div className="cf-mock-channel-item">
-                        <span>👨‍💼 David Vance</span>
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Main Mockup Chat Area */}
-                  <div className="cf-mock-chat-main">
-                    <div className="cf-mock-chat-header">
-                      <div className="cf-mock-chat-title">
-                        <span>🤖</span> #ai-copilot-sync
-                      </div>
-                      <div className="cf-mock-e2e-pill">
-                        <span>🛡️</span> Zero-Knowledge
-                      </div>
-                    </div>
-
-                    {/* Mock Messages Feed */}
-                    <div className="cf-mock-messages">
-                      <div className="cf-mock-msg-row">
-                        <div className="cf-mock-avatar" style={{ background: '#24170D', color: '#D8B66A' }}>SJ</div>
-                        <div className="cf-mock-msg-bubble peer">
-                          <div className="cf-mock-msg-author">Sarah Jenkins (Design Lead)</div>
-                          The Chatify 2.0 component system and fluid animations are ready for production. 🚀
-                        </div>
-                      </div>
-
-                      <div className="cf-mock-msg-row">
-                        <div className="cf-mock-avatar" style={{ background: 'rgba(216, 182, 106, 0.2)', color: '#D8B66A' }}>🤖</div>
-                        <div className="cf-mock-msg-bubble ai">
-                          <div className="cf-mock-msg-author ai">⚡ Chatify AI Copilot</div>
-                          Analyzed sprint backlog: 14 PRs merged with 0 regressions. Edge WebSocket latency is steady at 8.4ms.
-                        </div>
-                      </div>
-
-                      <div className="cf-mock-msg-row">
-                        <div className="cf-mock-msg-bubble me">
-                          Incredible speed! Chatify team chat + AI assistant in one view is a game changer. 🎉
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Mock Input */}
-                    <div className="cf-mock-input-box">
-                      <span style={{ opacity: 0.6, fontSize: 13 }}>📎</span>
-                      <div className="cf-mock-placeholder">Message #ai-copilot-sync...</div>
-                      <div className="cf-mock-send-btn">↵</div>
-                    </div>
+                  <div
+                    className="cf-floating-chat-bubble"
+                    onClick={() => triggerReaction("💬")}
+                  >
+                    <b>Sarah J. (Design Lead)</b>
+                    "Chatify 2.0 encrypted sprint thread created. Everyone has instant access."
                   </div>
                 </div>
               </div>
+
+              {/* Interactive Reaction Floating Pill */}
+              <div
+                className="cf-mini-reaction-pill"
+                onClick={() => triggerReaction("🔥")}
+                title="Click to react"
+                onMouseEnter={() => setCursorHovered(true)}
+                onMouseLeave={() => setCursorHovered(false)}
+              >
+                🔥 <span>18 active</span>
+              </div>
+
+              {/* Backdrop Panel */}
+              <div className="cf-backdrop-panel" />
+
+              {/* Sunburst Vector */}
+              <div className="cf-sunburst">
+                <svg viewBox="0 0 96 96">
+                  <g stroke="#14120f" strokeWidth="1.5">
+                    {Array.from({ length: 16 }).map((_, i) => {
+                      const angle = (i * Math.PI * 2) / 16;
+                      const x2 = 48 + Math.cos(angle) * 44;
+                      const y2 = 48 + Math.sin(angle) * 44;
+                      return <line key={i} x1="48" y1="48" x2={x2} y2={y2} />;
+                    })}
+                  </g>
+                  <circle cx="48" cy="48" r="4.5" fill="#14120f" />
+                </svg>
+              </div>
+
+              <div
+                className="cf-down-badge"
+                onClick={() => triggerReaction("⚡")}
+                onMouseEnter={() => setCursorHovered(true)}
+                onMouseLeave={() => setCursorHovered(false)}
+              >
+                ↓
+              </div>
+
+              {/* Connecting Drafting Plumbing Lines */}
+              <div className="cf-draft-line" style={{ left: 146, bottom: 84, width: 14, height: 1.5 }} />
+              <div className="cf-draft-line" style={{ left: 146, bottom: 16, width: 1.5, height: 70 }} />
+              <div className="cf-draft-line" style={{ left: 146, bottom: 16, width: 380, height: 1.5 }} />
+              <div className="cf-draft-line" style={{ right: 80, bottom: 16, width: 1.5, height: 70 }} />
             </div>
           </div>
 
           {/* Automatic Infinite Scrolling Marquee Ticker */}
-          <div className="cf-hero-marquee-wrapper">
+          <div className="cf-hero-marquee-wrapper cf-anim cf-delay-2">
+            {/* Track 1: Scrolling Left */}
             <div className="cf-marquee-track-container">
-              <div className="cf-marquee-track">
+              <div className="cf-marquee-track track-left">
                 {[...marqueeTrack1, ...marqueeTrack1].map((item, idx) => (
-                  <div key={`t1-${idx}`} className="cf-marquee-badge-card">
+                  <div
+                    key={`t1-${idx}`}
+                    className="cf-marquee-badge-card"
+                  >
                     <span className="cf-marquee-badge-icon">{item.icon}</span>
-                    <div>
+                    <div className="cf-marquee-badge-body">
                       <div className="cf-marquee-badge-title-row">
                         <span className="cf-marquee-badge-title">{item.title}</span>
                         <span className="cf-marquee-badge-tag">{item.tag}</span>
@@ -2447,12 +2771,16 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Track 2: Scrolling Right */}
             <div className="cf-marquee-track-container">
               <div className="cf-marquee-track track-right">
                 {[...marqueeTrack2, ...marqueeTrack2].map((item, idx) => (
-                  <div key={`t2-${idx}`} className="cf-marquee-badge-card">
+                  <div
+                    key={`t2-${idx}`}
+                    className="cf-marquee-badge-card"
+                  >
                     <span className="cf-marquee-badge-icon">{item.icon}</span>
-                    <div>
+                    <div className="cf-marquee-badge-body">
                       <div className="cf-marquee-badge-title-row">
                         <span className="cf-marquee-badge-title">{item.title}</span>
                         <span className="cf-marquee-badge-tag">{item.tag}</span>
@@ -2462,6 +2790,42 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Hero Bottom Feature Blocks */}
+          <div className="cf-hero-foot-row cf-anim cf-delay-3">
+            <div
+              className="cf-hero-feat-item"
+              onMouseEnter={() => setCursorHovered(true)}
+              onMouseLeave={() => setCursorHovered(false)}
+            >
+              <h4>
+                <span className="cf-ring-symbol">◇</span>Group Channels & DMs
+              </h4>
+              <p>Bring your whole team into organized threads with topic pins, instant polls, and custom notification rules.</p>
+            </div>
+
+            <div
+              className="cf-hero-feat-item"
+              onMouseEnter={() => setCursorHovered(true)}
+              onMouseLeave={() => setCursorHovered(false)}
+            >
+              <h4>
+                <span className="cf-ring-symbol">🤖</span>Chatify AI Copilot
+              </h4>
+              <p>Instant conversation summarization, action-item extraction, automated reply drafting, and deep search.</p>
+            </div>
+
+            <div
+              className="cf-hero-feat-item"
+              onMouseEnter={() => setCursorHovered(true)}
+              onMouseLeave={() => setCursorHovered(false)}
+            >
+              <h4>
+                <span className="cf-ring-symbol">◎</span>End-to-End Encrypted
+              </h4>
+              <p>Military-grade 256-bit cryptography ensures only your team members hold private decryption keys.</p>
             </div>
           </div>
         </div>
@@ -2470,7 +2834,7 @@ export default function Home() {
       {/* ==================== 3. INTERACTIVE LIVE PLATFORM & AI DEMO ==================== */}
       <section id="platform" className="cf-section">
         <div className="cf-container">
-          <div className="cf-sec-heading-row">
+          <div className="cf-sec-heading-row cf-anim">
             <div>
               <div className="cf-tag-kicker">Live Interactive Workspace</div>
               <h2 className="cf-sec-main-title">Experience Chatify & AI Live</h2>
@@ -2480,13 +2844,13 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="cf-live-workspace">
+          <div className="cf-live-workspace cf-anim cf-delay-2">
             {/* Sidebar */}
             <div className="cf-workspace-sidebar">
               <div className="cf-ws-title">Chatify Channels</div>
               <div className="cf-channel-list">
                 <button
-                  className={`cf-channel-item ${activeTab === "ai-copilot" ? "active" : ""}`}
+                  className={`cf-channel-item ai-channel ${activeTab === "ai-copilot" ? "active" : ""}`}
                   onClick={() => {
                     setActiveTab("ai-copilot");
                     triggerReaction("🤖");
@@ -2532,11 +2896,11 @@ export default function Home() {
               </div>
 
               <div className="cf-ws-title" style={{ marginTop: 12 }}>
-                Active Members & AI (4)
+                Online Teammates & AI (4)
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13, color: "#AFA69A" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13.5, color: "#55524a" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#D8B66A", boxShadow: "0 0 8px #D8B66A" }} />
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#e0521c", boxShadow: "0 0 8px #e0521c" }} />
                   Chatify AI Copilot ⚡
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -2610,7 +2974,7 @@ export default function Home() {
 
               {isTyping && (
                 <div className="cf-typing-bar">
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#D8B66A" }} />
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#e0521c" }} />
                   Chatify AI is generating an encrypted response...
                 </div>
               )}
@@ -2641,10 +3005,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ==================== 4. FEATURE PILLARS ==================== */}
+      {/* ==================== 4. FEATURES PILLARS ==================== */}
       <section id="features" className="cf-section">
         <div className="cf-container">
-          <div className="cf-sec-heading-row">
+          <div className="cf-sec-heading-row cf-anim">
             <div>
               <div className="cf-tag-kicker">Architecture & Toolkit</div>
               <h2 className="cf-sec-main-title">Built for High-Velocity Teams & AI</h2>
@@ -2656,7 +3020,7 @@ export default function Home() {
 
           <div className="cf-pillars-grid">
             <div
-              className="cf-pillar-box"
+              className="cf-pillar-box cf-anim cf-delay-1"
               onMouseEnter={() => setCursorHovered(true)}
               onMouseLeave={() => setCursorHovered(false)}
             >
@@ -2666,7 +3030,7 @@ export default function Home() {
             </div>
 
             <div
-              className="cf-pillar-box"
+              className="cf-pillar-box cf-anim cf-delay-2"
               onMouseEnter={() => setCursorHovered(true)}
               onMouseLeave={() => setCursorHovered(false)}
             >
@@ -2676,7 +3040,7 @@ export default function Home() {
             </div>
 
             <div
-              className="cf-pillar-box"
+              className="cf-pillar-box cf-anim cf-delay-3"
               onMouseEnter={() => setCursorHovered(true)}
               onMouseLeave={() => setCursorHovered(false)}
             >
@@ -2686,7 +3050,7 @@ export default function Home() {
             </div>
 
             <div
-              className="cf-pillar-box"
+              className="cf-pillar-box cf-anim cf-delay-1"
               onMouseEnter={() => setCursorHovered(true)}
               onMouseLeave={() => setCursorHovered(false)}
             >
@@ -2696,7 +3060,7 @@ export default function Home() {
             </div>
 
             <div
-              className="cf-pillar-box"
+              className="cf-pillar-box cf-anim cf-delay-2"
               onMouseEnter={() => setCursorHovered(true)}
               onMouseLeave={() => setCursorHovered(false)}
             >
@@ -2706,7 +3070,7 @@ export default function Home() {
             </div>
 
             <div
-              className="cf-pillar-box"
+              className="cf-pillar-box cf-anim cf-delay-3"
               onMouseEnter={() => setCursorHovered(true)}
               onMouseLeave={() => setCursorHovered(false)}
             >
@@ -2721,7 +3085,7 @@ export default function Home() {
       {/* ==================== 5. HOW IT WORKS & SECURITY ==================== */}
       <section id="how" className="cf-section">
         <div className="cf-container">
-          <div className="cf-sec-heading-row">
+          <div className="cf-sec-heading-row cf-anim">
             <div>
               <div className="cf-tag-kicker">Workflow Blueprint</div>
               <h2 className="cf-sec-main-title">Up and Running in 3 Steps</h2>
@@ -2735,7 +3099,7 @@ export default function Home() {
             {steps.map((step, idx) => (
               <div
                 key={step.num}
-                className={`cf-step-card ${activeStep === idx ? "active" : ""}`}
+                className={`cf-step-card cf-anim cf-delay-${idx + 1} ${activeStep === idx ? "active" : ""}`}
                 onClick={() => {
                   setActiveStep(idx);
                   triggerReaction(step.icon);
@@ -2751,8 +3115,8 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Dark Spec Security Card */}
-          <div id="security" className="cf-dark-spec-card">
+          {/* Dark Spec Card */}
+          <div id="security" className="cf-dark-spec-card cf-anim">
             <div>
               <h3>Military-Grade Security & Zero Tracking</h3>
               <p>
@@ -2761,6 +3125,7 @@ export default function Home() {
               <Link
                 to="/register"
                 className="cf-btn-primary-hero"
+                style={{ background: "#e0521c" }}
                 onMouseEnter={() => setCursorHovered(true)}
                 onMouseLeave={() => setCursorHovered(false)}
               >
@@ -2793,7 +3158,7 @@ export default function Home() {
       {/* ==================== 6. TESTIMONIALS ==================== */}
       <section id="reviews" className="cf-section">
         <div className="cf-container">
-          <div className="cf-sec-heading-row">
+          <div className="cf-sec-heading-row cf-anim">
             <div>
               <div className="cf-tag-kicker">Verified Customer Stories</div>
               <h2 className="cf-sec-main-title">Trusted by Modern Builders</h2>
@@ -2805,7 +3170,7 @@ export default function Home() {
 
           <div className="cf-reviews-grid">
             <div
-              className="cf-review-card"
+              className="cf-review-card cf-anim cf-delay-1"
               onMouseEnter={() => setCursorHovered(true)}
               onMouseLeave={() => setCursorHovered(false)}
             >
@@ -2825,7 +3190,7 @@ export default function Home() {
             </div>
 
             <div
-              className="cf-review-card"
+              className="cf-review-card cf-anim cf-delay-2"
               onMouseEnter={() => setCursorHovered(true)}
               onMouseLeave={() => setCursorHovered(false)}
             >
@@ -2848,7 +3213,7 @@ export default function Home() {
       </section>
 
       {/* ==================== 7. FINAL FULL-WIDTH CTA BANNER ==================== */}
-      <section className="cf-cta-section">
+      <section className="cf-cta-section cf-anim">
         <div className="cf-container">
           <h2 className="cf-cta-title">Ready to Experience Pure Team & AI Flow?</h2>
           <p className="cf-cta-subtext">
@@ -2886,16 +3251,10 @@ export default function Home() {
                 onMouseLeave={() => setCursorHovered(false)}
               >
                 <div className="cf-logo-icon-svg">
-                  <svg width="24" height="24" viewBox="0 0 36 36" fill="none">
-                    <rect width="36" height="36" rx="8" fill="#24170D" />
-                    <path
-                      d="M10 12C10 9.79086 11.7909 8 14 8H22C24.2091 8 26 9.79086 26 12V18C26 20.2091 24.2091 22 22 22H15L11 25.5V22H10C8.89543 22 8 21.1046 8 20V14C8 12.8954 8.89543 12 10 12Z"
-                      fill="#F5EFE4"
-                    />
-                    <path
-                      d="M19 16C19 14.8954 19.8954 14 21 14H25C26.1046 14 27 14.8954 27 16V21C27 22.1046 26.1046 23 25 23H23.5L21 25V23H21C19.8954 23 19 22.1046 19 21V16Z"
-                      fill="#D8B66A"
-                    />
+                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                    <rect width="36" height="36" rx="10" fill="#14120f" />
+                    <path d="M10 12C10 9.79086 11.7909 8 14 8H22C24.2091 8 26 9.79086 26 12V18C26 20.2091 24.2091 22 22 22H15L11 25.5V22H10C8.89543 22 8 21.1046 8 20V14C8 12.8954 8.89543 12 10 12Z" fill="#efece4" />
+                    <path d="M19 16C19 14.8954 19.8954 14 21 14H25C26.1046 14 27 14.8954 27 16V21C27 22.1046 26.1046 23 25 23H23.5L21 25V23H21C19.8954 23 19 22.1046 19 21V16Z" fill="#e0521c" />
                   </svg>
                 </div>
                 Chatify
@@ -2953,10 +3312,10 @@ export default function Home() {
               ✕
             </button>
             <div className="cf-tag-kicker" style={{ marginBottom: 12 }}>Product Tour</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: "#F5EFE4", marginBottom: 14 }}>
+            <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 14 }}>
               Welcome to Chatify & AI Copilot
             </h2>
-            <p style={{ fontSize: 15, color: "#AFA69A", lineHeight: 1.65, marginBottom: 28 }}>
+            <p style={{ fontSize: 15.5, color: "#55524a", lineHeight: 1.65, marginBottom: 28 }}>
               Experience how Chatify combines team messaging with real-time AI intelligence into calm, structured, and encrypted clarity. Test live messaging in the interactive workspace section below or start your free workspace.
             </p>
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
