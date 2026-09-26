@@ -81,8 +81,15 @@
 }
 
 @keyframes aichat-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
 }
 
 .aichat-brand-info {
@@ -123,9 +130,9 @@
 }
 
 .aichat-voice-toggle-btn.active {
-  background: rgba(224, 82, 28, 0.2);
-  border-color: #e0521c;
-  color: #e0521c;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #059669;
+  color: #059669;
 }
 
 .aichat-lang-wrapper {
@@ -162,7 +169,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, #e0521c 0%, #ff6b35 100%);
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -170,7 +177,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(224, 82, 28, 0.25);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
   transition: all 0.2s ease;
   white-space: nowrap;
 }
@@ -392,23 +399,30 @@
 }
 
 .aichat-tool-chip.active {
-  background: rgba(224, 82, 28, 0.2);
-  border-color: #e0521c;
-  color: #e0521c;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #059669;
+  color: #059669;
 }
 
 /* ─── AI TOOL DRAWER ─── */
 .aichat-tool-drawer {
   padding: 12px 16px;
   background: var(--bg-card, #111827);
-  border-bottom: 1px solid rgba(224, 82, 28, 0.3);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.3);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   animation: aichat-slide-down 0.2s ease-out;
 }
 
 @keyframes aichat-slide-down {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .aichat-tool-drawer-header {
@@ -421,7 +435,7 @@
 .aichat-tool-drawer-title {
   font-size: 13.5px;
   font-weight: 700;
-  color: #e0521c;
+  color: #059669;
 }
 
 .aichat-tool-drawer-close {
@@ -469,7 +483,7 @@
 }
 
 .aichat-tool-submit-btn {
-  background: #e0521c;
+  background: #059669;
   color: #ffffff;
   font-weight: 700;
   font-size: 12.5px;
@@ -639,10 +653,10 @@
 }
 
 .aichat-bubble.user-bubble {
-  background: linear-gradient(135deg, #e0521c 0%, #ff6b35 100%);
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
   color: #ffffff;
   border-top-right-radius: 4px;
-  box-shadow: 0 4px 14px rgba(224, 82, 28, 0.25);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
 }
 
 .aichat-user-text {
@@ -742,9 +756,9 @@
 }
 
 .aichat-action-pill-btn.voice-btn.speaking {
-  background: rgba(224, 82, 28, 0.25);
-  border-color: #e0521c;
-  color: #e0521c;
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #059669;
+  color: #059669;
   animation: aichat-pulse 1.5s infinite;
 }
 
@@ -764,16 +778,31 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #e0521c;
+  background: #059669;
   animation: aichat-bounce 1.4s infinite ease-in-out both;
 }
 
-.aichat-thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
-.aichat-thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+.aichat-thinking-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.aichat-thinking-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
 
 @keyframes aichat-bounce {
-  0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
-  40% { transform: scale(1); opacity: 1; }
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+    opacity: 0.4;
+  }
+
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .aichat-thinking-text {
@@ -834,7 +863,7 @@
 }
 
 .ai-md-quote {
-  border-left: 3px solid #e0521c;
+  border-left: 3px solid #059669;
   padding-left: 8px;
   margin: 3px 0;
   color: var(--text-muted, #94a3b8);
@@ -887,7 +916,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #e0521c;
+  color: #059669;
 }
 
 .ai-code-copy-btn {
@@ -907,9 +936,9 @@
 }
 
 .ai-code-copy-btn.copied {
-  background: rgba(224, 82, 28, 0.2);
-  border-color: #e0521c;
-  color: #e0521c;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #059669;
+  color: #059669;
 }
 
 .ai-code-pre {
@@ -993,13 +1022,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(224, 82, 28, 0.15);
-  border: 1px solid rgba(224, 82, 28, 0.3);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 8px;
   padding: 6px 12px;
   font-size: 12.5px;
   font-weight: 600;
-  color: #e0521c;
+  color: #059669;
 }
 
 .aichat-voice-wave {
@@ -1012,24 +1041,42 @@
 .aichat-voice-wave span {
   width: 2.5px;
   height: 100%;
-  background: #e0521c;
+  background: #059669;
   border-radius: 2px;
   animation: aichat-wave 1s infinite ease-in-out;
 }
 
-.aichat-voice-wave span:nth-child(1) { animation-delay: 0.1s; }
-.aichat-voice-wave span:nth-child(2) { animation-delay: 0.3s; }
-.aichat-voice-wave span:nth-child(3) { animation-delay: 0.2s; }
-.aichat-voice-wave span:nth-child(4) { animation-delay: 0.4s; }
+.aichat-voice-wave span:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.aichat-voice-wave span:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.aichat-voice-wave span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.aichat-voice-wave span:nth-child(4) {
+  animation-delay: 0.4s;
+}
 
 @keyframes aichat-wave {
-  0%, 100% { height: 3px; }
-  50% { height: 14px; }
+
+  0%,
+  100% {
+    height: 3px;
+  }
+
+  50% {
+    height: 14px;
+  }
 }
 
 .aichat-stop-voice-btn {
   margin-left: auto;
-  background: #e0521c;
+  background: #059669;
   color: #ffffff;
   border: none;
   border-radius: 5px;
@@ -1055,8 +1102,8 @@
 }
 
 .aichat-input-form:focus-within {
-  border-color: #e0521c;
-  box-shadow: 0 0 0 2px rgba(224, 82, 28, 0.2);
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
 .aichat-input-tool-btn {
@@ -1099,7 +1146,7 @@
 }
 
 .aichat-send-btn {
-  background: linear-gradient(135deg, #e0521c 0%, #ff6b35 100%);
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px;
