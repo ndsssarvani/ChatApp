@@ -770,6 +770,8 @@ export default function Home() {
           align-items: flex-start;
           position: relative;
           min-height: auto;
+          margin-bottom: 32px;
+          padding-bottom: 12px;
         }
 
         /* Hero Left Column */
@@ -1252,17 +1254,17 @@ export default function Home() {
 
         /* Auto-Scrolling Hero Feature Marquee Ticker */
         .cf-hero-marquee-wrapper {
-          margin-top: 8px;
-          margin-bottom: 12px;
+          margin-top: 32px;
+          margin-bottom: 20px;
           position: relative;
           width: 100%;
           overflow: hidden;
-          padding: 4px 0 10px;
+          padding: 6px 0 10px;
           mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 6%, rgba(0,0,0,1) 94%, transparent 100%);
           -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 6%, rgba(0,0,0,1) 94%, transparent 100%);
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 14px;
         }
 
         .cf-marquee-track-container {
