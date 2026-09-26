@@ -340,6 +340,15 @@ export default function Home() {
     { icon: "🔥", title: "Live Typing Waves", desc: "Real-time collaborative draft view", tag: "Live" },
   ];
 
+  const [mascotMood, setMascotMood] = useState(0);
+  const mascotPhrases = [
+    "✨ Swiping the live 70K+ feeds for you!",
+    "🚀 Sub-11ms WebSocket delivery in action!",
+    "🤖 Chatify AI Copilot is listening!",
+    "🔒 256-Bit E2EE quantum encryption active!",
+    "🎉 Team channels synced across all devices!",
+  ];
+
   return (
     <div className="cf-app-root" onMouseMove={handleMouseMove}>
       <style>{`
@@ -758,7 +767,7 @@ export default function Home() {
         /* ---------- HERO SECTION ---------- */
         .cf-hero {
           position: relative;
-          padding: 52px 0 100px;
+          padding: 24px 0 32px;
           border-bottom: 1px solid rgba(20, 18, 15, 0.08);
           overflow: hidden;
         }
@@ -766,10 +775,10 @@ export default function Home() {
         .cf-hero-grid {
           display: grid;
           grid-template-columns: 1.05fr 1fr;
-          gap: 48px;
+          gap: 32px;
           align-items: flex-start;
           position: relative;
-          min-height: 650px;
+          min-height: auto;
         }
 
         /* Hero Left Column */
@@ -784,9 +793,9 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          font-size: 14.5px;
+          font-size: 14px;
           color: #55524a;
-          margin-bottom: 24px;
+          margin-bottom: 18px;
           cursor: pointer;
           transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           width: fit-content;
@@ -829,13 +838,13 @@ export default function Home() {
 
         /* Typewriter Headline */
         .cf-hero-headline {
-          font-size: 76px;
-          line-height: 1.01;
+          font-size: 70px;
+          line-height: 1.02;
           font-weight: 400;
           letter-spacing: -0.04em;
           color: #14120f;
-          margin-bottom: 38px;
-          min-height: 160px;
+          margin-bottom: 20px;
+          min-height: 120px;
         }
         .cf-typewriter-text {
           font-weight: 800;
@@ -856,8 +865,8 @@ export default function Home() {
         .cf-hero-cta-group {
           display: flex;
           align-items: center;
-          gap: 28px;
-          margin-bottom: 48px;
+          gap: 24px;
+          margin-bottom: 32px;
         }
 
         .cf-btn-primary-hero {
@@ -999,7 +1008,7 @@ export default function Home() {
         /* Hero Right Visual Cluster with Parallax & Floating */
         .cf-hero-right {
           position: relative;
-          height: 580px;
+          height: 440px;
           width: 100%;
         }
 
@@ -1012,16 +1021,16 @@ export default function Home() {
           animation: floatBadge1 7s ease-in-out infinite;
         }
         .cf-downloads-badge .num {
-          font-size: 34px;
+          font-size: 30px;
           font-weight: 800;
           color: #14120f;
           letter-spacing: -0.03em;
           line-height: 1;
         }
         .cf-downloads-badge .lbl {
-          font-size: 13.5px;
+          font-size: 13px;
           color: #55524a;
-          margin-top: 4px;
+          margin-top: 3px;
           font-weight: 700;
         }
 
@@ -1029,12 +1038,12 @@ export default function Home() {
         .cf-tip-matrix {
           position: absolute;
           left: 10px;
-          top: 36px;
-          width: 154px;
-          height: 154px;
+          top: 20px;
+          width: 144px;
+          height: 144px;
           background: #a49a89;
           border-radius: 8px;
-          padding: 22px;
+          padding: 18px;
           box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
           z-index: 2;
           transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1048,12 +1057,12 @@ export default function Home() {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
           gap: 5px;
-          width: 90px;
-          margin-bottom: 26px;
+          width: 80px;
+          margin-bottom: 20px;
         }
         .cf-tip-grid span {
-          width: 7px;
-          height: 7px;
+          width: 6.5px;
+          height: 6.5px;
           background: #14120f;
           opacity: 0.6;
           border-radius: 1.5px;
@@ -1065,7 +1074,7 @@ export default function Home() {
           transform: scale(1.2);
         }
         .cf-tip-matrix p {
-          font-size: 13.5px;
+          font-size: 13px;
           line-height: 1.35;
           color: #14120f;
           font-weight: 800;
@@ -1075,9 +1084,9 @@ export default function Home() {
         .cf-orange-orb {
           position: absolute;
           left: 120px;
-          top: 0;
-          width: 88px;
-          height: 88px;
+          top: -8px;
+          width: 80px;
+          height: 80px;
           border-radius: 50%;
           background: #e0521c;
           display: flex;
@@ -1098,9 +1107,9 @@ export default function Home() {
         .cf-photo-card {
           position: absolute;
           left: 160px;
-          top: 48px;
+          top: 24px;
           width: 290px;
-          height: 350px;
+          height: 310px;
           border-radius: 8px;
           background: #dcd6c7;
           border: 1px solid rgba(20, 18, 15, 0.12);
@@ -1112,7 +1121,7 @@ export default function Home() {
         }
         .cf-photo-card:hover {
           box-shadow: 0 42px 90px -15px rgba(0, 0, 0, 0.4);
-          transform: translateY(-10px) scale(1.03);
+          transform: translateY(-8px) scale(1.02);
         }
         .cf-photo-bg {
           width: 100%;
@@ -1121,19 +1130,19 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 24px;
+          padding: 20px;
         }
         .cf-live-badge {
           align-self: flex-start;
           background: rgba(20, 18, 15, 0.92);
           color: #ffffff;
-          font-size: 11.5px;
+          font-size: 11px;
           font-weight: 700;
-          padding: 6px 14px;
+          padding: 5px 12px;
           border-radius: 999px;
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 7px;
           box-shadow: 0 4px 14px rgba(0,0,0,0.22);
         }
         .cf-live-badge span {
@@ -1147,11 +1156,11 @@ export default function Home() {
         }
         .cf-floating-chat-bubble {
           background: #efece4;
-          padding: 16px 18px;
+          padding: 14px 16px;
           border-radius: 10px;
           box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
-          font-size: 13px;
-          line-height: 1.45;
+          font-size: 12.5px;
+          line-height: 1.4;
           color: #14120f;
           border: 1px solid rgba(20, 18, 15, 0.08);
           transition: transform 0.25s ease;
@@ -1162,8 +1171,8 @@ export default function Home() {
         }
         .cf-floating-chat-bubble b {
           display: block;
-          margin-bottom: 4px;
-          font-size: 12px;
+          margin-bottom: 3px;
+          font-size: 11.5px;
           color: #e0521c;
           font-weight: 800;
         }
@@ -1172,12 +1181,12 @@ export default function Home() {
         .cf-mini-reaction-pill {
           position: absolute;
           right: -12px;
-          top: 140px;
+          top: 120px;
           background: #ffffff;
           border: 1px solid rgba(20,18,15,0.12);
           padding: 6px 14px;
           border-radius: 999px;
-          font-size: 13.5px;
+          font-size: 13px;
           font-weight: 800;
           box-shadow: 0 8px 24px rgba(0,0,0,0.14);
           display: flex;
@@ -1198,9 +1207,9 @@ export default function Home() {
         .cf-backdrop-panel {
           position: absolute;
           right: 36px;
-          top: 156px;
+          top: 110px;
           width: 96px;
-          height: 230px;
+          height: 190px;
           background: #d6cfbe;
           border-radius: 8px;
           z-index: 1;
@@ -1210,9 +1219,9 @@ export default function Home() {
         .cf-sunburst {
           position: absolute;
           left: 10px;
-          bottom: 120px;
-          width: 96px;
-          height: 96px;
+          bottom: 40px;
+          width: 88px;
+          height: 88px;
           z-index: 2;
           animation: burstSpin 28s linear infinite;
         }
@@ -1220,16 +1229,16 @@ export default function Home() {
         .cf-down-badge {
           position: absolute;
           left: 130px;
-          bottom: 148px;
-          width: 34px;
-          height: 34px;
+          bottom: 66px;
+          width: 32px;
+          height: 32px;
           border-radius: 50%;
           border: 1.5px solid #14120f;
           background: #efece4;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 800;
           z-index: 6;
           box-shadow: 0 6px 14px rgba(0,0,0,0.08);
@@ -1250,32 +1259,140 @@ export default function Home() {
           pointer-events: none;
         }
 
-        /* Auto-Scrolling Hero Feature Marquee Ticker */
+        /* Auto-Scrolling Hero Feature Marquee Ticker with Cute Boy Mascot */
         .cf-hero-marquee-wrapper {
-          margin-top: 52px;
-          margin-bottom: 8px;
+          margin-top: 8px;
+          margin-bottom: 12px;
           position: relative;
           width: 100%;
           overflow: hidden;
-          padding: 8px 0;
+          padding: 4px 0 10px;
           mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 6%, rgba(0,0,0,1) 94%, transparent 100%);
           -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 6%, rgba(0,0,0,1) 94%, transparent 100%);
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 12px;
         }
 
-        .cf-marquee-sublabel {
+        /* Mascot Pill Header */
+        .cf-mascot-pill-container {
+          display: inline-flex;
+          align-items: center;
+          gap: 14px;
+          padding: 6px 18px 6px 10px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.88);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1.5px solid rgba(20, 18, 15, 0.1);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: mascotPillFloat 3.8s ease-in-out infinite;
+          align-self: center;
+          user-select: none;
+        }
+        .cf-mascot-pill-container:hover {
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 12px 28px rgba(224, 82, 28, 0.16);
+          border-color: rgba(224, 82, 28, 0.45);
+          background: #ffffff;
+        }
+
+        @keyframes mascotPillFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+
+        .cf-boy-avatar-box {
+          position: relative;
+          width: 52px;
+          height: 48px;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.08em;
+          flex-shrink: 0;
+        }
+        .cf-boy-svg {
+          width: 100%;
+          height: 100%;
+          overflow: visible;
+        }
+
+        /* Cute Boy Character Animations */
+        @keyframes boyEyeBlink {
+          0%, 90%, 100% { transform: scaleY(1); }
+          95% { transform: scaleY(0.1); }
+        }
+        .cf-boy-eye {
+          transform-origin: center;
+          animation: boyEyeBlink 3.8s infinite;
+        }
+
+        @keyframes boyHeadBob {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-1.5px) rotate(2deg); }
+        }
+        .cf-boy-head {
+          transform-origin: 80px 80px;
+          animation: boyHeadBob 2.5s ease-in-out infinite;
+        }
+
+        @keyframes boyHandSwipe {
+          0% { transform: translate(0, 0) rotate(0deg); }
+          25% { transform: translate(-10px, -2px) rotate(-6deg); }
+          50% { transform: translate(-20px, 1px) rotate(-12deg); }
+          75% { transform: translate(-6px, 2px) rotate(-4deg); }
+          100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .cf-boy-arm-swipe {
+          transform-origin: 108px 105px;
+          animation: boyHandSwipe 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+        }
+
+        @keyframes boySwipeSparkle {
+          0%, 100% { opacity: 0.3; transform: translateX(0) scale(0.9); }
+          50% { opacity: 1; transform: translateX(-6px) scale(1.2); }
+        }
+        .cf-boy-swipe-sparks {
+          animation: boySwipeSparkle 1.6s ease-in-out infinite;
+        }
+
+        .cf-mascot-content {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .cf-mascot-header-line {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .cf-mascot-name {
+          font-size: 12px;
+          font-weight: 800;
+          color: #14120f;
+          letter-spacing: -0.01em;
+        }
+
+        .cf-mascot-action-tag {
+          font-size: 9.5px;
+          font-weight: 800;
           text-transform: uppercase;
-          color: rgba(20, 18, 15, 0.6);
-          margin-bottom: 2px;
+          letter-spacing: 0.5px;
+          padding: 1px 7px;
+          border-radius: 999px;
+          background: rgba(224, 82, 28, 0.12);
+          color: #e0521c;
+          border: 1px solid rgba(224, 82, 28, 0.2);
+        }
+
+        .cf-mascot-quote {
+          font-size: 11.5px;
+          font-weight: 600;
+          color: rgba(20, 18, 15, 0.7);
         }
 
         .cf-marquee-live-dot {
@@ -1300,17 +1417,17 @@ export default function Home() {
 
         .cf-marquee-track {
           display: flex;
-          gap: 14px;
+          gap: 12px;
           width: max-content;
           will-change: transform;
         }
 
         .cf-marquee-track.track-left {
-          animation: scrollMarqueeLeft 40s linear infinite;
+          animation: scrollMarqueeLeft 38s linear infinite;
         }
 
         .cf-marquee-track.track-right {
-          animation: scrollMarqueeRight 44s linear infinite;
+          animation: scrollMarqueeRight 42s linear infinite;
         }
 
         .cf-hero-marquee-wrapper:hover .cf-marquee-track {
@@ -1330,14 +1447,14 @@ export default function Home() {
         .cf-marquee-badge-card {
           display: inline-flex;
           align-items: center;
-          gap: 12px;
-          padding: 10px 18px;
+          gap: 10px;
+          padding: 8px 16px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.78);
+          background: rgba(255, 255, 255, 0.8);
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
           border: 1px solid rgba(20, 18, 15, 0.09);
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.035);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.035);
           white-space: nowrap;
           cursor: pointer;
           transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1347,7 +1464,7 @@ export default function Home() {
         .cf-marquee-badge-card:hover {
           background: #ffffff;
           transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
           border-color: rgba(224, 82, 28, 0.45);
         }
 
@@ -1355,11 +1472,11 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 32px;
-          height: 32px;
+          width: 30px;
+          height: 30px;
           border-radius: 50%;
           background: rgba(20, 18, 15, 0.05);
-          font-size: 15px;
+          font-size: 14px;
           transition: transform 0.25s ease;
         }
 
@@ -1377,19 +1494,19 @@ export default function Home() {
         .cf-marquee-badge-title-row {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 7px;
         }
 
         .cf-marquee-badge-title {
-          font-size: 13.5px;
+          font-size: 13px;
           font-weight: 700;
           color: #14120f;
         }
 
         .cf-marquee-badge-tag {
-          font-size: 9.5px;
+          font-size: 9px;
           font-weight: 800;
-          padding: 2px 7px;
+          padding: 1px 6px;
           border-radius: 999px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -1399,19 +1516,19 @@ export default function Home() {
         }
 
         .cf-marquee-badge-desc {
-          font-size: 12px;
+          font-size: 11.5px;
           font-weight: 500;
           color: rgba(20, 18, 15, 0.6);
         }
 
         /* Hero Foot Features Row */
         .cf-hero-foot-row {
-          margin-top: 64px;
-          padding-top: 42px;
-          border-top: 1px solid rgba(20, 18, 15, 0.12);
+          margin-top: 18px;
+          padding-top: 24px;
+          border-top: 1px solid rgba(20, 18, 15, 0.1);
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
-          gap: 40px;
+          gap: 28px;
         }
         .cf-hero-feat-item {
           padding: 24px;
@@ -2713,18 +2830,110 @@ export default function Home() {
               </div>
 
               {/* Connecting Drafting Plumbing Lines */}
-              <div className="cf-draft-line" style={{ left: 146, bottom: 164, width: 14, height: 1.5 }} />
-              <div className="cf-draft-line" style={{ left: 146, bottom: 64, width: 1.5, height: 100 }} />
-              <div className="cf-draft-line" style={{ left: 146, bottom: 64, width: 380, height: 1.5 }} />
-              <div className="cf-draft-line" style={{ right: 80, bottom: 64, width: 1.5, height: 100 }} />
+              <div className="cf-draft-line" style={{ left: 146, bottom: 84, width: 14, height: 1.5 }} />
+              <div className="cf-draft-line" style={{ left: 146, bottom: 16, width: 1.5, height: 70 }} />
+              <div className="cf-draft-line" style={{ left: 146, bottom: 16, width: 380, height: 1.5 }} />
+              <div className="cf-draft-line" style={{ right: 80, bottom: 16, width: 1.5, height: 70 }} />
             </div>
           </div>
 
-          {/* Automatic Infinite Scrolling Marquee Ticker */}
+          {/* Automatic Infinite Scrolling Marquee Ticker with Animated Cute Boy Mascot */}
           <div className="cf-hero-marquee-wrapper cf-anim cf-delay-2">
-            <div className="cf-marquee-sublabel">
-              <span className="cf-marquee-live-dot" />
-              <span>Real-Time Engine Capabilities & Workspaces</span>
+            {/* Interactive Cute Boy Scrolling Mascot Bar */}
+            <div
+              className="cf-mascot-pill-container"
+              onClick={() => {
+                setMascotMood((prev) => (prev + 1) % mascotPhrases.length);
+                triggerReaction("✨");
+              }}
+              title="Click me to interact!"
+              onMouseEnter={() => setCursorHovered(true)}
+              onMouseLeave={() => setCursorHovered(false)}
+            >
+              <div className="cf-boy-avatar-box">
+                <svg viewBox="0 0 170 140" className="cf-boy-svg">
+                  <defs>
+                    <linearGradient id="boySkinGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ffe6d5" />
+                      <stop offset="100%" stopColor="#ffd0b3" />
+                    </linearGradient>
+                    <linearGradient id="boyHoodieGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#2c2724" />
+                      <stop offset="100%" stopColor="#14120f" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Body / Hoodie */}
+                  <path d="M 42 106 Q 80 88 118 106 L 126 140 L 34 140 Z" fill="url(#boyHoodieGrad)" />
+                  <path d="M 64 102 Q 80 114 96 102" stroke="#e0521c" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                  <line x1="73" y1="108" x2="73" y2="122" stroke="#e0521c" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="87" y1="108" x2="87" y2="122" stroke="#e0521c" strokeWidth="2" strokeLinecap="round" />
+
+                  {/* Neck */}
+                  <rect x="72" y="86" width="16" height="15" rx="3" fill="url(#boySkinGrad)" />
+
+                  {/* Head Group with subtle Bobbing */}
+                  <g className="cf-boy-head">
+                    <ellipse cx="80" cy="62" rx="30" ry="31" fill="url(#boySkinGrad)" />
+                    {/* Blush */}
+                    <ellipse cx="62" cy="72" rx="5.5" ry="3.5" fill="#ff7f7f" opacity="0.65" />
+                    <ellipse cx="98" cy="72" rx="5.5" ry="3.5" fill="#ff7f7f" opacity="0.65" />
+
+                    {/* Blinking Eyes */}
+                    <g className="cf-boy-eyes">
+                      <ellipse cx="66" cy="62" rx="4.5" ry="6" fill="#14120f" className="cf-boy-eye" />
+                      <circle cx="68" cy="59" r="1.8" fill="#ffffff" />
+                      <circle cx="64.5" cy="64" r="0.9" fill="#ffffff" />
+
+                      <ellipse cx="94" cy="62" rx="4.5" ry="6" fill="#14120f" className="cf-boy-eye" />
+                      <circle cx="96" cy="59" r="1.8" fill="#ffffff" />
+                      <circle cx="92.5" cy="64" r="0.9" fill="#ffffff" />
+                    </g>
+
+                    {/* Eyebrows */}
+                    <path d="M 60 52 Q 67 47 73 52" stroke="#14120f" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                    <path d="M 87 52 Q 93 47 100 52" stroke="#14120f" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+
+                    {/* Smile */}
+                    <path d="M 74 74 Q 80 82 86 74" stroke="#14120f" strokeWidth="2.2" fill="#e0521c" strokeLinecap="round" />
+
+                    {/* Stylized Modern Anime/Boy Hair */}
+                    <path d="M 48 58 Q 50 28 80 26 Q 110 28 112 58 Q 106 40 94 36 Q 80 44 68 36 Q 58 42 48 58 Z" fill="#261d19" />
+                    <path d="M 62 36 Q 74 46 80 39 Q 86 46 98 36" fill="#261d19" />
+
+                    {/* Neon Orange Headphones */}
+                    <path d="M 47 62 C 45 24 115 24 113 62" stroke="#14120f" strokeWidth="5.5" fill="none" strokeLinecap="round" />
+                    <rect x="43" y="50" width="9" height="22" rx="4.5" fill="#e0521c" />
+                    <rect x="108" y="50" width="9" height="22" rx="4.5" fill="#e0521c" />
+                    <circle cx="47.5" cy="61" r="2" fill="#ffffff" opacity="0.8" />
+                    <circle cx="112.5" cy="61" r="2" fill="#ffffff" opacity="0.8" />
+                  </g>
+
+                  {/* Animated Hand Swiping / Scrolling */}
+                  <g className="cf-boy-arm-swipe">
+                    <path d="M 108 108 Q 128 104 140 94 Q 136 88 120 95 Z" fill="url(#boyHoodieGrad)" />
+                    <path d="M 134 94 Q 148 87 154 84" stroke="url(#boySkinGrad)" strokeWidth="8" strokeLinecap="round" />
+                    <circle cx="153" cy="84" r="5" fill="#ffd0b3" />
+                    <path d="M 153 84 Q 163 80 166 79" stroke="#ffd0b3" strokeWidth="3.2" strokeLinecap="round" />
+
+                    {/* Swipe Sparks */}
+                    <g className="cf-boy-swipe-sparks">
+                      <path d="M 164 71 Q 172 79 164 87" stroke="#e0521c" strokeWidth="2" strokeDasharray="3,2" fill="none" />
+                      <circle cx="168" cy="68" r="1.5" fill="#e0521c" />
+                      <circle cx="172" cy="86" r="1.2" fill="#ffaa00" />
+                    </g>
+                  </g>
+                </svg>
+              </div>
+
+              <div className="cf-mascot-content">
+                <div className="cf-mascot-header-line">
+                  <span className="cf-marquee-live-dot" />
+                  <span className="cf-mascot-name">Chatify Buddy</span>
+                  <span className="cf-mascot-action-tag">Live Swiping</span>
+                </div>
+                <div className="cf-mascot-quote">{mascotPhrases[mascotMood]}</div>
+              </div>
             </div>
 
             {/* Track 1: Scrolling Left */}
