@@ -453,9 +453,9 @@ export default function Home() {
 
         .cf-container {
           width: 100%;
-          max-width: 1260px;
+          max-width: 1440px;
           margin: 0 auto;
-          padding: 0 48px;
+          padding: 0 clamp(20px, 3.5vw, 56px);
           position: relative;
           z-index: 2;
         }
@@ -578,7 +578,7 @@ export default function Home() {
           position: sticky;
           top: 0;
           width: 100%;
-          height: 102px;
+          height: 94px;
           background: rgba(239, 236, 228, 0.94);
           backdrop-filter: blur(18px);
           -webkit-backdrop-filter: blur(18px);
@@ -758,16 +758,16 @@ export default function Home() {
         /* ---------- HERO SECTION ---------- */
         .cf-hero {
           position: relative;
-          padding: 24px 0 32px;
+          padding: 28px 0 40px;
           border-bottom: 1px solid rgba(20, 18, 15, 0.08);
           overflow: hidden;
         }
 
         .cf-hero-grid {
           display: grid;
-          grid-template-columns: 1.05fr 1fr;
-          gap: 32px;
-          align-items: flex-start;
+          grid-template-columns: 1.14fr 1fr;
+          gap: clamp(24px, 3.5vw, 56px);
+          align-items: center;
           position: relative;
           min-height: auto;
           margin-bottom: 32px;
@@ -826,13 +826,13 @@ export default function Home() {
         /* Typewriter Headline with Elegant Serif Display */
         .cf-hero-headline {
           font-family: 'Playfair Display', Georgia, serif;
-          font-size: clamp(44px, 5.2vw, 72px);
-          line-height: 1.06;
+          font-size: clamp(38px, 4.6vw, 68px);
+          line-height: 1.08;
           font-weight: 700;
           letter-spacing: -0.02em;
           color: #14120f;
           margin-bottom: 22px;
-          min-height: 120px;
+          min-height: 110px;
         }
         .cf-headline-accent {
           display: block;
@@ -932,7 +932,8 @@ export default function Home() {
         /* Hero Stat Box & Pulsing Waveform */
         .cf-hero-stats-wrap {
           position: relative;
-          width: 300px;
+          width: 100%;
+          max-width: 320px;
           margin-top: 14px;
         }
         .cf-stat-box {
@@ -1006,11 +1007,13 @@ export default function Home() {
           position: relative;
           height: 480px;
           width: 100%;
+          max-width: 540px;
+          margin-left: auto;
         }
 
         .cf-downloads-badge {
           position: absolute;
-          right: 28px;
+          right: 16px;
           top: 0;
           text-align: right;
           z-index: 3;
@@ -1079,10 +1082,10 @@ export default function Home() {
         /* Radiant Orange Action Button */
         .cf-orange-orb {
           position: absolute;
-          left: 100px;
+          left: 104px;
           top: -14px;
-          width: 90px;
-          height: 90px;
+          width: 88px;
+          height: 88px;
           border-radius: 50%;
           background: #e0521c;
           display: flex;
@@ -1102,9 +1105,10 @@ export default function Home() {
         /* Central Floating Photo / Live Chat Showcase Card */
         .cf-photo-card {
           position: absolute;
-          left: 140px;
+          left: 135px;
           top: 20px;
-          width: 340px;
+          width: 330px;
+          max-width: calc(100% - 150px);
           height: 360px;
           border-radius: 10px;
           background: #dcd6c7;
@@ -1176,7 +1180,7 @@ export default function Home() {
         /* Floating reaction mini-pill */
         .cf-mini-reaction-pill {
           position: absolute;
-          right: -16px;
+          right: 10px;
           top: 135px;
           background: #ffffff;
           border: 1px solid rgba(20,18,15,0.12);
@@ -1202,7 +1206,7 @@ export default function Home() {
         /* Right Panel Behind */
         .cf-backdrop-panel {
           position: absolute;
-          right: 28px;
+          right: 16px;
           top: 100px;
           width: 110px;
           height: 220px;
@@ -1215,7 +1219,7 @@ export default function Home() {
         .cf-sunburst {
           position: absolute;
           left: 0px;
-          bottom: 30px;
+          bottom: 24px;
           width: 96px;
           height: 96px;
           z-index: 2;
@@ -1224,8 +1228,8 @@ export default function Home() {
 
         .cf-down-badge {
           position: absolute;
-          left: 120px;
-          bottom: 56px;
+          left: 116px;
+          bottom: 50px;
           width: 34px;
           height: 34px;
           border-radius: 50%;
@@ -2160,15 +2164,14 @@ export default function Home() {
 
         /* Responsive Breakpoints */
         @media (max-width: 1080px) {
-          .cf-hero-headline {
-            font-size: 60px;
-          }
           .cf-hero-grid {
             grid-template-columns: 1fr;
-            gap: 60px;
+            gap: 48px;
           }
           .cf-hero-right {
-            height: 480px;
+            height: 440px;
+            max-width: 500px;
+            margin: 0 auto;
           }
           .cf-live-workspace {
             grid-template-columns: 1fr;
@@ -2178,9 +2181,12 @@ export default function Home() {
           }
           .cf-dark-spec-card {
             grid-template-columns: 1fr;
+            gap: 36px;
+            padding: 40px;
           }
           .cf-footer-cols {
             grid-template-columns: 1fr 1fr;
+            gap: 40px;
           }
         }
 
@@ -2189,7 +2195,7 @@ export default function Home() {
             padding: 0 20px;
           }
           .cf-navbar {
-            height: 74px;
+            height: 72px;
           }
           .cf-nav-menu {
             display: none;
@@ -2201,11 +2207,16 @@ export default function Home() {
             display: flex;
           }
           .cf-hero {
-            padding: 36px 0 60px;
+            padding: 24px 0 44px;
+          }
+          .cf-hero-grid {
+            gap: 28px;
+            margin-bottom: 24px;
           }
           .cf-hero-headline {
-            font-size: 40px;
+            font-size: clamp(30px, 8vw, 42px);
             letter-spacing: -0.02em;
+            min-height: auto;
           }
           .cf-hero-subhead {
             font-size: 16px;
@@ -2214,8 +2225,8 @@ export default function Home() {
           .cf-hero-foot-row {
             grid-template-columns: 1fr;
             gap: 16px;
-            margin-top: 28px;
-            padding-top: 24px;
+            margin-top: 24px;
+            padding-top: 20px;
           }
           .cf-hero-marquee-wrapper {
             margin-top: 24px;
@@ -2244,7 +2255,11 @@ export default function Home() {
           .cf-stat-card-wrap {
             width: 100%;
             max-width: 100%;
-            margin-top: 18px;
+            margin-top: 14px;
+          }
+          .cf-hero-stats-wrap {
+            max-width: 100%;
+            margin-top: 14px;
           }
           .cf-stat-pill-floating {
             position: relative;
@@ -2252,16 +2267,13 @@ export default function Home() {
             margin-top: 10px;
             width: 100%;
           }
-          .cf-pillars-grid, .cf-steps-row, .cf-reviews-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-          }
-          .cf-footer-cols {
-            grid-template-columns: 1fr;
-            gap: 36px;
-          }
           .cf-hero-right {
-            display: none;
+            display: block;
+            height: 380px;
+            max-width: 360px;
+            margin: 10px auto 0 auto;
+            transform: scale(0.95);
+            transform-origin: top center;
           }
           .cf-hero-cta-group {
             flex-direction: column;
@@ -2269,16 +2281,16 @@ export default function Home() {
             gap: 12px;
             width: 100%;
           }
-          .cf-btn-primary-hero, .cf-btn-secondary-hero {
+          .cf-btn-primary-hero, .cf-demo-trigger {
             text-align: center;
             justify-content: center;
             width: 100%;
           }
           .cf-section {
-            padding: 68px 0;
+            padding: 64px 0;
           }
           .cf-sec-main-title {
-            font-size: 32px;
+            font-size: 30px;
           }
           .cf-live-workspace {
             grid-template-columns: 1fr;
@@ -2300,12 +2312,26 @@ export default function Home() {
             padding: 8px 14px;
             font-size: 13.5px;
           }
+          .cf-pillars-grid, .cf-steps-row, .cf-reviews-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          .cf-dark-spec-card {
+            padding: 28px 20px;
+          }
+          .cf-dark-spec-card h3 {
+            font-size: 26px;
+          }
+          .cf-dark-metrics-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+          }
           .cf-cta-title {
-            font-size: 34px;
+            font-size: 30px;
           }
           .cf-cta-subtext {
-            font-size: 15.5px;
-            margin-bottom: 32px;
+            font-size: 15px;
+            margin-bottom: 28px;
           }
           .cf-cta-actions {
             flex-direction: column;
@@ -2314,7 +2340,12 @@ export default function Home() {
           .cf-btn-cta-white, .cf-btn-cta-outline {
             width: 100%;
             text-align: center;
-            padding: 16px 24px;
+            padding: 15px 24px;
+          }
+          .cf-footer-cols {
+            grid-template-columns: 1fr;
+            gap: 32px;
+            margin-bottom: 40px;
           }
           .cf-footer-base-row {
             flex-direction: column;
@@ -2328,10 +2359,15 @@ export default function Home() {
             padding: 0 16px;
           }
           .cf-hero-headline {
-            font-size: 32px;
+            font-size: 28px;
           }
           .cf-sec-main-title {
-            font-size: 26px;
+            font-size: 24px;
+          }
+          .cf-hero-right {
+            height: 350px;
+            max-width: 320px;
+            transform: scale(0.85);
           }
           .cf-marquee-badge-card {
             padding: 6px 12px;
@@ -2353,7 +2389,7 @@ export default function Home() {
             gap: 12px;
           }
           .cf-modal-window {
-            padding: 28px 20px;
+            padding: 24px 16px;
           }
         }
       `}</style>
