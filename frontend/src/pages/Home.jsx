@@ -318,6 +318,28 @@ export default function Home() {
     },
   ];
 
+  const marqueeTrack1 = [
+    { icon: "⚡", title: "Sub-11ms Latency", desc: "Edge WebSocket message delivery", tag: "Ultra Fast" },
+    { icon: "🤖", title: "Chatify Copilot 4.5", desc: "Instant AI thread summaries & action items", tag: "AI Powered" },
+    { icon: "🔒", title: "Zero-Knowledge E2EE", desc: "256-bit military encryption keys", tag: "Protected" },
+    { icon: "🎙️", title: "HD Spatial Audio", desc: "Noise-cancelled voice & video rooms", tag: "Pro Audio" },
+    { icon: "🌐", title: "50+ Real-Time Languages", desc: "Neural auto-translation across chats", tag: "Global" },
+    { icon: "📁", title: "4K Media Engine", desc: "Drag & drop streaming zero compression", tag: "Instant" },
+    { icon: "📌", title: "Smart Pins & Threads", desc: "Zero clutter, organized topic channels", tag: "Productive" },
+    { icon: "✨", title: "Ephemeral Channels", desc: "Confidential self-destructing chats", tag: "Privacy" },
+  ];
+
+  const marqueeTrack2 = [
+    { icon: "⭐", title: "4.9 / 5 Rating", desc: "Loved by 70,000+ modern teams", tag: "Top Rated" },
+    { icon: "🚀", title: "1-Click Magic Link", desc: "Instant zero-friction teammate onboarding", tag: "Seamless" },
+    { icon: "📊", title: "Sentiment Radar", desc: "Live team pulse & engagement telemetry", tag: "Analytics" },
+    { icon: "🛡️", title: "SOC-2 & GDPR Certified", desc: "Enterprise-grade data security", tag: "Compliant" },
+    { icon: "🔔", title: "AI Focus Shield", desc: "Smart urgency detection & noise filter", tag: "Smart Alerts" },
+    { icon: "🎨", title: "Adaptive UI Themes", desc: "Fluid light to obsidian dark mode", tag: "Customizable" },
+    { icon: "👥", title: "Unlimited Scalability", desc: "From 5 to 50,000 concurrent members", tag: "Enterprise" },
+    { icon: "🔥", title: "Live Typing Waves", desc: "Real-time collaborative draft view", tag: "Live" },
+  ];
+
   return (
     <div className="cf-app-root" onMouseMove={handleMouseMove}>
       <style>{`
@@ -1226,6 +1248,160 @@ export default function Home() {
           background: #14120f;
           opacity: 0.8;
           pointer-events: none;
+        }
+
+        /* Auto-Scrolling Hero Feature Marquee Ticker */
+        .cf-hero-marquee-wrapper {
+          margin-top: 52px;
+          margin-bottom: 8px;
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+          padding: 8px 0;
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 6%, rgba(0,0,0,1) 94%, transparent 100%);
+          -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 6%, rgba(0,0,0,1) 94%, transparent 100%);
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .cf-marquee-sublabel {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: rgba(20, 18, 15, 0.6);
+          margin-bottom: 2px;
+        }
+
+        .cf-marquee-live-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 10px #10b981;
+          animation: pulseMarqueeDot 1.8s infinite;
+        }
+
+        @keyframes pulseMarqueeDot {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.4); opacity: 0.6; }
+        }
+
+        .cf-marquee-track-container {
+          overflow: hidden;
+          width: 100%;
+          display: flex;
+        }
+
+        .cf-marquee-track {
+          display: flex;
+          gap: 14px;
+          width: max-content;
+          will-change: transform;
+        }
+
+        .cf-marquee-track.track-left {
+          animation: scrollMarqueeLeft 40s linear infinite;
+        }
+
+        .cf-marquee-track.track-right {
+          animation: scrollMarqueeRight 44s linear infinite;
+        }
+
+        .cf-hero-marquee-wrapper:hover .cf-marquee-track {
+          animation-play-state: paused;
+        }
+
+        @keyframes scrollMarqueeLeft {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        @keyframes scrollMarqueeRight {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+
+        .cf-marquee-badge-card {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 18px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.78);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          border: 1px solid rgba(20, 18, 15, 0.09);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.035);
+          white-space: nowrap;
+          cursor: pointer;
+          transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+          user-select: none;
+        }
+
+        .cf-marquee-badge-card:hover {
+          background: #ffffff;
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+          border-color: rgba(224, 82, 28, 0.45);
+        }
+
+        .cf-marquee-badge-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: rgba(20, 18, 15, 0.05);
+          font-size: 15px;
+          transition: transform 0.25s ease;
+        }
+
+        .cf-marquee-badge-card:hover .cf-marquee-badge-icon {
+          transform: rotate(12deg) scale(1.15);
+          background: rgba(224, 82, 28, 0.12);
+        }
+
+        .cf-marquee-badge-body {
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
+        }
+
+        .cf-marquee-badge-title-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .cf-marquee-badge-title {
+          font-size: 13.5px;
+          font-weight: 700;
+          color: #14120f;
+        }
+
+        .cf-marquee-badge-tag {
+          font-size: 9.5px;
+          font-weight: 800;
+          padding: 2px 7px;
+          border-radius: 999px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          background: rgba(224, 82, 28, 0.1);
+          color: #e0521c;
+          border: 1px solid rgba(224, 82, 28, 0.2);
+        }
+
+        .cf-marquee-badge-desc {
+          font-size: 12px;
+          font-weight: 500;
+          color: rgba(20, 18, 15, 0.6);
         }
 
         /* Hero Foot Features Row */
@@ -2541,6 +2717,62 @@ export default function Home() {
               <div className="cf-draft-line" style={{ left: 146, bottom: 64, width: 1.5, height: 100 }} />
               <div className="cf-draft-line" style={{ left: 146, bottom: 64, width: 380, height: 1.5 }} />
               <div className="cf-draft-line" style={{ right: 80, bottom: 64, width: 1.5, height: 100 }} />
+            </div>
+          </div>
+
+          {/* Automatic Infinite Scrolling Marquee Ticker */}
+          <div className="cf-hero-marquee-wrapper cf-anim cf-delay-2">
+            <div className="cf-marquee-sublabel">
+              <span className="cf-marquee-live-dot" />
+              <span>Real-Time Engine Capabilities & Workspaces</span>
+            </div>
+
+            {/* Track 1: Scrolling Left */}
+            <div className="cf-marquee-track-container">
+              <div className="cf-marquee-track track-left">
+                {[...marqueeTrack1, ...marqueeTrack1].map((item, idx) => (
+                  <div
+                    key={`t1-${idx}`}
+                    className="cf-marquee-badge-card"
+                    onClick={() => triggerReaction(item.icon)}
+                    onMouseEnter={() => setCursorHovered(true)}
+                    onMouseLeave={() => setCursorHovered(false)}
+                  >
+                    <span className="cf-marquee-badge-icon">{item.icon}</span>
+                    <div className="cf-marquee-badge-body">
+                      <div className="cf-marquee-badge-title-row">
+                        <span className="cf-marquee-badge-title">{item.title}</span>
+                        <span className="cf-marquee-badge-tag">{item.tag}</span>
+                      </div>
+                      <span className="cf-marquee-badge-desc">{item.desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Track 2: Scrolling Right */}
+            <div className="cf-marquee-track-container">
+              <div className="cf-marquee-track track-right">
+                {[...marqueeTrack2, ...marqueeTrack2].map((item, idx) => (
+                  <div
+                    key={`t2-${idx}`}
+                    className="cf-marquee-badge-card"
+                    onClick={() => triggerReaction(item.icon)}
+                    onMouseEnter={() => setCursorHovered(true)}
+                    onMouseLeave={() => setCursorHovered(false)}
+                  >
+                    <span className="cf-marquee-badge-icon">{item.icon}</span>
+                    <div className="cf-marquee-badge-body">
+                      <div className="cf-marquee-badge-title-row">
+                        <span className="cf-marquee-badge-title">{item.title}</span>
+                        <span className="cf-marquee-badge-tag">{item.tag}</span>
+                      </div>
+                      <span className="cf-marquee-badge-desc">{item.desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
