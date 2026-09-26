@@ -786,8 +786,8 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           gap: 10px;
-          background: rgba(224, 82, 28, 0.08);
-          border: 1px solid rgba(224, 82, 28, 0.25);
+          background: rgba(74, 21, 37, 0.08);
+          border: 1px solid rgba(74, 21, 37, 0.22);
           border-radius: 999px;
           padding: 6px 18px;
           font-size: 13.5px;
@@ -798,15 +798,15 @@ export default function Home() {
           width: fit-content;
         }
         .cf-trial-badge:hover {
-          background: rgba(224, 82, 28, 0.15);
-          border-color: #e0521c;
+          background: rgba(74, 21, 37, 0.15);
+          border-color: #4a1525;
           transform: translateY(-2px);
         }
         .cf-trial-circle {
           width: 22px;
           height: 22px;
           border-radius: 50%;
-          background: #e0521c;
+          background: #4a1525;
           color: #ffffff;
           display: flex;
           align-items: center;
@@ -819,7 +819,7 @@ export default function Home() {
           transform: rotate(45deg) scale(1.08);
         }
         .cf-trial-badge b {
-          color: #e0521c;
+          color: #4a1525;
           font-weight: 700;
         }
 
@@ -839,20 +839,20 @@ export default function Home() {
           font-family: 'Cormorant Garamond', Georgia, serif;
           font-style: italic;
           font-weight: 600;
-          color: #e0521c;
+          color: #4a1525;
         }
         .cf-typewriter-text {
           font-family: 'Playfair Display', Georgia, serif;
           font-weight: 700;
           display: inline;
-          color: #e0521c;
+          color: #4a1525;
           position: relative;
         }
         .cf-typewriter-cursor {
           display: inline-block;
           width: 4px;
           height: 0.85em;
-          background: #e0521c;
+          background: #4a1525;
           margin-left: 6px;
           vertical-align: middle;
           animation: cursorBlink 0.9s infinite;
@@ -1005,9 +1005,9 @@ export default function Home() {
         /* Hero Right Visual Cluster with Parallax & Floating */
         .cf-hero-right {
           position: relative;
-          height: 480px;
+          height: 520px;
           width: 100%;
-          max-width: 540px;
+          max-width: 580px;
           margin-left: auto;
         }
 
@@ -1038,11 +1038,11 @@ export default function Home() {
           position: absolute;
           left: 0px;
           top: 16px;
-          width: 156px;
-          height: 156px;
+          width: 165px;
+          height: 165px;
           background: #a49a89;
           border-radius: 8px;
-          padding: 20px;
+          padding: 22px;
           box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
           z-index: 2;
           transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1055,13 +1055,13 @@ export default function Home() {
         .cf-tip-grid {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
-          gap: 5.5px;
-          width: 86px;
-          margin-bottom: 22px;
+          gap: 6px;
+          width: 90px;
+          margin-bottom: 24px;
         }
         .cf-tip-grid span {
-          width: 7px;
-          height: 7px;
+          width: 7.5px;
+          height: 7.5px;
           background: #14120f;
           opacity: 0.6;
           border-radius: 1.5px;
@@ -1073,7 +1073,7 @@ export default function Home() {
           transform: scale(1.2);
         }
         .cf-tip-matrix p {
-          font-size: 13.5px;
+          font-size: 14px;
           line-height: 1.35;
           color: #14120f;
           font-weight: 800;
@@ -1082,10 +1082,10 @@ export default function Home() {
         /* Radiant Orange Action Button */
         .cf-orange-orb {
           position: absolute;
-          left: 104px;
+          left: 110px;
           top: -14px;
-          width: 88px;
-          height: 88px;
+          width: 92px;
+          height: 92px;
           border-radius: 50%;
           background: #e0521c;
           display: flex;
@@ -1102,15 +1102,15 @@ export default function Home() {
           background: #ff5a22;
         }
 
-        /* Central Floating Photo / Live Chat Showcase Card */
+        /* Central Floating Photo / Live Chat Showcase Card (Enlarged) */
         .cf-photo-card {
           position: absolute;
-          left: 135px;
-          top: 20px;
-          width: 330px;
-          max-width: calc(100% - 150px);
-          height: 360px;
-          border-radius: 10px;
+          left: 140px;
+          top: 15px;
+          width: 375px;
+          max-width: calc(100% - 145px);
+          height: 410px;
+          border-radius: 12px;
           background: #dcd6c7;
           border: 1px solid rgba(20, 18, 15, 0.12);
           box-shadow: 0 32px 80px -15px rgba(0, 0, 0, 0.28);
@@ -1130,24 +1130,24 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 24px;
+          padding: 26px;
         }
         .cf-live-badge {
           align-self: flex-start;
           background: rgba(20, 18, 15, 0.92);
           color: #ffffff;
-          font-size: 11.5px;
+          font-size: 12px;
           font-weight: 700;
-          padding: 6px 14px;
+          padding: 7px 15px;
           border-radius: 999px;
           display: flex;
           align-items: center;
-          gap: 7px;
+          gap: 8px;
           box-shadow: 0 4px 14px rgba(0,0,0,0.22);
         }
         .cf-live-badge span {
-          width: 7.5px;
-          height: 7.5px;
+          width: 8px;
+          height: 8px;
           border-radius: 50%;
           background: #10b981;
           box-shadow: 0 0 10px #10b981;
@@ -1156,11 +1156,11 @@ export default function Home() {
         }
         .cf-floating-chat-bubble {
           background: #efece4;
-          padding: 16px 18px;
+          padding: 18px 20px;
           border-radius: 12px;
           box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
-          font-size: 13.5px;
-          line-height: 1.45;
+          font-size: 14.5px;
+          line-height: 1.48;
           color: #14120f;
           border: 1px solid rgba(20, 18, 15, 0.08);
           transition: transform 0.25s ease;
@@ -1171,27 +1171,27 @@ export default function Home() {
         }
         .cf-floating-chat-bubble b {
           display: block;
-          margin-bottom: 4px;
-          font-size: 12px;
-          color: #e0521c;
+          margin-bottom: 5px;
+          font-size: 12.5px;
+          color: #4a1525;
           font-weight: 800;
         }
 
         /* Floating reaction mini-pill */
         .cf-mini-reaction-pill {
           position: absolute;
-          right: 10px;
-          top: 135px;
+          right: 6px;
+          top: 155px;
           background: #ffffff;
           border: 1px solid rgba(20,18,15,0.12);
-          padding: 7px 16px;
+          padding: 8px 18px;
           border-radius: 999px;
-          font-size: 13.5px;
+          font-size: 14px;
           font-weight: 800;
           box-shadow: 0 8px 24px rgba(0,0,0,0.14);
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 7px;
           z-index: 7;
           animation: floatBadge3 5.5s ease-in-out infinite;
           cursor: pointer;
@@ -1206,10 +1206,10 @@ export default function Home() {
         /* Right Panel Behind */
         .cf-backdrop-panel {
           position: absolute;
-          right: 16px;
-          top: 100px;
-          width: 110px;
-          height: 220px;
+          right: 12px;
+          top: 85px;
+          width: 125px;
+          height: 250px;
           background: #d6cfbe;
           border-radius: 8px;
           z-index: 1;
@@ -1220,8 +1220,8 @@ export default function Home() {
           position: absolute;
           left: 0px;
           bottom: 24px;
-          width: 96px;
-          height: 96px;
+          width: 104px;
+          height: 104px;
           z-index: 2;
           animation: burstSpin 28s linear infinite;
         }
@@ -1230,15 +1230,15 @@ export default function Home() {
           position: absolute;
           left: 116px;
           bottom: 50px;
-          width: 34px;
-          height: 34px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
           border: 1.5px solid #14120f;
           background: #efece4;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 800;
           z-index: 6;
           box-shadow: 0 6px 14px rgba(0,0,0,0.08);
@@ -2779,8 +2779,8 @@ export default function Home() {
               {/* Connecting Drafting Plumbing Lines */}
               <div className="cf-draft-line" style={{ left: 146, bottom: 84, width: 14, height: 1.5 }} />
               <div className="cf-draft-line" style={{ left: 146, bottom: 16, width: 1.5, height: 70 }} />
-              <div className="cf-draft-line" style={{ left: 146, bottom: 16, width: 380, height: 1.5 }} />
-              <div className="cf-draft-line" style={{ right: 80, bottom: 16, width: 1.5, height: 70 }} />
+              <div className="cf-draft-line" style={{ left: 146, bottom: 16, width: 410, height: 1.5 }} />
+              <div className="cf-draft-line" style={{ right: 24, bottom: 16, width: 1.5, height: 70 }} />
             </div>
           </div>
 
