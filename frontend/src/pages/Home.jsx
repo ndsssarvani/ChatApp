@@ -340,15 +340,6 @@ export default function Home() {
     { icon: "🔥", title: "Live Typing Waves", desc: "Real-time collaborative draft view", tag: "Live" },
   ];
 
-  const [mascotMood, setMascotMood] = useState(0);
-  const mascotPhrases = [
-    "✨ Swiping the live 70K+ feeds for you!",
-    "🚀 Sub-11ms WebSocket delivery in action!",
-    "🤖 Chatify AI Copilot is listening!",
-    "🔒 256-Bit E2EE quantum encryption active!",
-    "🎉 Team channels synced across all devices!",
-  ];
-
   return (
     <div className="cf-app-root" onMouseMove={handleMouseMove}>
       <style>{`
@@ -1259,7 +1250,7 @@ export default function Home() {
           pointer-events: none;
         }
 
-        /* Auto-Scrolling Hero Feature Marquee Ticker with Cute Boy Mascot */
+        /* Auto-Scrolling Hero Feature Marquee Ticker */
         .cf-hero-marquee-wrapper {
           margin-top: 8px;
           margin-bottom: 12px;
@@ -1272,141 +1263,6 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           gap: 12px;
-        }
-
-        /* Mascot Pill Header */
-        .cf-mascot-pill-container {
-          display: inline-flex;
-          align-items: center;
-          gap: 14px;
-          padding: 6px 18px 6px 10px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.88);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1.5px solid rgba(20, 18, 15, 0.1);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-          cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          animation: mascotPillFloat 3.8s ease-in-out infinite;
-          align-self: center;
-          user-select: none;
-        }
-        .cf-mascot-pill-container:hover {
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 12px 28px rgba(224, 82, 28, 0.16);
-          border-color: rgba(224, 82, 28, 0.45);
-          background: #ffffff;
-        }
-
-        @keyframes mascotPillFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
-        }
-
-        .cf-boy-avatar-box {
-          position: relative;
-          width: 52px;
-          height: 48px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-        .cf-boy-svg {
-          width: 100%;
-          height: 100%;
-          overflow: visible;
-        }
-
-        /* Cute Boy Character Animations */
-        @keyframes boyEyeBlink {
-          0%, 90%, 100% { transform: scaleY(1); }
-          95% { transform: scaleY(0.1); }
-        }
-        .cf-boy-eye {
-          transform-origin: center;
-          animation: boyEyeBlink 3.8s infinite;
-        }
-
-        @keyframes boyHeadBob {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-1.5px) rotate(2deg); }
-        }
-        .cf-boy-head {
-          transform-origin: 80px 80px;
-          animation: boyHeadBob 2.5s ease-in-out infinite;
-        }
-
-        @keyframes boyHandSwipe {
-          0% { transform: translate(0, 0) rotate(0deg); }
-          25% { transform: translate(-10px, -2px) rotate(-6deg); }
-          50% { transform: translate(-20px, 1px) rotate(-12deg); }
-          75% { transform: translate(-6px, 2px) rotate(-4deg); }
-          100% { transform: translate(0, 0) rotate(0deg); }
-        }
-        .cf-boy-arm-swipe {
-          transform-origin: 108px 105px;
-          animation: boyHandSwipe 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        }
-
-        @keyframes boySwipeSparkle {
-          0%, 100% { opacity: 0.3; transform: translateX(0) scale(0.9); }
-          50% { opacity: 1; transform: translateX(-6px) scale(1.2); }
-        }
-        .cf-boy-swipe-sparks {
-          animation: boySwipeSparkle 1.6s ease-in-out infinite;
-        }
-
-        .cf-mascot-content {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .cf-mascot-header-line {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .cf-mascot-name {
-          font-size: 12px;
-          font-weight: 800;
-          color: #14120f;
-          letter-spacing: -0.01em;
-        }
-
-        .cf-mascot-action-tag {
-          font-size: 9.5px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          padding: 1px 7px;
-          border-radius: 999px;
-          background: rgba(224, 82, 28, 0.12);
-          color: #e0521c;
-          border: 1px solid rgba(224, 82, 28, 0.2);
-        }
-
-        .cf-mascot-quote {
-          font-size: 11.5px;
-          font-weight: 600;
-          color: rgba(20, 18, 15, 0.7);
-        }
-
-        .cf-marquee-live-dot {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: #10b981;
-          box-shadow: 0 0 10px #10b981;
-          animation: pulseMarqueeDot 1.8s infinite;
-        }
-
-        @keyframes pulseMarqueeDot {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.4); opacity: 0.6; }
         }
 
         .cf-marquee-track-container {
@@ -1428,10 +1284,6 @@ export default function Home() {
 
         .cf-marquee-track.track-right {
           animation: scrollMarqueeRight 42s linear infinite;
-        }
-
-        .cf-hero-marquee-wrapper:hover .cf-marquee-track {
-          animation-play-state: paused;
         }
 
         @keyframes scrollMarqueeLeft {
@@ -2837,105 +2689,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Automatic Infinite Scrolling Marquee Ticker with Animated Cute Boy Mascot */}
+          {/* Automatic Infinite Scrolling Marquee Ticker */}
           <div className="cf-hero-marquee-wrapper cf-anim cf-delay-2">
-            {/* Interactive Cute Boy Scrolling Mascot Bar */}
-            <div
-              className="cf-mascot-pill-container"
-              onClick={() => {
-                setMascotMood((prev) => (prev + 1) % mascotPhrases.length);
-                triggerReaction("✨");
-              }}
-              title="Click me to interact!"
-              onMouseEnter={() => setCursorHovered(true)}
-              onMouseLeave={() => setCursorHovered(false)}
-            >
-              <div className="cf-boy-avatar-box">
-                <svg viewBox="0 0 170 140" className="cf-boy-svg">
-                  <defs>
-                    <linearGradient id="boySkinGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ffe6d5" />
-                      <stop offset="100%" stopColor="#ffd0b3" />
-                    </linearGradient>
-                    <linearGradient id="boyHoodieGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#2c2724" />
-                      <stop offset="100%" stopColor="#14120f" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Body / Hoodie */}
-                  <path d="M 42 106 Q 80 88 118 106 L 126 140 L 34 140 Z" fill="url(#boyHoodieGrad)" />
-                  <path d="M 64 102 Q 80 114 96 102" stroke="#e0521c" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                  <line x1="73" y1="108" x2="73" y2="122" stroke="#e0521c" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="87" y1="108" x2="87" y2="122" stroke="#e0521c" strokeWidth="2" strokeLinecap="round" />
-
-                  {/* Neck */}
-                  <rect x="72" y="86" width="16" height="15" rx="3" fill="url(#boySkinGrad)" />
-
-                  {/* Head Group with subtle Bobbing */}
-                  <g className="cf-boy-head">
-                    <ellipse cx="80" cy="62" rx="30" ry="31" fill="url(#boySkinGrad)" />
-                    {/* Blush */}
-                    <ellipse cx="62" cy="72" rx="5.5" ry="3.5" fill="#ff7f7f" opacity="0.65" />
-                    <ellipse cx="98" cy="72" rx="5.5" ry="3.5" fill="#ff7f7f" opacity="0.65" />
-
-                    {/* Blinking Eyes */}
-                    <g className="cf-boy-eyes">
-                      <ellipse cx="66" cy="62" rx="4.5" ry="6" fill="#14120f" className="cf-boy-eye" />
-                      <circle cx="68" cy="59" r="1.8" fill="#ffffff" />
-                      <circle cx="64.5" cy="64" r="0.9" fill="#ffffff" />
-
-                      <ellipse cx="94" cy="62" rx="4.5" ry="6" fill="#14120f" className="cf-boy-eye" />
-                      <circle cx="96" cy="59" r="1.8" fill="#ffffff" />
-                      <circle cx="92.5" cy="64" r="0.9" fill="#ffffff" />
-                    </g>
-
-                    {/* Eyebrows */}
-                    <path d="M 60 52 Q 67 47 73 52" stroke="#14120f" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-                    <path d="M 87 52 Q 93 47 100 52" stroke="#14120f" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-
-                    {/* Smile */}
-                    <path d="M 74 74 Q 80 82 86 74" stroke="#14120f" strokeWidth="2.2" fill="#e0521c" strokeLinecap="round" />
-
-                    {/* Stylized Modern Anime/Boy Hair */}
-                    <path d="M 48 58 Q 50 28 80 26 Q 110 28 112 58 Q 106 40 94 36 Q 80 44 68 36 Q 58 42 48 58 Z" fill="#261d19" />
-                    <path d="M 62 36 Q 74 46 80 39 Q 86 46 98 36" fill="#261d19" />
-
-                    {/* Neon Orange Headphones */}
-                    <path d="M 47 62 C 45 24 115 24 113 62" stroke="#14120f" strokeWidth="5.5" fill="none" strokeLinecap="round" />
-                    <rect x="43" y="50" width="9" height="22" rx="4.5" fill="#e0521c" />
-                    <rect x="108" y="50" width="9" height="22" rx="4.5" fill="#e0521c" />
-                    <circle cx="47.5" cy="61" r="2" fill="#ffffff" opacity="0.8" />
-                    <circle cx="112.5" cy="61" r="2" fill="#ffffff" opacity="0.8" />
-                  </g>
-
-                  {/* Animated Hand Swiping / Scrolling */}
-                  <g className="cf-boy-arm-swipe">
-                    <path d="M 108 108 Q 128 104 140 94 Q 136 88 120 95 Z" fill="url(#boyHoodieGrad)" />
-                    <path d="M 134 94 Q 148 87 154 84" stroke="url(#boySkinGrad)" strokeWidth="8" strokeLinecap="round" />
-                    <circle cx="153" cy="84" r="5" fill="#ffd0b3" />
-                    <path d="M 153 84 Q 163 80 166 79" stroke="#ffd0b3" strokeWidth="3.2" strokeLinecap="round" />
-
-                    {/* Swipe Sparks */}
-                    <g className="cf-boy-swipe-sparks">
-                      <path d="M 164 71 Q 172 79 164 87" stroke="#e0521c" strokeWidth="2" strokeDasharray="3,2" fill="none" />
-                      <circle cx="168" cy="68" r="1.5" fill="#e0521c" />
-                      <circle cx="172" cy="86" r="1.2" fill="#ffaa00" />
-                    </g>
-                  </g>
-                </svg>
-              </div>
-
-              <div className="cf-mascot-content">
-                <div className="cf-mascot-header-line">
-                  <span className="cf-marquee-live-dot" />
-                  <span className="cf-mascot-name">Chatify Buddy</span>
-                  <span className="cf-mascot-action-tag">Live Swiping</span>
-                </div>
-                <div className="cf-mascot-quote">{mascotPhrases[mascotMood]}</div>
-              </div>
-            </div>
-
             {/* Track 1: Scrolling Left */}
             <div className="cf-marquee-track-container">
               <div className="cf-marquee-track track-left">
@@ -2943,9 +2698,6 @@ export default function Home() {
                   <div
                     key={`t1-${idx}`}
                     className="cf-marquee-badge-card"
-                    onClick={() => triggerReaction(item.icon)}
-                    onMouseEnter={() => setCursorHovered(true)}
-                    onMouseLeave={() => setCursorHovered(false)}
                   >
                     <span className="cf-marquee-badge-icon">{item.icon}</span>
                     <div className="cf-marquee-badge-body">
@@ -2967,9 +2719,6 @@ export default function Home() {
                   <div
                     key={`t2-${idx}`}
                     className="cf-marquee-badge-card"
-                    onClick={() => triggerReaction(item.icon)}
-                    onMouseEnter={() => setCursorHovered(true)}
-                    onMouseLeave={() => setCursorHovered(false)}
                   >
                     <span className="cf-marquee-badge-icon">{item.icon}</span>
                     <div className="cf-marquee-badge-body">
