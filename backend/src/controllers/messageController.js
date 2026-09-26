@@ -73,6 +73,35 @@ export const sendMessage = async (req, res) => {
       return res.status(403).json({ success: false, message: 'You are not a participant in this conversation' });
     }
 
+    // Check if either user is blocked in a 1-on-1 conversation
+    if (!conversation.isGroup) {
+      const otherParticipantId = conversation.participants.find(
+        (p) => p.toString() !== req.user._id.toString()
+      );
+      if (otherParticipantId) {
+        const [senderUser, recipientUser] = await Promise.all([
+          User.findById(req.user._id).select('blockedUsers'),
+          User.findById(otherParticipantId).select('blockedUsers'),
+        ]);
+
+        if (senderUser?.blockedUsers?.some((id) => id.toString() === otherParticipantId.toString())) {
+          return res.status(403).json({
+            success: false,
+            message: 'You have blocked this user. Unblock them to send messages.',
+            isBlockedByMe: true,
+          });
+        }
+
+        if (recipientUser?.blockedUsers?.some((id) => id.toString() === req.user._id.toString())) {
+          return res.status(403).json({
+            success: false,
+            message: 'You cannot send messages to this user because you have been blocked.',
+            isBlockedByThem: true,
+          });
+        }
+      }
+    }
+
     // Determine temporary expiration if enabled on conversation
     let isTemporary = conversation.isTemporary;
     let expiresAt = null;
@@ -142,6 +171,32 @@ export const forwardMessage = async (req, res) => {
 
     if (!conversation.participants.some((p) => p.toString() === req.user._id.toString())) {
       return res.status(403).json({ success: false, message: 'Not a member of target conversation' });
+    }
+
+    if (!conversation.isGroup) {
+      const otherParticipantId = conversation.participants.find(
+        (p) => p.toString() !== req.user._id.toString()
+      );
+      if (otherParticipantId) {
+        const [senderUser, recipientUser] = await Promise.all([
+          User.findById(req.user._id).select('blockedUsers'),
+          User.findById(otherParticipantId).select('blockedUsers'),
+        ]);
+
+        if (senderUser?.blockedUsers?.some((id) => id.toString() === otherParticipantId.toString())) {
+          return res.status(403).json({
+            success: false,
+            message: 'You have blocked this user. Unblock them to send messages.',
+          });
+        }
+
+        if (recipientUser?.blockedUsers?.some((id) => id.toString() === req.user._id.toString())) {
+          return res.status(403).json({
+            success: false,
+            message: 'You cannot forward messages to this user because you have been blocked.',
+          });
+        }
+      }
     }
 
     const originalMessage = await Message.findById(messageId);

@@ -147,6 +147,32 @@ export const setupSocketHandlers = (io) => {
       const receiverIdStr = receiverId.toString();
       const callerIdStr = caller._id.toString();
 
+      // Check if blocked
+      try {
+        const [callerUser, receiverUser] = await Promise.all([
+          User.findById(callerIdStr).select('blockedUsers'),
+          User.findById(receiverIdStr).select('blockedUsers'),
+        ]);
+
+        if (callerUser?.blockedUsers?.some((id) => id.toString() === receiverIdStr)) {
+          socket.emit('call:unavailable', {
+            receiverId: receiverIdStr,
+            reason: 'You have blocked this user.',
+          });
+          return;
+        }
+
+        if (receiverUser?.blockedUsers?.some((id) => id.toString() === callerIdStr)) {
+          socket.emit('call:unavailable', {
+            receiverId: receiverIdStr,
+            reason: 'User is unavailable.',
+          });
+          return;
+        }
+      } catch (err) {
+        console.error('[Socket Call] Error checking blocked users:', err);
+      }
+
       // Check if receiver is online
       const isReceiverOnline = onlineUsers.has(receiverIdStr) && onlineUsers.get(receiverIdStr).size > 0;
 

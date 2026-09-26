@@ -255,7 +255,8 @@ export const blockUser = async (req, res) => {
     }
 
     const user = await User.findById(req.user._id);
-    if (!user.blockedUsers.includes(blockId)) {
+    const isAlreadyBlocked = user.blockedUsers.some((id) => id.toString() === blockId.toString());
+    if (!isAlreadyBlocked) {
       user.blockedUsers.push(blockId);
       await user.save();
     }
@@ -272,7 +273,7 @@ export const unblockUser = async (req, res) => {
   try {
     const blockId = req.params.id;
     const user = await User.findById(req.user._id);
-    user.blockedUsers = user.blockedUsers.filter((id) => id.toString() !== blockId);
+    user.blockedUsers = user.blockedUsers.filter((id) => id.toString() !== blockId.toString());
     await user.save();
 
     res.status(200).json({ success: true, message: 'User unblocked', blockedUsers: user.blockedUsers });

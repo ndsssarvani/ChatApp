@@ -113,6 +113,7 @@ const ChatDashboard = () => {
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [highlightedMsgId, setHighlightedMsgId] = useState(null);
   const [isRailExpanded, setIsRailExpanded] = useState(false);
+  const [blockedUserIds, setBlockedUserIds] = useState([]);
 
   // Translation State
   const [translatedMessages, setTranslatedMessages] = useState({}); // { [msgId]: { translatedText, sourceLanguage, sourceLanguageName, targetLanguage, targetLanguageName, isHidden, loading, error } }
@@ -227,9 +228,22 @@ const ChatDashboard = () => {
     } catch (err) {}
   };
 
+  // Load blocked users
+  const fetchBlockedUsers = async () => {
+    try {
+      const res = await userService.getBlockedUsers();
+      if (res.success && res.blockedUsers) {
+        setBlockedUserIds(res.blockedUsers.map((u) => (u._id || u).toString()));
+      }
+    } catch (err) {
+      console.error("[Dashboard] Error fetching blocked users:", err);
+    }
+  };
+
   useEffect(() => {
     fetchConversations();
     fetchNotifCounts();
+    fetchBlockedUsers();
 
     const handleNotifsCleared = () => {
       setUnreadNotifCount(0);
@@ -580,6 +594,9 @@ const ChatDashboard = () => {
       }
     } catch (err) {
       console.error("[Dashboard] Error sending message:", err);
+      if (err.response?.data?.message) {
+        alert(err.response.data.message);
+      }
     } finally {
       setIsSending(false);
     }
@@ -700,6 +717,9 @@ const ChatDashboard = () => {
       }
     } catch (err) {
       console.error("[Dashboard] Error sending voice message:", err);
+      if (err.response?.data?.message) {
+        alert(err.response.data.message);
+      }
     } finally {
       setIsSending(false);
     }
@@ -918,6 +938,38 @@ const ChatDashboard = () => {
     }
   };
 
+  // Block / Unblock user
+  const handleToggleBlock = async (targetUserId, targetUserName = "this user") => {
+    if (!targetUserId) return;
+    const targetIdStr = targetUserId.toString();
+    const isBlocked = blockedUserIds.includes(targetIdStr);
+
+    if (isBlocked) {
+      try {
+        const res = await userService.unblockUser(targetIdStr);
+        if (res.success) {
+          setBlockedUserIds((prev) => prev.filter((id) => id !== targetIdStr));
+        }
+      } catch (err) {
+        alert(err.response?.data?.message || "Failed to unblock user");
+      }
+    } else {
+      const confirmBlock = window.confirm(
+        `Are you sure you want to block ${targetUserName}? They will not be able to send you messages or start calls with you.`
+      );
+      if (!confirmBlock) return;
+
+      try {
+        const res = await userService.blockUser(targetIdStr);
+        if (res.success) {
+          setBlockedUserIds((prev) => [...prev, targetIdStr]);
+        }
+      } catch (err) {
+        alert(err.response?.data?.message || "Failed to block user");
+      }
+    }
+  };
+
   // Filter conversations
   const filteredConversations = conversations.filter((c) => {
     const display = getChatDisplay(c);
@@ -948,6 +1000,10 @@ const ChatDashboard = () => {
     .flatMap((m) => m.attachments);
 
   const activeChatDisplay = getChatDisplay(selectedChat);
+  const activePeerId = !selectedChat?.isGroup
+    ? (activeChatDisplay.participant?._id || activeChatDisplay.participant)?.toString()
+    : null;
+  const isPeerBlockedByMe = Boolean(activePeerId && blockedUserIds.includes(activePeerId));
 
   return (
     <div className="dashboard-wrapper" data-theme={isDarkMode ? "dark" : "light"}>
@@ -1387,7 +1443,13 @@ const ChatDashboard = () => {
                     <button
                       type="button"
                       className="header-action-btn call-audio"
-                      onClick={() => startCall(activeChatDisplay.participant, "audio", selectedChat._id)}
+                      onClick={() => {
+                        if (isPeerBlockedByMe) {
+                          alert("You have blocked this user. Unblock them to start an audio call.");
+                          return;
+                        }
+                        startCall(activeChatDisplay.participant, "audio", selectedChat._id);
+                      }}
                       title="Start Audio Call"
                     >
                       <IconPhone size={18} />
@@ -1395,7 +1457,13 @@ const ChatDashboard = () => {
                     <button
                       type="button"
                       className="header-action-btn call-video"
-                      onClick={() => startCall(activeChatDisplay.participant, "video", selectedChat._id)}
+                      onClick={() => {
+                        if (isPeerBlockedByMe) {
+                          alert("You have blocked this user. Unblock them to start a video call.");
+                          return;
+                        }
+                        startCall(activeChatDisplay.participant, "video", selectedChat._id);
+                      }}
                       title="Start Video Call"
                     >
                       <IconVideo size={18} />
@@ -1777,172 +1845,216 @@ const ChatDashboard = () => {
 
             {/* Composer Area */}
             <div className="composer-area">
-              {/* Quoted Reply Banner */}
-              {replyingTo && (
-                <div className="composer-preview-banner">
-                  <div className="banner-content">
-                    <span className="banner-sender">
-                      Replying to {replyingTo.sender?.name || "User"}
-                    </span>
-                    <span className="banner-text">
-                      {replyingTo.text || (replyingTo.attachments?.length ? "Attachment" : "")}
-                    </span>
+              {isPeerBlockedByMe ? (
+                <div
+                  style={{
+                    padding: "16px 20px",
+                    background: "var(--bg-secondary)",
+                    borderRadius: "14px",
+                    border: "1px dashed rgba(239, 68, 68, 0.4)",
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--text-secondary)", fontSize: "13px", fontWeight: 500 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                    </svg>
+                    <span>You have blocked this contact. Unblock them to send messages.</span>
                   </div>
                   <button
                     type="button"
-                    className="banner-close-btn"
-                    onClick={() => setReplyingTo(null)}
-                  >
-                    <IconClose size={14} />
-                  </button>
-                </div>
-              )}
-
-              {/* Attachment Preview Banner */}
-              {attachment && (
-                <div className="composer-preview-banner">
-                  <div className="banner-content">
-                    <span className="banner-sender"><IconPaperclip size={14} /> Attached file:</span>
-                    <span className="banner-text">{attachment.name}</span>
-                  </div>
-                  <button type="button" className="banner-close-btn" onClick={clearAttachment}>
-                    <IconClose size={14} />
-                  </button>
-                </div>
-              )}
-
-              {/* Editing Banner */}
-              {editingMessage && (
-                <div className="composer-preview-banner">
-                  <div className="banner-content">
-                    <span className="banner-sender"><IconEdit size={14} /> Editing message</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="banner-close-btn"
-                    onClick={() => {
-                      setEditingMessage(null);
-                      setMessageInput("");
+                    onClick={() => handleToggleBlock(activePeerId, activeChatDisplay.name)}
+                    style={{
+                      padding: "8px 16px",
+                      background: "var(--accent-primary)",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "10px",
+                      fontWeight: 700,
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      boxShadow: "0 2px 8px rgba(255, 122, 0, 0.25)",
                     }}
                   >
-                    <IconClose size={14} />
+                    Unblock
                   </button>
-                </div>
-              )}
-
-              {/* Hidden file picker */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleFileSelect}
-              />
-
-              {/* Live Voice Recorder or Standard Input */}
-              {showVoiceRecorder ? (
-                <div className="composer-row">
-                  <VoiceRecorder
-                    onSendVoice={handleSendVoice}
-                    onCancel={() => setShowVoiceRecorder(false)}
-                  />
                 </div>
               ) : (
-                <div className="composer-row">
-                  <button
-                    type="button"
-                    className="composer-action-btn"
-                    onClick={() => fileInputRef.current?.click()}
-                    title="Attach Image or File"
-                  >
-                    <IconPaperclip size={19} />
-                  </button>
-
-                  <button
-                    type="button"
-                    className="composer-action-btn"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    title="Emoji Picker"
-                  >
-                    <IconSmile size={19} />
-                  </button>
-
-                  {/* Emoji Picker Popover */}
-                  {showEmojiPicker && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: "75px",
-                        left: "60px",
-                        background: "var(--bg-primary)",
-                        border: "1px solid var(--border-color)",
-                        borderRadius: "16px",
-                        boxShadow: "var(--shadow-lg)",
-                        padding: "10px",
-                        display: "grid",
-                        gridTemplateColumns: "repeat(6, 1fr)",
-                        gap: "6px",
-                        zIndex: 100,
-                        width: "240px",
-                      }}
-                    >
-                      {[
-                        "😀", "😂", "😍", "👍", "❤️", "🔥",
-                        "🎉", "🙌", "✨", "😎", "🥳", "💯",
-                        "🙏", "👏", "🚀", "💡", "👋", "🤩",
-                      ].map((emoji) => (
-                        <button
-                          key={emoji}
-                          type="button"
-                          onClick={() => {
-                            setMessageInput((prev) => prev + emoji);
-                            setShowEmojiPicker(false);
-                          }}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            fontSize: "20px",
-                            cursor: "pointer",
-                            padding: "4px",
-                            borderRadius: "6px",
-                          }}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
+                <>
+                  {/* Quoted Reply Banner */}
+                  {replyingTo && (
+                    <div className="composer-preview-banner">
+                      <div className="banner-content">
+                        <span className="banner-sender">
+                          Replying to {replyingTo.sender?.name || "User"}
+                        </span>
+                        <span className="banner-text">
+                          {replyingTo.text || (replyingTo.attachments?.length ? "Attachment" : "")}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="banner-close-btn"
+                        onClick={() => setReplyingTo(null)}
+                      >
+                        <IconClose size={14} />
+                      </button>
                     </div>
                   )}
 
-                  <textarea
-                    className="composer-textarea"
-                    placeholder={editingMessage ? "Edit message..." : "Type a message..."}
-                    value={messageInput}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    rows={1}
+                  {/* Attachment Preview Banner */}
+                  {attachment && (
+                    <div className="composer-preview-banner">
+                      <div className="banner-content">
+                        <span className="banner-sender"><IconPaperclip size={14} /> Attached file:</span>
+                        <span className="banner-text">{attachment.name}</span>
+                      </div>
+                      <button type="button" className="banner-close-btn" onClick={clearAttachment}>
+                        <IconClose size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Editing Banner */}
+                  {editingMessage && (
+                    <div className="composer-preview-banner">
+                      <div className="banner-content">
+                        <span className="banner-sender"><IconEdit size={14} /> Editing message</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="banner-close-btn"
+                        onClick={() => {
+                          setEditingMessage(null);
+                          setMessageInput("");
+                        }}
+                      >
+                        <IconClose size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Hidden file picker */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    onChange={handleFileSelect}
                   />
 
-                  {/* Toggle Voice Recorder or Send */}
-                  {!messageInput.trim() && !attachment ? (
-                    <button
-                      type="button"
-                      className="composer-action-btn voice-btn"
-                      onClick={() => setShowVoiceRecorder(true)}
-                      title="Record Voice Note"
-                    >
-                      <IconMic size={20} />
-                    </button>
+                  {/* Live Voice Recorder or Standard Input */}
+                  {showVoiceRecorder ? (
+                    <div className="composer-row">
+                      <VoiceRecorder
+                        onSendVoice={handleSendVoice}
+                        onCancel={() => setShowVoiceRecorder(false)}
+                      />
+                    </div>
                   ) : (
-                    <button
-                      type="button"
-                      className="composer-send-btn"
-                      onClick={handleSendMessage}
-                      disabled={isSending}
-                      title="Send Message"
-                    >
-                      {isSending ? "..." : <IconSend size={18} />}
-                    </button>
+                    <div className="composer-row">
+                      <button
+                        type="button"
+                        className="composer-action-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                        title="Attach Image or File"
+                      >
+                        <IconPaperclip size={19} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="composer-action-btn"
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        title="Emoji Picker"
+                      >
+                        <IconSmile size={19} />
+                      </button>
+
+                      {/* Emoji Picker Popover */}
+                      {showEmojiPicker && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: "75px",
+                            left: "60px",
+                            background: "var(--bg-primary)",
+                            border: "1px solid var(--border-color)",
+                            borderRadius: "16px",
+                            boxShadow: "var(--shadow-lg)",
+                            padding: "10px",
+                            display: "grid",
+                            gridTemplateColumns: "repeat(6, 1fr)",
+                            gap: "6px",
+                            zIndex: 100,
+                            width: "240px",
+                          }}
+                        >
+                          {[
+                            "😀", "😂", "😍", "👍", "❤️", "🔥",
+                            "🎉", "🙌", "✨", "😎", "🥳", "💯",
+                            "🙏", "👏", "🚀", "💡", "👋", "🤩",
+                          ].map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => {
+                                setMessageInput((prev) => prev + emoji);
+                                setShowEmojiPicker(false);
+                              }}
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                fontSize: "20px",
+                                cursor: "pointer",
+                                padding: "4px",
+                                borderRadius: "6px",
+                              }}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      <textarea
+                        className="composer-textarea"
+                        placeholder={editingMessage ? "Edit message..." : "Type a message..."}
+                        value={messageInput}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        rows={1}
+                      />
+
+                      {/* Toggle Voice Recorder or Send */}
+                      {!messageInput.trim() && !attachment ? (
+                        <button
+                          type="button"
+                          className="composer-action-btn voice-btn"
+                          onClick={() => setShowVoiceRecorder(true)}
+                          title="Record Voice Note"
+                        >
+                          <IconMic size={20} />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="composer-send-btn"
+                          onClick={handleSendMessage}
+                          disabled={isSending}
+                          title="Send Message"
+                        >
+                          {isSending ? "..." : <IconSend size={18} />}
+                        </button>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           </>
@@ -2097,8 +2209,37 @@ const ChatDashboard = () => {
             )}
           </div>
 
-          {/* Delete Chat Button inside Profile Sidebar */}
-          <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px solid var(--border-color)" }}>
+          {/* Action Buttons inside Profile Sidebar */}
+          <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px solid var(--border-color)", display: "flex", flexDirection: "column", gap: "10px" }}>
+            {!selectedChat.isGroup && (
+              <button
+                type="button"
+                onClick={() => handleToggleBlock(activePeerId, activeChatDisplay.name)}
+                style={{
+                  width: "100%",
+                  padding: "10px 16px",
+                  borderRadius: "12px",
+                  border: isPeerBlockedByMe ? "1px solid rgba(245, 158, 11, 0.4)" : "1px solid rgba(239, 68, 68, 0.3)",
+                  background: isPeerBlockedByMe ? "rgba(245, 158, 11, 0.12)" : "rgba(239, 68, 68, 0.08)",
+                  color: isPeerBlockedByMe ? "#f59e0b" : "#ef4444",
+                  fontWeight: 700,
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  transition: "all 0.2s",
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                </svg>
+                {isPeerBlockedByMe ? "Unblock User" : "Block User"}
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => handleDeleteConversation(selectedChat._id)}
