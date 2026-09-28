@@ -70,7 +70,7 @@ const ChatDashboard = () => {
   const { t, currentLanguage, languages, getCurrentLanguageData } = useLanguage();
   const { user: currentUser, logout } = useAuth();
   const { socket, isUserOnline } = useSocket();
-  const { startCall } = useCall();
+  const { startCall, startGroupCall, joinGroupCall, requestActiveGroupCall, activeGroupCallsMap } = useCall();
 
   // Conversations & Messages State
   const [conversations, setConversations] = useState([]);
@@ -119,6 +119,17 @@ const ChatDashboard = () => {
   const [translatedMessages, setTranslatedMessages] = useState({}); // { [msgId]: { translatedText, sourceLanguage, sourceLanguageName, targetLanguage, targetLanguageName, isHidden, loading, error } }
   const [translateLanguageModal, setTranslateLanguageModal] = useState(null); // message object or null
   const [translateSearchQuery, setTranslateSearchQuery] = useState("");
+
+  // Add People & Group Invite State
+  const [showAddPeopleModal, setShowAddPeopleModal] = useState(false);
+  const [addPeopleSearch, setAddPeopleSearch] = useState("");
+  const [selectedAddMemberIds, setSelectedAddMemberIds] = useState([]);
+  const [isSubmittingAddPeople, setIsSubmittingAddPeople] = useState(false);
+
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteModalData, setInviteModalData] = useState(null);
+  const [inviteModalLoading, setInviteModalLoading] = useState(false);
+  const [inviteCopiedToast, setInviteCopiedToast] = useState(false);
 
   const menuRef = useRef(null);
   const groupModalRef = useRef(null);
@@ -274,6 +285,10 @@ const ChatDashboard = () => {
     if (!selectedChat) {
       setMessages([]);
       return;
+    }
+
+    if (selectedChat.isGroup && requestActiveGroupCall) {
+      requestActiveGroupCall(selectedChat._id);
     }
 
     const fetchChatMessages = async () => {
@@ -433,6 +448,29 @@ const ChatDashboard = () => {
       setUnreadNotifCount((prev) => prev + 1);
     };
 
+    const handleGroupUpdated = (updatedConv) => {
+      if (!updatedConv || !updatedConv._id) return;
+      setConversations((prev) => {
+        const exists = prev.some((c) => c._id === updatedConv._id);
+        if (exists) {
+          return prev.map((c) => (c._id === updatedConv._id ? { ...c, ...updatedConv } : c));
+        }
+        return [updatedConv, ...prev];
+      });
+      setSelectedChat((prev) => {
+        if (prev && prev._id === updatedConv._id) {
+          return { ...prev, ...updatedConv };
+        }
+        return prev;
+      });
+    };
+
+    const handleGroupRemoved = ({ conversationId }) => {
+      if (!conversationId) return;
+      setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+      setSelectedChat((prev) => (prev?._id === conversationId ? null : prev));
+    };
+
     socket.on("message_received", handleMessageReceived);
     socket.on("typing", handleTyping);
     socket.on("stop_typing", handleStopTyping);
@@ -440,6 +478,8 @@ const ChatDashboard = () => {
     socket.on("message_deleted", handleMessageDeleted);
     socket.on("messages_read", handleMessagesRead);
     socket.on("notification_received", handleNotification);
+    socket.on("group_updated", handleGroupUpdated);
+    socket.on("group_removed", handleGroupRemoved);
 
     return () => {
       socket.off("message_received", handleMessageReceived);
@@ -449,6 +489,8 @@ const ChatDashboard = () => {
       socket.off("message_deleted", handleMessageDeleted);
       socket.off("messages_read", handleMessagesRead);
       socket.off("notification_received", handleNotification);
+      socket.off("group_updated", handleGroupUpdated);
+      socket.off("group_removed", handleGroupRemoved);
     };
   }, [socket, selectedChat, currentUser?._id]);
 
@@ -822,6 +864,148 @@ const ChatDashboard = () => {
     }
   };
 
+  // Add member toggle for Add People modal
+  const toggleAddMemberSelection = (userId) => {
+    setSelectedAddMemberIds((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+  };
+
+  // Submit Add People
+  const handleAddPeopleToGroup = async () => {
+    if (!selectedChat?.isGroup || selectedAddMemberIds.length === 0) return;
+    try {
+      setIsSubmittingAddPeople(true);
+      const res = await conversationService.addMembers(selectedChat._id, selectedAddMemberIds);
+      if (res.success) {
+        setSelectedChat(res.conversation);
+        setConversations((prev) =>
+          prev.map((c) => (c._id === res.conversation._id ? res.conversation : c))
+        );
+        setShowAddPeopleModal(false);
+        setSelectedAddMemberIds([]);
+        setAddPeopleSearch("");
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to add members to group");
+    } finally {
+      setIsSubmittingAddPeople(false);
+    }
+  };
+
+  // Open invite link modal
+  const handleOpenInviteModal = async () => {
+    if (!selectedChat?.isGroup) return;
+    setShowInviteModal(true);
+    try {
+      setInviteModalLoading(true);
+      const res = await conversationService.getGroupInvite(selectedChat._id);
+      if (res.success) {
+        setInviteModalData(res);
+      }
+    } catch (err) {
+      console.error("[Dashboard] Error loading invite:", err);
+    } finally {
+      setInviteModalLoading(false);
+    }
+  };
+
+  // Copy invite link
+  const handleCopyGroupInvite = () => {
+    if (!inviteModalData?.inviteToken) return;
+    const url = `${window.location.origin}/invite/${inviteModalData.inviteToken}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setInviteCopiedToast(true);
+      setTimeout(() => setInviteCopiedToast(false), 2500);
+    });
+  };
+
+  // Share invite link
+  const handleShareGroupInvite = async () => {
+    if (!inviteModalData?.inviteToken) return;
+    const url = `${window.location.origin}/invite/${inviteModalData.inviteToken}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: selectedChat?.groupName || "Chatify Group",
+          text: `Join "${selectedChat?.groupName || "our group"}" on Chatify!`,
+          url,
+        });
+      } catch (e) {
+        handleCopyGroupInvite();
+      }
+    } else {
+      handleCopyGroupInvite();
+    }
+  };
+
+  // Regenerate invite link
+  const handleRegenerateGroupInvite = async () => {
+    if (!selectedChat?.isGroup) return;
+    if (window.confirm("Regenerating will invalidate the previous invite link. Continue?")) {
+      try {
+        setInviteModalLoading(true);
+        const res = await conversationService.regenerateGroupInvite(selectedChat._id);
+        if (res.success) {
+          setInviteModalData(res);
+        }
+      } catch (err) {
+        alert(err.response?.data?.message || "Failed to regenerate invite link");
+      } finally {
+        setInviteModalLoading(false);
+      }
+    }
+  };
+
+  // Toggle invite link active / disabled
+  const handleToggleInviteLink = async () => {
+    if (!selectedChat?.isGroup || !inviteModalData) return;
+    try {
+      setInviteModalLoading(true);
+      const newStatus = !inviteModalData.inviteEnabled;
+      const res = await conversationService.toggleGroupInviteStatus(selectedChat._id, newStatus);
+      if (res.success) {
+        setInviteModalData((prev) => ({ ...prev, inviteEnabled: res.inviteEnabled }));
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update invite link");
+    } finally {
+      setInviteModalLoading(false);
+    }
+  };
+
+  // Remove participant
+  const handleRemoveGroupParticipant = async (userId, memberName) => {
+    if (!selectedChat?.isGroup) return;
+    if (window.confirm(`Remove ${memberName || 'this member'} from the group?`)) {
+      try {
+        const res = await conversationService.removeMember(selectedChat._id, userId);
+        if (res.success) {
+          setSelectedChat(res.conversation);
+          setConversations((prev) =>
+            prev.map((c) => (c._id === res.conversation._id ? res.conversation : c))
+          );
+        }
+      } catch (err) {
+        alert(err.response?.data?.message || "Failed to remove member");
+      }
+    }
+  };
+
+  // Leave Group
+  const handleLeaveCurrentGroup = async () => {
+    if (!selectedChat?.isGroup) return;
+    if (window.confirm("Are you sure you want to leave this group?")) {
+      try {
+        await conversationService.removeMember(selectedChat._id, currentUser._id);
+        setConversations((prev) => prev.filter((c) => c._id !== selectedChat._id));
+        setSelectedChat(null);
+      } catch (err) {
+        alert(err.response?.data?.message || "Failed to leave group");
+      }
+    }
+  };
+
   // Start 1-on-1 chat from contact search
   const handleStartDirectChat = async (targetUser) => {
     try {
@@ -1004,6 +1188,12 @@ const ChatDashboard = () => {
     ? (activeChatDisplay.participant?._id || activeChatDisplay.participant)?.toString()
     : null;
   const isPeerBlockedByMe = Boolean(activePeerId && blockedUserIds.includes(activePeerId));
+  const isCurrentUserMemberOfGroup = Boolean(
+    selectedChat?.isGroup &&
+    selectedChat.participants?.some(
+      (p) => (p._id || p.id || p)?.toString() === (currentUser?._id || currentUser?.id)?.toString()
+    )
+  );
 
   return (
     <div className="dashboard-wrapper" data-theme={isDarkMode ? "dark" : "light"}>
@@ -1438,7 +1628,7 @@ const ChatDashboard = () => {
 
               {/* Call & Tool Actions */}
               <div className="chat-header-actions">
-                {!selectedChat.isGroup && (
+                {!selectedChat.isGroup ? (
                   <>
                     <button
                       type="button"
@@ -1451,6 +1641,7 @@ const ChatDashboard = () => {
                         startCall(activeChatDisplay.participant, "audio", selectedChat._id);
                       }}
                       title="Start Audio Call"
+                      aria-label="Start Audio Call"
                     >
                       <IconPhone size={18} />
                     </button>
@@ -1465,10 +1656,34 @@ const ChatDashboard = () => {
                         startCall(activeChatDisplay.participant, "video", selectedChat._id);
                       }}
                       title="Start Video Call"
+                      aria-label="Start Video Call"
                     >
                       <IconVideo size={18} />
                     </button>
                   </>
+                ) : (
+                  isCurrentUserMemberOfGroup && (
+                    <>
+                      <button
+                        type="button"
+                        className="header-action-btn call-audio"
+                        onClick={() => startGroupCall(selectedChat, "audio")}
+                        title="Start Group Audio Call"
+                        aria-label="Start Group Audio Call"
+                      >
+                        <IconPhone size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        className="header-action-btn call-video"
+                        onClick={() => startGroupCall(selectedChat, "video")}
+                        title="Start Group Video Call"
+                        aria-label="Start Group Video Call"
+                      >
+                        <IconVideo size={18} />
+                      </button>
+                    </>
+                  )
                 )}
 
                 <button
@@ -1508,6 +1723,30 @@ const ChatDashboard = () => {
                 </button>
               </div>
             </header>
+
+            {/* Live Group Call Banner */}
+            {selectedChat?.isGroup && activeGroupCallsMap?.[selectedChat._id]?.active && (
+              <div className="active-group-call-banner">
+                <div className="banner-left">
+                  <span className="live-dot-pulse">🔴</span>
+                  <div className="banner-info">
+                    <span className="banner-title">
+                      Live Group {activeGroupCallsMap[selectedChat._id].callType === 'video' ? 'Video' : 'Audio'} Call
+                    </span>
+                    <span className="banner-subtitle">
+                      {activeGroupCallsMap[selectedChat._id].participantCount} {activeGroupCallsMap[selectedChat._id].participantCount === 1 ? 'participant' : 'participants'} currently live
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-join-group-call"
+                  onClick={() => joinGroupCall(selectedChat._id, activeGroupCallsMap[selectedChat._id].callType, selectedChat.groupName)}
+                >
+                  Join Call
+                </button>
+              </div>
+            )}
 
             {/* Message Feed */}
             <div className="messages-scroll-view" style={getActiveWallpaperStyle()}>
@@ -2105,40 +2344,167 @@ const ChatDashboard = () => {
           </div>
 
           {/* Group Members Section */}
-          {selectedChat.isGroup && (
-            <div>
-              <div className="profile-section-title">Group Participants</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {selectedChat.participants?.map((member) => (
-                  <div
-                    key={member._id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "6px 8px",
-                      borderRadius: "8px",
-                      background: "var(--bg-secondary)",
-                    }}
-                  >
-                    <img
-                      src={member.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${member.name}`}
-                      alt={member.name}
-                      style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }}
-                    />
-                    <div style={{ flex: 1, fontSize: "13px", fontWeight: 600 }}>
-                      {member.name}
-                      {selectedChat.admins?.some((a) => (a._id || a) === member._id) && (
-                        <span style={{ fontSize: "11px", color: "var(--accent-primary)", marginLeft: "6px" }}>
-                          (Admin)
-                        </span>
-                      )}
-                    </div>
+          {selectedChat.isGroup && (() => {
+            const isOwner = selectedChat.groupOwner
+              ? (selectedChat.groupOwner._id || selectedChat.groupOwner) === currentUser?._id
+              : (selectedChat.admins?.[0]?._id || selectedChat.admins?.[0]) === currentUser?._id;
+            const isAdmin = isOwner || selectedChat.admins?.some((a) => (a._id || a) === currentUser?._id);
+
+            return (
+              <div style={{ marginBottom: "20px" }}>
+                {selectedChat.groupDescription && (
+                  <div style={{ marginBottom: "14px", padding: "10px 12px", background: "var(--bg-secondary)", borderRadius: "10px", fontSize: "12px", color: "var(--text-secondary)" }}>
+                    {selectedChat.groupDescription}
                   </div>
-                ))}
+                )}
+
+                {/* Group Action Buttons */}
+                {isAdmin && (
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedAddMemberIds([]);
+                        setAddPeopleSearch("");
+                        setShowAddPeopleModal(true);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        background: "#e0521c",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "10px",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      + Add People
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleOpenInviteModal}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        background: "var(--bg-secondary)",
+                        color: "var(--text-primary)",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "10px",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      🔗 Invite Link
+                    </button>
+                  </div>
+                )}
+
+                <div className="profile-section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>Group Participants</span>
+                  <span style={{ fontSize: "11px", opacity: 0.8 }}>{selectedChat.participants?.length || 0}</span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "240px", overflowY: "auto" }}>
+                  {selectedChat.participants?.map((member) => {
+                    const mId = member._id || member;
+                    const isSelf = mId === currentUser?._id;
+                    const memberIsOwner = selectedChat.groupOwner
+                      ? (selectedChat.groupOwner._id || selectedChat.groupOwner) === mId
+                      : (selectedChat.admins?.[0]?._id || selectedChat.admins?.[0]) === mId;
+                    const memberIsAdmin = memberIsOwner || selectedChat.admins?.some((a) => (a._id || a) === mId);
+                    const isOnline = isUserOnline(mId);
+
+                    const canRemove = !isSelf && !memberIsOwner && (isOwner || (isAdmin && !memberIsAdmin));
+
+                    return (
+                      <div
+                        key={mId}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: "8px",
+                          padding: "8px 10px",
+                          borderRadius: "10px",
+                          background: "var(--bg-secondary)",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, overflow: "hidden" }}>
+                          <div style={{ position: "relative" }}>
+                            <img
+                              src={member.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${member.name || "User"}`}
+                              alt={member.name}
+                              style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", display: "block" }}
+                            />
+                            {isOnline && (
+                              <span
+                                style={{
+                                  position: "absolute",
+                                  bottom: 0,
+                                  right: 0,
+                                  width: "8px",
+                                  height: "8px",
+                                  borderRadius: "50%",
+                                  background: "#22c55e",
+                                  border: "1.5px solid var(--bg-secondary)",
+                                }}
+                              />
+                            )}
+                          </div>
+                          <div style={{ flex: 1, overflow: "hidden" }}>
+                            <div style={{ fontSize: "13px", fontWeight: 600, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                              {member.name || "Member"} {isSelf && "(You)"}
+                            </div>
+                            <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>
+                              {memberIsOwner ? (
+                                <span style={{ color: "#e0521c", fontWeight: 700 }}>👑 Owner</span>
+                              ) : memberIsAdmin ? (
+                                <span style={{ color: "var(--accent-primary)", fontWeight: 700 }}>⭐ Admin</span>
+                              ) : (
+                                "Member"
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {canRemove && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveGroupParticipant(mId, member.name)}
+                            style={{
+                              padding: "3px 7px",
+                              borderRadius: "6px",
+                              border: "1px solid rgba(239, 68, 68, 0.3)",
+                              background: "rgba(239, 68, 68, 0.08)",
+                              color: "#ef4444",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                            title="Remove member"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Shared Media & Docs */}
           <div>
@@ -2237,6 +2603,31 @@ const ChatDashboard = () => {
                   <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
                 </svg>
                 {isPeerBlockedByMe ? "Unblock User" : "Block User"}
+              </button>
+            )}
+
+            {selectedChat.isGroup && (
+              <button
+                type="button"
+                onClick={handleLeaveCurrentGroup}
+                style={{
+                  width: "100%",
+                  padding: "10px 16px",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(239, 68, 68, 0.25)",
+                  background: "rgba(239, 68, 68, 0.08)",
+                  color: "#dc2626",
+                  fontWeight: 700,
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  transition: "all 0.2s",
+                }}
+              >
+                🚪 Leave Group
               </button>
             )}
 
@@ -2363,6 +2754,251 @@ const ChatDashboard = () => {
                 disabled={!groupName.trim() || selectedMembers.length < 1}
               >
                 Create Group
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── ADD PEOPLE TO EXISTING GROUP MODAL ─── */}
+      {showAddPeopleModal && selectedChat?.isGroup && (
+        <div className="call-history-modal-overlay" onClick={() => setShowAddPeopleModal(false)}>
+          <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "460px" }}>
+            <div className="call-history-header">
+              <div className="history-title-area">
+                <h2>Add People</h2>
+                <p>Add new members to "{selectedChat.groupName}"</p>
+              </div>
+              <button type="button" className="history-close-btn" onClick={() => setShowAddPeopleModal(false)}>
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: "16px 24px" }}>
+              <div style={{ marginBottom: "12px" }}>
+                <input
+                  type="text"
+                  className="search-input-modern"
+                  placeholder="🔍 Search people by name or email..."
+                  value={addPeopleSearch}
+                  onChange={(e) => setAddPeopleSearch(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <label style={{ fontSize: "12px", fontWeight: 700, display: "block", marginBottom: "8px", color: "var(--text-tertiary)" }}>
+                SELECT PEOPLE ({selectedAddMemberIds.length} selected)
+              </label>
+
+              <div style={{ maxHeight: "220px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "6px" }}>
+                {allUsers
+                  .filter(
+                    (u) =>
+                      u._id !== currentUser?._id &&
+                      !selectedChat.participants?.some((p) => (p._id || p) === u._id) &&
+                      (addPeopleSearch
+                        ? u.name?.toLowerCase().includes(addPeopleSearch.toLowerCase()) ||
+                          u.username?.toLowerCase().includes(addPeopleSearch.toLowerCase()) ||
+                          u.email?.toLowerCase().includes(addPeopleSearch.toLowerCase())
+                        : true)
+                  )
+                  .map((userItem) => {
+                    const isSelected = selectedAddMemberIds.includes(userItem._id);
+                    const isOnline = isUserOnline(userItem._id);
+                    return (
+                      <div
+                        key={userItem._id}
+                        onClick={() => toggleAddMemberSelection(userItem._id)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          padding: "8px 12px",
+                          borderRadius: "10px",
+                          background: isSelected ? "rgba(224, 82, 28, 0.15)" : "var(--bg-secondary)",
+                          cursor: "pointer",
+                          border: isSelected ? "1px solid #e0521c" : "1px solid transparent",
+                        }}
+                      >
+                        <div style={{ position: "relative" }}>
+                          <img
+                            src={userItem.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${userItem.name}`}
+                            alt={userItem.name}
+                            style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }}
+                          />
+                          {isOnline && (
+                            <span
+                              style={{
+                                position: "absolute",
+                                bottom: 0,
+                                right: 0,
+                                width: "8px",
+                                height: "8px",
+                                borderRadius: "50%",
+                                background: "#22c55e",
+                                border: "1.5px solid var(--bg-secondary)",
+                              }}
+                            />
+                          )}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: "13px", fontWeight: 700 }}>{userItem.name}</div>
+                          <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>{userItem.email || userItem.username}</div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleAddMemberSelection(userItem._id)}
+                          style={{ width: "16px", height: "16px", accentColor: "#e0521c" }}
+                        />
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            <div style={{ padding: "14px 24px", borderTop: "1px solid var(--border-color)", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button
+                type="button"
+                className="filter-pill"
+                onClick={() => setShowAddPeopleModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="filter-pill active"
+                onClick={handleAddPeopleToGroup}
+                disabled={selectedAddMemberIds.length === 0 || isSubmittingAddPeople}
+              >
+                {isSubmittingAddPeople ? "Adding..." : `Add to Group (${selectedAddMemberIds.length})`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── GROUP INVITE LINK MODAL ─── */}
+      {showInviteModal && selectedChat?.isGroup && (
+        <div className="call-history-modal-overlay" onClick={() => setShowInviteModal(false)}>
+          <div className="call-history-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "460px" }}>
+            <div className="call-history-header">
+              <div className="history-title-area">
+                <h2>Invite to Group</h2>
+                <p>Share a link to invite people to "{selectedChat.groupName}"</p>
+              </div>
+              <button type="button" className="history-close-btn" onClick={() => setShowInviteModal(false)}>
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: "20px 24px" }}>
+              {inviteModalLoading ? (
+                <div style={{ textAlign: "center", padding: "24px 0", color: "var(--text-tertiary)" }}>
+                  Loading invitation link...
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Shareable Link
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: "10px",
+                        background: inviteModalData?.inviteEnabled !== false ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                        color: inviteModalData?.inviteEnabled !== false ? "#16a34a" : "#ef4444",
+                      }}
+                    >
+                      {inviteModalData?.inviteEnabled !== false ? "Active" : "Disabled"}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      background: "var(--bg-secondary)",
+                      padding: "12px 14px",
+                      borderRadius: "12px",
+                      border: "1px solid var(--border-color)",
+                      fontSize: "13px",
+                      wordBreak: "break-all",
+                      fontFamily: "monospace",
+                      marginBottom: "16px",
+                      color: inviteModalData?.inviteEnabled !== false ? "inherit" : "var(--text-tertiary)",
+                      textDecoration: inviteModalData?.inviteEnabled !== false ? "none" : "line-through",
+                    }}
+                  >
+                    {inviteModalData?.inviteToken
+                      ? `${window.location.origin}/invite/${inviteModalData.inviteToken}`
+                      : "Generating link..."}
+                  </div>
+
+                  {inviteCopiedToast && (
+                    <div style={{ color: "#16a34a", fontSize: "12px", fontWeight: 700, marginBottom: "12px", textAlign: "center" }}>
+                      ✓ Invite link copied to clipboard!
+                    </div>
+                  )}
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+                    <button
+                      type="button"
+                      onClick={handleCopyGroupInvite}
+                      disabled={inviteModalData?.inviteEnabled === false}
+                      className="filter-pill active"
+                      style={{ justifyContent: "center" }}
+                    >
+                      📋 Copy Link
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleShareGroupInvite}
+                      disabled={inviteModalData?.inviteEnabled === false}
+                      className="filter-pill"
+                      style={{ justifyContent: "center" }}
+                    >
+                      ↗ Share
+                    </button>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                    <button
+                      type="button"
+                      onClick={handleRegenerateGroupInvite}
+                      className="filter-pill"
+                      style={{ justifyContent: "center", fontSize: "12px" }}
+                      title="Generate a fresh link and revoke the old one"
+                    >
+                      🔄 Regenerate
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleToggleInviteLink}
+                      className="filter-pill"
+                      style={{
+                        justifyContent: "center",
+                        fontSize: "12px",
+                        color: inviteModalData?.inviteEnabled !== false ? "#ef4444" : "#16a34a",
+                      }}
+                    >
+                      {inviteModalData?.inviteEnabled !== false ? "🚫 Disable Link" : "✓ Enable Link"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div style={{ padding: "14px 24px", borderTop: "1px solid var(--border-color)", display: "flex", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                className="filter-pill"
+                onClick={() => setShowInviteModal(false)}
+              >
+                Close
               </button>
             </div>
           </div>

@@ -5,7 +5,7 @@ import callService from '../services/callService';
 
 const CallHistory = ({ onClose, onSelectChat }) => {
   const { user: currentUser } = useAuth();
-  const { startCall } = useCall();
+  const { startCall, startGroupCall } = useCall();
   const [calls, setCalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all' | 'missed'
@@ -114,26 +114,36 @@ const CallHistory = ({ onClose, onSelectChat }) => {
             </div>
           ) : (
             filteredCalls.map((call) => {
+              const isGroup = Boolean(call.isGroup);
               const isCaller = call.caller?._id === currentUser?._id;
               const peer = isCaller ? call.receiver : call.caller;
               const isMissed = call.status === 'missed';
               const isRejected = call.status === 'rejected';
 
+              const displayName = isGroup
+                ? call.conversation?.groupName || 'Group Call'
+                : peer?.name || 'Unknown User';
+
+              const avatarUrl = isGroup
+                ? call.conversation?.groupAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`
+                : peer?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${peer?.name || 'User'}`;
+
               return (
                 <div key={call._id} className="call-history-item">
                   <img
-                    src={
-                      peer?.avatar ||
-                      `https://api.dicebear.com/7.x/initials/svg?seed=${peer?.name || 'User'}`
-                    }
-                    alt={peer?.name}
-                    className="call-peer-avatar"
+                    src={avatarUrl}
+                    alt={displayName}
+                    className={`call-peer-avatar ${isGroup ? 'group-avatar' : ''}`}
                   />
 
                   <div className="call-peer-info">
                     <div className="call-peer-name">
-                      <span>{peer?.name || 'Unknown User'}</span>
-                      {call.callType === 'video' ? (
+                      <span>{displayName}</span>
+                      {isGroup ? (
+                        <span className="call-type-badge group">
+                          {call.callType === 'video' ? '📹 Group Video' : '📞 Group Audio'}
+                        </span>
+                      ) : call.callType === 'video' ? (
                         <span className="call-type-badge video">📹 Video</span>
                       ) : (
                         <span className="call-type-badge audio">📞 Audio</span>
@@ -142,7 +152,13 @@ const CallHistory = ({ onClose, onSelectChat }) => {
 
                     <div className="call-meta-line">
                       <span className={`call-status-indicator ${isMissed ? 'missed' : isCaller ? 'outgoing' : 'incoming'}`}>
-                        {isMissed ? '↙ Missed Call' : isCaller ? '↗ Outgoing' : '↙ Incoming'}
+                        {isGroup
+                          ? `👥 ${call.participants?.length || 0} participants`
+                          : isMissed
+                          ? '↙ Missed Call'
+                          : isCaller
+                          ? '↗ Outgoing'
+                          : '↙ Incoming'}
                       </span>
                       <span>•</span>
                       <span>{new Date(call.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })} at {new Date(call.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -161,7 +177,13 @@ const CallHistory = ({ onClose, onSelectChat }) => {
                       type="button"
                       className="call-back-btn audio"
                       onClick={() => {
-                        if (peer) startCall(peer, 'audio');
+                        if (isGroup && call.conversation) {
+                          startGroupCall(call.conversation, 'audio');
+                          onClose();
+                        } else if (peer) {
+                          startCall(peer, 'audio');
+                          onClose();
+                        }
                       }}
                       title="Audio Call Back"
                     >
@@ -171,7 +193,13 @@ const CallHistory = ({ onClose, onSelectChat }) => {
                       type="button"
                       className="call-back-btn video"
                       onClick={() => {
-                        if (peer) startCall(peer, 'video');
+                        if (isGroup && call.conversation) {
+                          startGroupCall(call.conversation, 'video');
+                          onClose();
+                        } else if (peer) {
+                          startCall(peer, 'video');
+                          onClose();
+                        }
                       }}
                       title="Video Call Back"
                     >

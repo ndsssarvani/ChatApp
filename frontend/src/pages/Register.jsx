@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 const Register = () => {
   const navigate = useNavigate();
   const { register, loginWithGoogle } = useAuth();
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTarget = searchParams.get('redirect') || '/dashboard';
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -96,7 +98,7 @@ const Register = () => {
     const result = await loginWithGoogle({ credential: response.credential });
     setIsSubmitting(false);
     if (result.success) {
-      navigate('/dashboard');
+      navigate(redirectTarget);
     } else {
       setErrors((prev) => ({ ...prev, api: result.message || 'Google authentication failed.' }));
     }
@@ -109,7 +111,7 @@ const Register = () => {
       const result = await loginWithGoogle({ accessToken: tokenResponse.access_token });
       setIsSubmitting(false);
       if (result.success) {
-        navigate('/dashboard');
+        navigate(redirectTarget);
       } else {
         setErrors((prev) => ({ ...prev, api: result.message || 'Google authentication failed.' }));
       }
@@ -211,7 +213,7 @@ const Register = () => {
     setIsSubmitting(false);
 
     if (result.success) {
-      navigate('/dashboard');
+      navigate(redirectTarget);
     } else {
       setErrors(prev => ({
         ...prev,

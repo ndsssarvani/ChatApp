@@ -22,12 +22,50 @@ export const conversationService = {
   },
 
   async addMembers(id, members) {
-    const res = await api.post(`/conversations/${id}/members`, { members });
+    // Accepts array of user IDs
+    const userIds = Array.isArray(members) ? members : [members];
+    const res = await api.post(`/conversations/${id}/members`, { userIds, members: userIds });
+    return res.data;
+  },
+
+  async addGroupMembers(id, userIds) {
+    const ids = Array.isArray(userIds) ? userIds : [userIds];
+    const res = await api.post(`/conversations/${id}/members`, { userIds: ids, members: ids });
     return res.data;
   },
 
   async removeMember(id, userId) {
     const res = await api.delete(`/conversations/${id}/members/${userId}`);
+    return res.data;
+  },
+
+  async getGroupInvite(id) {
+    const res = await api.get(`/conversations/${id}/invite`);
+    return res.data;
+  },
+
+  async generateGroupInvite(id) {
+    const res = await api.get(`/conversations/${id}/invite`);
+    return res.data;
+  },
+
+  async regenerateGroupInvite(id) {
+    const res = await api.post(`/conversations/${id}/invite/regenerate`);
+    return res.data;
+  },
+
+  async toggleGroupInviteStatus(id, enabled) {
+    const res = await api.put(`/conversations/${id}/invite/status`, { enabled });
+    return res.data;
+  },
+
+  async getInviteInfo(token) {
+    const res = await api.get(`/conversations/invite/${token}`);
+    return res.data;
+  },
+
+  async joinGroupByInvite(token) {
+    const res = await api.post(`/conversations/invite/${token}/join`);
     return res.data;
   },
 

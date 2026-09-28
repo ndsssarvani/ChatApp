@@ -33,6 +33,31 @@ const conversationSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+    groupOwner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    inviteToken: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    inviteEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    inviteExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    inviteCreatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    inviteCreatedAt: {
+      type: Date,
+      default: Date.now,
+    },
     lastMessage: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Message',
@@ -53,6 +78,7 @@ const conversationSchema = new mongoose.Schema(
 
 conversationSchema.index({ participants: 1 });
 conversationSchema.index({ updatedAt: -1 });
+conversationSchema.index({ inviteToken: 1 }, { sparse: true });
 
 const Conversation = mongoose.model('Conversation', conversationSchema);
 export default Conversation;

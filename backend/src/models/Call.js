@@ -11,9 +11,24 @@ const callSchema = new mongoose.Schema(
     receiver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false, // Optional for group calls
       index: true,
     },
+    conversation: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Conversation',
+      index: true,
+    },
+    isGroup: {
+      type: Boolean,
+      default: false,
+    },
+    participants: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
     callType: {
       type: String,
       enum: ['audio', 'video'],
@@ -21,7 +36,7 @@ const callSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['completed', 'missed', 'rejected', 'cancelled', 'busy', 'failed'],
+      enum: ['completed', 'missed', 'rejected', 'cancelled', 'busy', 'failed', 'active'],
       default: 'completed',
     },
     startTime: {
@@ -42,6 +57,7 @@ const callSchema = new mongoose.Schema(
 );
 
 callSchema.index({ caller: 1, receiver: 1, createdAt: -1 });
+callSchema.index({ conversation: 1, createdAt: -1 });
 
 const Call = mongoose.model('Call', callSchema);
 export default Call;

@@ -25,6 +25,7 @@ import TemporaryChat from './pages/TemporaryChat';
 import HelpSupport from './pages/HelpSupport';
 import AboutApp from './pages/AboutApp';
 import NotFound from './pages/NotFound';
+import GroupInvite from './pages/GroupInvite';
 import AIChat from './components/AIChat';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 
@@ -211,7 +212,8 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/* Publicly Accessible Information & Support Routes */}
+      {/* Publicly Accessible Information, Support & Group Invite Routes */}
+      <Route path="/invite/:token" element={<GroupInvite />} />
       <Route path="/help" element={<HelpSupport />} />
       <Route path="/about" element={<AboutApp />} />
 

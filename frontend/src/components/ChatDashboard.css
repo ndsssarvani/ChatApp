@@ -1991,6 +1991,321 @@
   margin-top: 2px;
 }
 
+/* ─── GROUP CALLING ENHANCEMENTS ─── */
+.group-incoming-card {
+  border: 1px solid rgba(224, 82, 28, 0.4);
+  box-shadow: 0 20px 50px rgba(224, 82, 28, 0.25);
+}
+
+.group-incoming-badge {
+  display: inline-block;
+  background: rgba(224, 82, 28, 0.2);
+  color: #ff7a3c;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  border: 1px solid rgba(224, 82, 28, 0.3);
+}
+
+.group-active-overlay {
+  z-index: 9999;
+}
+
+.group-call-container {
+  width: 95vw;
+  max-width: 1200px;
+  height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #090d16;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.group-call-container.audio-mode {
+  width: 90vw;
+  max-width: 800px;
+  height: 70vh;
+}
+
+.active-call-header.group-header {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(15, 23, 42, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  z-index: 30;
+  margin-bottom: 0;
+}
+
+.group-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-call-badge {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  animation: pulse 2s infinite;
+}
+
+.group-call-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.group-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.group-members-pill {
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Group Video Grid Layouts */
+.group-video-grid {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  overflow-y: auto;
+  background: #050811;
+  align-content: center;
+}
+
+.group-video-grid.grid-1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.group-video-grid.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+}
+
+.group-video-grid.grid-4 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.group-video-grid.grid-6 {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.group-video-grid.grid-many {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-auto-rows: minmax(180px, 1fr);
+}
+
+.group-video-grid.audio-grid-mode {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-auto-rows: minmax(160px, 1fr);
+}
+
+/* Individual Participant Tile */
+.group-participant-tile {
+  position: relative;
+  background: #0f172a;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.group-participant-tile.self-tile {
+  border: 1px solid rgba(224, 82, 28, 0.4);
+}
+
+.participant-video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.participant-video-element.hidden {
+  display: none;
+}
+
+.participant-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+}
+
+.participant-avatar-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  padding: 3px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.participant-avatar-wrapper.speaking-pulse {
+  border-color: #22c55e;
+  animation: pulse 1.5s infinite;
+}
+
+.participant-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.participant-info-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10;
+}
+
+.participant-mic-status.muted {
+  color: #ef4444;
+}
+
+.participant-reconnecting-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(234, 179, 8, 0.85);
+  color: #000;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+.active-call-controls.group-controls {
+  padding: 14px 28px;
+  background: rgba(15, 23, 42, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 0;
+  z-index: 30;
+}
+
+/* ─── ACTIVE GROUP CALL BANNER IN CONVERSATION ─── */
+.active-group-call-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, rgba(224, 82, 28, 0.18) 0%, rgba(239, 68, 68, 0.12) 100%);
+  border: 1px solid rgba(224, 82, 28, 0.35);
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin: 10px 16px 4px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(224, 82, 28, 0.15);
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-dot-pulse {
+  font-size: 16px;
+  animation: pulse 1.5s infinite;
+}
+
+.banner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.banner-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.btn-join-group-call {
+  background: linear-gradient(135deg, #e0521c 0%, #ff6b35 100%);
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(224, 82, 28, 0.4);
+}
+
+.btn-join-group-call:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 6px 16px rgba(224, 82, 28, 0.5);
+}
+
+/* Call type badge in history for groups */
+.call-type-badge.group {
+  background: rgba(224, 82, 28, 0.15);
+  color: #ff7a3c;
+  border: 1px solid rgba(224, 82, 28, 0.3);
+}
+
+.call-peer-avatar.group-avatar {
+  border-radius: 14px;
+}
+
 /* ─── 9. CALL HISTORY MODAL ─── */
 .call-history-modal-overlay {
   position: fixed;

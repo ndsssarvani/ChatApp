@@ -6,6 +6,8 @@ import authService from '../services/authService';
 const Login = () => {
   const navigate = useNavigate();
   const { login, loginWithOTP, loginWithGoogle } = useAuth();
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTarget = searchParams.get('redirect') || '/dashboard';
 
   // Mode: 'password' | 'email-otp'
   const [authMode, setAuthMode] = useState('password');
@@ -111,7 +113,7 @@ const Login = () => {
     const result = await loginWithGoogle({ credential: response.credential });
     setIsLoading(false);
     if (result.success) {
-      navigate('/dashboard');
+      navigate(redirectTarget);
     } else {
       setError(result.message || 'Google authentication failed.');
     }
@@ -124,7 +126,7 @@ const Login = () => {
       const result = await loginWithGoogle({ accessToken: tokenResponse.access_token });
       setIsLoading(false);
       if (result.success) {
-        navigate('/dashboard');
+        navigate(redirectTarget);
       } else {
         setError(result.message || 'Google authentication failed.');
       }
@@ -187,7 +189,7 @@ const Login = () => {
     setIsLoading(false);
 
     if (result.success) {
-      navigate('/dashboard');
+      navigate(redirectTarget);
     } else {
       setError(result.message || 'Invalid email or password.');
     }
@@ -284,7 +286,7 @@ const Login = () => {
     setIsLoading(false);
 
     if (result.success) {
-      navigate('/dashboard');
+      navigate(redirectTarget);
     } else {
       setError(result.message || 'Invalid verification code.');
     }
