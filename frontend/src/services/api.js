@@ -1,8 +1,15 @@
 import axios from 'axios';
+import { Capacitor } from '@capacitor/core';
 
 const getBaseUrl = () => {
-  let url = import.meta.env.VITE_API_URL;
-  if (!url) return '/api';
+  let url = import.meta.env.VITE_API_URL || import.meta.env.VITE_SOCKET_URL;
+  if (!url) {
+    // If running inside Capacitor native webview (iOS/Android), relative URLs will fail against localhost webview
+    if (Capacitor.isNativePlatform()) {
+      return 'http://localhost:5000/api'; // fallback if no env variable provided
+    }
+    return '/api';
+  }
   url = url.trim().replace(/\/+$/, '');
   if (!url.endsWith('/api')) {
     url = `${url}/api`;

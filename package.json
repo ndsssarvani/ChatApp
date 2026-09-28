@@ -8,7 +8,11 @@
     "start": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue.bold,green.bold\" \"npm run start --prefix backend\" \"npm run preview --prefix frontend\"",
     "build": "npm run build --prefix frontend",
     "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
-    "seed": "npm run seed --prefix backend"
+    "seed": "npm run seed --prefix backend",
+    "mobile:build": "npm --prefix frontend run mobile:build",
+    "mobile:sync": "npm --prefix frontend run mobile:sync",
+    "android": "npm --prefix frontend run android",
+    "ios": "npm --prefix frontend run ios"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

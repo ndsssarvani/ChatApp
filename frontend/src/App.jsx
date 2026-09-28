@@ -1,5 +1,6 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import { initNativeApp, registerPushNotifications } from './services/nativeService';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -30,6 +31,33 @@ import AIChat from './components/AIChat';
 import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute';
 
 function App() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Initialize native features (Splash, Status Bar, Back Button, Deep Links, Keyboard, Network)
+    const cleanup = initNativeApp({ navigate });
+
+    // Initialize native Push Notifications
+    registerPushNotifications(
+      (token) => {
+        // Token received from APNS or FCM
+        console.log('[Native Push Token]:', token);
+      },
+      (data) => {
+        // Notification action tapped
+        if (data?.conversationId) {
+          navigate('/dashboard');
+        } else if (data?.type === 'missed_call') {
+          navigate('/dashboard');
+        }
+      }
+    );
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [navigate]);
+
   return (
     <Routes>
       {/* Public Routes */}

@@ -45,7 +45,17 @@ export const SocketProvider = ({ children }) => {
         });
       });
 
+      const handleNativeNetwork = (event) => {
+        if (event.detail?.connected && socketRef.current) {
+          if (!socketRef.current.connected) {
+            socketRef.current.connect();
+          }
+        }
+      };
+      window.addEventListener('native_network_changed', handleNativeNetwork);
+
       return () => {
+        window.removeEventListener('native_network_changed', handleNativeNetwork);
         newSocket.disconnect();
         socketRef.current = null;
       };

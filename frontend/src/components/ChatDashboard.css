@@ -3371,4 +3371,27 @@
     font-size: 12px;
     padding: 5px 12px;
   }
+
+  /* Safe Area Insets for Mobile Notches and Home Indicators */
+  .chat-main-header {
+    padding-top: max(12px, calc(10px + env(safe-area-inset-top, 0px)));
+  }
+
+  .sidebar-header {
+    padding-top: max(14px, calc(10px + env(safe-area-inset-top, 0px)));
+  }
+
+  .nav-rail {
+    padding-top: max(12px, calc(10px + env(safe-area-inset-top, 0px)));
+    padding-bottom: max(12px, calc(10px + env(safe-area-inset-bottom, 0px)));
+  }
+
+  /* Native Keyboard Active State Adjustments */
+  body.keyboard-open .composer-area {
+    padding-bottom: 8px;
+  }
+
+  body.keyboard-open .chat-container {
+    height: calc(100vh - var(--keyboard-height, 0px));
+  }
 }
