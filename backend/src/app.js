@@ -26,12 +26,23 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
+  'capacitor://localhost',       // Android Capacitor app
+  'https://localhost',           // iOS Capacitor app
+  'http://localhost',            // Capacitor fallback
   process.env.CLIENT_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
 ].filter(Boolean);
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true;
-  if (origin.includes('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+  // Allow all Vercel deployments, localhost variants, and Capacitor origins
+  if (
+    origin.includes('.vercel.app') ||
+    origin.includes('localhost') ||
+    origin.includes('127.0.0.1') ||
+    origin.startsWith('capacitor://') ||
+    origin.startsWith('ionic://')
+  ) {
     return true;
   }
   if (allowedOrigins.some((allowed) => origin.startsWith(allowed) || allowed.startsWith(origin))) {
