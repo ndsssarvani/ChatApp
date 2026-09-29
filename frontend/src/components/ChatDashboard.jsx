@@ -1280,7 +1280,7 @@ const ChatDashboard = () => {
 
           <button
             type="button"
-            className="rail-btn mobile-hide"
+            className="rail-btn"
             onClick={() => setShowCreateGroup(true)}
             title="Create Group"
           >
@@ -1292,7 +1292,7 @@ const ChatDashboard = () => {
 
           <button
             type="button"
-            className="rail-btn mobile-hide"
+            className="rail-btn"
             onClick={() => setShowCallHistory(true)}
             title="Calls History"
           >
@@ -1317,7 +1317,7 @@ const ChatDashboard = () => {
 
           <button
             type="button"
-            className="rail-btn mobile-hide"
+            className="rail-btn"
             onClick={() => navigate("/starred")}
             title="Starred Messages"
           >
@@ -1342,7 +1342,7 @@ const ChatDashboard = () => {
 
           <button
             type="button"
-            className="rail-btn mobile-hide"
+            className="rail-btn"
             onClick={() => navigate("/analytics")}
             title="Analytics"
           >
@@ -1356,14 +1356,14 @@ const ChatDashboard = () => {
         <div className="rail-bottom">
           <button
             type="button"
-            className="rail-btn mobile-hide"
+            className="rail-btn"
             onClick={toggleTheme}
             title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             <span className="rail-icon-wrap">
               {isDarkMode ? <IconSun size={20} /> : <IconMoon size={20} />}
             </span>
-            <span className="rail-btn-text">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+            <span className="rail-btn-text">{isDarkMode ? "Theme" : "Theme"}</span>
           </button>
 
           <button
@@ -1379,7 +1379,7 @@ const ChatDashboard = () => {
           </button>
 
           <div
-            className="rail-avatar-btn mobile-hide"
+            className="rail-avatar-btn"
             onClick={() => navigate("/profile")}
             title={currentUser?.name}
           >

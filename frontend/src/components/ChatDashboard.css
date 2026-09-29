@@ -3127,11 +3127,11 @@
   .nav-rail {
     width: 100vw;
     height: calc(64px + env(safe-area-inset-bottom, 0px));
-    padding: 2px 6px calc(env(safe-area-inset-bottom, 0px));
+    padding: 0 8px calc(env(safe-area-inset-bottom, 0px));
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: space-around !important;
+    justify-content: flex-start !important;
     border-right: none;
     border-top: 1px solid var(--border-color, rgba(255,255,255,0.1));
     background: var(--bg-rail, #0f172a);
@@ -3139,20 +3139,24 @@
     -webkit-backdrop-filter: blur(20px);
     z-index: 90;
     flex-shrink: 0;
-    overflow: visible;
-    gap: 0;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    gap: 4px;
     box-sizing: border-box;
   }
 
-  .nav-rail::-webkit-scrollbar { display: none; }
+  .nav-rail::-webkit-scrollbar { display: none !important; }
 
   .nav-rail.expanded {
     width: 100vw;
     flex-direction: row !important;
-    padding: 2px 6px calc(env(safe-area-inset-bottom, 0px));
+    padding: 0 8px calc(env(safe-area-inset-bottom, 0px));
   }
 
-  /* Unroll rail-top and rail-bottom so direct buttons are equal flex children */
+  /* Unroll rail-top and rail-bottom so all 11 direct buttons flow horizontally */
   .rail-top,
   .rail-bottom {
     display: contents !important;
@@ -3168,24 +3172,20 @@
     display: none !important;
   }
 
-  /* Hide secondary items on mobile so bottom bar stays clean and spacious */
-  .rail-btn.mobile-hide,
-  .rail-avatar-btn.mobile-hide {
-    display: none !important;
-  }
-
   /* Show labels below icons on mobile */
   .rail-btn-text {
     display: block !important;
-    font-size: 10.5px;
+    font-size: 9.5px;
     font-weight: 600;
-    margin-top: 2px;
-    opacity: 0.7;
+    margin-top: 1px;
+    opacity: 0.75;
     letter-spacing: -0.01em;
     line-height: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
+    max-width: 58px;
     transition: opacity 0.2s, color 0.2s;
   }
 
@@ -3195,10 +3195,11 @@
     font-weight: 700;
   }
 
-  /* Each nav button: vertical stack (icon + label) */
+  /* Each nav button: equal fixed width (58px), perfectly spaced, zero clumsy squishing! */
   .rail-btn {
-    flex: 1;
-    min-width: 0;
+    flex: 0 0 58px !important;
+    width: 58px !important;
+    min-width: 58px !important;
     height: 100%;
     padding: 6px 2px 4px !important;
     display: flex !important;
@@ -3206,10 +3207,12 @@
     align-items: center !important;
     justify-content: center !important;
     gap: 2px;
-    border-radius: 8px;
+    border-radius: 10px;
     background: transparent !important;
     position: relative;
     color: var(--text-muted, #94a3b8);
+    scroll-snap-align: center;
+    box-sizing: border-box;
   }
 
   /* Active state: top indicator bar */
@@ -3218,8 +3221,8 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 20%;
-    right: 20%;
+    left: 15%;
+    right: 15%;
     height: 2.5px;
     border-radius: 0 0 3px 3px;
     background: var(--accent-primary, #e0521c);
@@ -3238,20 +3241,43 @@
     justify-content: center;
     transition: background 0.2s, color 0.2s;
     border-radius: 10px;
-    padding: 4px;
+    padding: 3px;
     width: 28px;
     height: 28px;
   }
 
   .rail-icon-wrap svg {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     display: block;
+  }
+
+  /* Avatar button on mobile rail */
+  .rail-avatar-btn {
+    flex: 0 0 46px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 100%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 50%;
+    scroll-snap-align: center;
+  }
+
+  .rail-avatar-btn img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--accent-primary, #e0521c);
   }
 
   .rail-ai-spark-dot {
     top: 4px;
-    right: 6px;
+    right: 8px;
   }
 
   /* Hide bottom nav rail when an active conversation is open */
