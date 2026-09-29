@@ -3126,8 +3126,8 @@
   /* ── Mobile Bottom Navigation Bar ── */
   .nav-rail {
     width: 100vw;
-    height: calc(64px + env(safe-area-inset-bottom, 0px));
-    padding: 0 8px calc(env(safe-area-inset-bottom, 0px));
+    height: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding: 0 4px calc(env(safe-area-inset-bottom, 0px));
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
@@ -3144,7 +3144,7 @@
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
-    gap: 4px;
+    gap: 2px;
     box-sizing: border-box;
   }
 
@@ -3153,10 +3153,10 @@
   .nav-rail.expanded {
     width: 100vw;
     flex-direction: row !important;
-    padding: 0 8px calc(env(safe-area-inset-bottom, 0px));
+    padding: 0 4px calc(env(safe-area-inset-bottom, 0px));
   }
 
-  /* Unroll rail-top and rail-bottom so all 11 direct buttons flow horizontally */
+  /* Unroll rail-top and rail-bottom so all direct buttons flow horizontally */
   .rail-top,
   .rail-bottom {
     display: contents !important;
@@ -3175,7 +3175,7 @@
   /* Show labels below icons on mobile */
   .rail-btn-text {
     display: block !important;
-    font-size: 9.5px;
+    font-size: 8.5px;
     font-weight: 600;
     margin-top: 1px;
     opacity: 0.75;
@@ -3185,7 +3185,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
-    max-width: 58px;
+    max-width: 44px;
     transition: opacity 0.2s, color 0.2s;
   }
 
@@ -3195,19 +3195,19 @@
     font-weight: 700;
   }
 
-  /* Each nav button: equal fixed width (58px), perfectly spaced, zero clumsy squishing! */
+  /* Each nav button: compact 44px width for tight, clean spacing */
   .rail-btn {
-    flex: 0 0 58px !important;
-    width: 58px !important;
-    min-width: 58px !important;
+    flex: 0 0 44px !important;
+    width: 44px !important;
+    min-width: 44px !important;
     height: 100%;
-    padding: 6px 2px 4px !important;
+    padding: 4px 1px 2px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 2px;
-    border-radius: 10px;
+    gap: 1px;
+    border-radius: 8px;
     background: transparent !important;
     position: relative;
     color: var(--text-muted, #94a3b8);
@@ -3221,17 +3221,17 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 15%;
-    right: 15%;
-    height: 2.5px;
-    border-radius: 0 0 3px 3px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
     background: var(--accent-primary, #e0521c);
   }
 
   /* Active icon highlight */
   .rail-btn.active .rail-icon-wrap {
     background: rgba(224, 82, 28, 0.15);
-    border-radius: 10px;
+    border-radius: 8px;
     color: var(--accent-primary, #e0521c);
   }
 
@@ -3240,23 +3240,23 @@
     align-items: center;
     justify-content: center;
     transition: background 0.2s, color 0.2s;
-    border-radius: 10px;
-    padding: 3px;
-    width: 28px;
-    height: 28px;
+    border-radius: 8px;
+    padding: 2px;
+    width: 24px;
+    height: 24px;
   }
 
   .rail-icon-wrap svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     display: block;
   }
 
   /* Avatar button on mobile rail */
   .rail-avatar-btn {
-    flex: 0 0 46px !important;
-    width: 46px !important;
-    min-width: 46px !important;
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    min-width: 36px !important;
     height: 100%;
     display: flex !important;
     align-items: center !important;
@@ -3268,16 +3268,16 @@
   }
 
   .rail-avatar-btn img {
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     object-fit: cover;
     border: 1.5px solid var(--accent-primary, #e0521c);
   }
 
   .rail-ai-spark-dot {
-    top: 4px;
-    right: 8px;
+    top: 2px;
+    right: 4px;
   }
 
   /* Hide bottom nav rail when an active conversation is open */
