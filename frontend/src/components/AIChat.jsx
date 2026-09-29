@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import aiService from "../services/aiService";
+import { directGeminiChat } from "../services/directGemini";
 import { AppLogo, IconAIChat } from "./Icons";
 import "./AIChat.css";
 
@@ -547,40 +548,50 @@ const AIChat = () => {
     setLoading(true);
 
     try {
-      const res = await aiService.sendMessage({
-        message: message || "Please analyze the attached file.",
-        conversationId: activeConversationId || undefined,
-        language: aiLanguage,
-        style: responseStyle,
-        attachments: currentAttachments,
-      });
+      let replyText = "";
+      try {
+        const res = await aiService.sendMessage({
+          message: message || "Please analyze the attached file.",
+          conversationId: activeConversationId || undefined,
+          language: aiLanguage,
+          style: responseStyle,
+          attachments: currentAttachments,
+        });
 
-      if (res.success) {
+        if (res.success && res.reply) {
+          replyText = res.reply;
+          if (res.conversationId && (!activeConversationId || activeConversationId !== res.conversationId)) {
+            setActiveConversationId(res.conversationId);
+            loadConversations();
+          }
+        } else {
+          throw new Error(res.message || "Backend AI call returned failure");
+        }
+      } catch (backendErr) {
+        console.warn("[AIChat] Backend AI failed, executing direct Gemini client fallback:", backendErr.message);
+        const directRes = await directGeminiChat({
+          messages: [...messages, userMsgObj],
+          language: aiLanguage,
+          style: responseStyle,
+        });
+        replyText = directRes.text;
+      }
+
+      if (replyText) {
         const modelMsgObj = {
           role: "model",
-          content: res.reply,
+          content: replyText,
           createdAt: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, modelMsgObj]);
 
-        if (res.conversationId && (!activeConversationId || activeConversationId !== res.conversationId)) {
-          setActiveConversationId(res.conversationId);
-          loadConversations();
-        }
-
-        // Auto read response if voice mode enabled
         if (autoSpeakEnabled) {
-          speakText(res.reply, messages.length + 1);
+          speakText(replyText, messages.length + 1);
         }
-      } else {
-        throw new Error(res.message || "Failed to get response");
       }
     } catch (err) {
       console.error("[AIChat] Send Error:", err);
-      const errorText =
-        err.response?.data?.message ||
-        "AI is temporarily unavailable. Please try again or check your Gemini API key.";
-      setErrorMsg(errorText);
+      setErrorMsg("AI service busy or high demand. Please try again in a moment.");
     } finally {
       setLoading(false);
     }
