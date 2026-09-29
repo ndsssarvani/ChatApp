@@ -3123,77 +3123,131 @@
     overflow: hidden;
   }
 
-  /* Bottom navigation rail on mobile (active when browsing chats) */
+  /* ── Mobile Bottom Navigation Bar ── */
   .nav-rail {
     width: 100vw;
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    height: calc(66px + env(safe-area-inset-bottom, 0px));
+    padding: 0 4px calc(env(safe-area-inset-bottom, 0px));
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    align-items: stretch;
+    justify-content: space-around;
     border-right: none;
     border-top: 1px solid var(--border-color);
     background: var(--bg-rail);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     z-index: 90;
     flex-shrink: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    overflow: visible;
+    gap: 0;
   }
 
-  .nav-rail::-webkit-scrollbar {
-    display: none;
-  }
+  .nav-rail::-webkit-scrollbar { display: none; }
 
   .nav-rail.expanded {
     width: 100vw;
     flex-direction: row;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    padding: 0 4px calc(env(safe-area-inset-bottom, 0px));
   }
 
+  /* Each section becomes a single equal-width flex row */
   .rail-top,
   .rail-bottom {
     flex-direction: row;
     justify-content: space-around;
+    align-items: stretch;
     width: auto;
     flex: 1;
-    gap: 2px;
+    gap: 0;
   }
 
+  /* Hide desktop-only elements */
   .rail-logo-btn,
   .rail-brand-meta,
   .rail-header-toggle,
   .rail-item-label,
   .rail-expand-btn,
-  .rail-btn-text,
   .rail-user-details {
     display: none !important;
   }
 
+  /* Show labels below icons on mobile */
+  .rail-btn-text {
+    display: block !important;
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 2px;
+    opacity: 0.6;
+    letter-spacing: 0;
+    line-height: 1;
+    transition: opacity 0.2s;
+  }
+
+  .rail-btn.active .rail-btn-text {
+    opacity: 1;
+    color: var(--accent-primary, #e0521c);
+  }
+
+  /* Each nav button: vertical stack (icon + label) */
   .rail-btn {
-    width: 44px;
-    height: 44px;
-    padding: 0 !important;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 8px 4px 6px !important;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    gap: 0;
+    border-radius: 0;
+    background: transparent !important;
+    position: relative;
   }
 
+  /* Active state: top indicator bar */
   .rail-btn.active::before {
-    display: none;
+    display: block;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 25%;
+    right: 25%;
+    height: 2.5px;
+    border-radius: 0 0 3px 3px;
+    background: var(--accent-primary, #e0521c);
   }
 
+  /* Active icon highlight */
+  .rail-btn.active .rail-icon-wrap {
+    background: rgba(224, 82, 28, 0.1);
+    border-radius: 10px;
+    padding: 4px;
+  }
+
+  .rail-icon-wrap {
+    transition: background 0.2s;
+    border-radius: 10px;
+    padding: 4px;
+  }
+
+  .rail-icon-wrap svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Avatar button */
   .rail-avatar-btn {
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
     padding: 0 !important;
+    border-radius: 50%;
   }
 
   .rail-ai-spark-dot {
-    top: 6px;
-    right: 6px;
+    top: 4px;
+    right: 4px;
   }
 
-  /* Hide bottom nav rail when an active conversation is open to maximize chat viewport */
+  /* Hide bottom nav rail when an active conversation is open */
   .dashboard-wrapper:has(.chat-container.chat-selected) .nav-rail {
     display: none;
   }
