@@ -1011,48 +1011,6 @@ const Login = () => {
                 >
                   {isLoading ? 'Signing In...' : 'Sign In to Workspace →'}
                 </button>
-
-                <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px dashed var(--cf-border, #ccc)', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--cf-ink-muted, #666)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                    ⚡ 1-Click Quick Demo Login:
-                  </span>
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmailOrUsername('sarvani@example.com');
-                        setPassword('password123');
-                        login('sarvani@example.com', 'password123').then((res) => {
-                          if (res.success) navigate(redirectTarget);
-                          else setError(res.message || 'Demo login failed');
-                        });
-                      }}
-                      style={{
-                        padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(224,82,28,0.3)',
-                        background: 'rgba(224,82,28,0.08)', color: '#e0521c', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer'
-                      }}
-                    >
-                      Sarvani Patel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmailOrUsername('alex@example.com');
-                        setPassword('password123');
-                        login('alex@example.com', 'password123').then((res) => {
-                          if (res.success) navigate(redirectTarget);
-                          else setError(res.message || 'Demo login failed');
-                        });
-                      }}
-                      style={{
-                        padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)',
-                        background: 'rgba(0,0,0,0.04)', color: '#333', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer'
-                      }}
-                    >
-                      Alex Johnson
-                    </button>
-                  </div>
-                </div>
               </form>
             )}
 

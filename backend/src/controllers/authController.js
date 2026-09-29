@@ -66,30 +66,34 @@ export const register = async (req, res) => {
 
     const token = generateToken(user._id);
 
-    // Track initial device session
+    // Track initial device session safely
     const userAgent = req.headers['user-agent'] || 'Unknown Device';
-    await DeviceSession.create({
-      user: user._id,
-      device: userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Browser',
-      browser: userAgent.includes('Chrome')
-        ? 'Chrome'
-        : userAgent.includes('Firefox')
-        ? 'Firefox'
-        : userAgent.includes('Safari')
-        ? 'Safari'
-        : 'Web Browser',
-      os: userAgent.includes('Windows')
-        ? 'Windows'
-        : userAgent.includes('Mac')
-        ? 'macOS'
-        : userAgent.includes('Android')
-        ? 'Android'
-        : userAgent.includes('iPhone')
-        ? 'iOS'
-        : 'Unknown OS',
-      ip: req.ip || req.connection?.remoteAddress || '127.0.0.1',
-      token,
-    });
+    try {
+      await DeviceSession.create({
+        user: user._id,
+        device: userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Browser',
+        browser: userAgent.includes('Chrome')
+          ? 'Chrome'
+          : userAgent.includes('Firefox')
+          ? 'Firefox'
+          : userAgent.includes('Safari')
+          ? 'Safari'
+          : 'Web Browser',
+        os: userAgent.includes('Windows')
+          ? 'Windows'
+          : userAgent.includes('Mac')
+          ? 'macOS'
+          : userAgent.includes('Android')
+          ? 'Android'
+          : userAgent.includes('iPhone')
+          ? 'iOS'
+          : 'Unknown OS',
+        ip: req.ip || req.connection?.remoteAddress || '127.0.0.1',
+        token,
+      });
+    } catch (e) {
+      console.warn('[DeviceSession Register Warning]', e.message);
+    }
 
     res.status(201).json({
       success: true,
