@@ -17,8 +17,8 @@ const getAIClient = () => {
   return aiInstance;
 };
 
-// Candidate models in priority order (Valid Google Gemini API Models)
-const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+// Candidate models in priority order (Working Google Gemini API Models)
+const MODELS = ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-pro', 'gemini-3.0-flash'];
 
 /**
  * Call Gemini with multi-model fallback & retry
