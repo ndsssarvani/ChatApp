@@ -6,7 +6,7 @@ const getBaseUrl = () => {
   if (!url) {
     // If running inside Capacitor native webview (iOS/Android), relative URLs will fail against localhost webview
     if (Capacitor.isNativePlatform()) {
-      return 'http://localhost:5000/api'; // fallback if no env variable provided
+      return 'http://10.0.2.2:5000/api'; // Android emulator host alias (127.0.0.1 on host machine)
     }
     return '/api';
   }
