@@ -3393,5 +3393,238 @@
 
   body.keyboard-open .chat-container {
     height: calc(100vh - var(--keyboard-height, 0px));
+    height: calc(100dvh - var(--keyboard-height, 0px));
   }
 }
+
+/* ─── 430px / 414px — Large Android Phones ─── */
+@media (max-width: 430px) {
+  .contacts-sidebar {
+    width: 100vw;
+  }
+
+  .sidebar-heading {
+    font-size: 20px;
+  }
+
+  .chat-list-item {
+    padding: 10px 12px;
+  }
+
+  .chat-item-avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .chat-item-name {
+    font-size: 14.5px;
+  }
+
+  .chat-item-preview {
+    font-size: 12.5px;
+  }
+
+  /* Composer on large phones */
+  .composer-area {
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .composer-row {
+    padding: 3px 6px;
+    gap: 5px;
+    border-radius: 18px;
+  }
+}
+
+/* ─── 390px / 375px — Standard iPhones ─── */
+@media (max-width: 390px) {
+  .chat-header-meta h2 {
+    font-size: 14px;
+    max-width: 120px;
+  }
+
+  .chat-header-meta p {
+    font-size: 11.5px;
+  }
+
+  .header-action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .message-row {
+    max-width: 92%;
+  }
+
+  .message-bubble {
+    font-size: 13.5px;
+    padding: 8px 11px;
+  }
+
+  .chat-timestamp-divider {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}
+
+/* ─── 360px — Small Android Phones ─── */
+@media (max-width: 360px) {
+  .sidebar-header {
+    padding: 12px 12px 10px;
+  }
+
+  .sidebar-heading {
+    font-size: 18px;
+  }
+
+  .search-input-modern {
+    font-size: 13px;
+    padding: 9px 12px 9px 36px;
+  }
+
+  .filter-pill {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .chat-list-item {
+    padding: 9px 10px;
+    gap: 10px;
+  }
+
+  .chat-item-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-item-name {
+    font-size: 13.5px;
+  }
+
+  .chat-item-time {
+    font-size: 10.5px;
+  }
+
+  /* Composer: tightest mode */
+  .composer-area {
+    padding: 5px 7px calc(5px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .composer-textarea {
+    font-size: 14px;
+    padding: 5px 4px;
+  }
+
+  .composer-action-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .composer-send-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* ─── 320px — Smallest supported screen ─── */
+@media (max-width: 320px) {
+  .sidebar-heading {
+    font-size: 16px;
+  }
+
+  .chat-item-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-action-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .chat-header-meta h2 {
+    font-size: 13px;
+    max-width: 90px;
+  }
+
+  .message-bubble {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+
+  .composer-action-btn,
+  .composer-send-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+}
+
+/* ─── LANDSCAPE for Chat on Mobile ─── */
+@media (max-width: 768px) and (orientation: landscape) {
+  .chat-main-header {
+    min-height: 48px;
+    padding: max(4px, env(safe-area-inset-top, 0px)) 12px 4px;
+  }
+
+  .messages-scroll-view {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .composer-area {
+    padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .nav-rail {
+    padding-left: max(8px, env(safe-area-inset-left, 0px));
+    padding-right: max(8px, env(safe-area-inset-right, 0px));
+  }
+}
+
+/* ─── Tablet (769px – 1024px) Sidebar refinement ─── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-wrapper {
+    flex-direction: row;
+  }
+
+  .nav-rail {
+    width: 62px;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: none;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .rail-top,
+  .rail-bottom {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+  }
+
+  .contacts-sidebar {
+    width: 280px;
+    max-width: 280px;
+    flex-shrink: 0;
+  }
+
+  .chat-container {
+    display: flex !important;
+    flex: 1;
+  }
+
+  .mobile-back-btn {
+    display: none;
+  }
+
+  /* Hide the right profile panel until opened */
+  .profile-sidebar:not(.visible) {
+    display: none;
+  }
+}

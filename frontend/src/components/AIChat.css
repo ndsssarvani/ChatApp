@@ -1292,6 +1292,108 @@
   }
 }
 
+/* ─── 5b. SMALL PHONE BREAKPOINTS ─── */
+@media (max-width: 430px) {
+  .aichat-new-chat-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .aichat-new-chat-text {
+    display: none;
+  }
+
+  .aichat-tools-bar {
+    gap: 6px;
+  }
+
+  .aichat-tool-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 390px) {
+  .aichat-navbar {
+    height: 52px;
+  }
+
+  .aichat-brand-icon {
+    font-size: 22px;
+  }
+
+  .aichat-title {
+    font-size: 13.5px;
+  }
+
+  .aichat-nav-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .aichat-bubble {
+    max-width: 94%;
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 360px) {
+  .aichat-navbar {
+    padding: 0 8px;
+    height: 50px;
+  }
+
+  .aichat-brand {
+    gap: 6px;
+  }
+
+  .aichat-title {
+    font-size: 13px;
+  }
+
+  .aichat-input-form {
+    margin: 0 8px;
+    border-radius: 10px;
+  }
+
+  .aichat-send-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 320px) {
+  .aichat-title {
+    font-size: 12px;
+  }
+
+  .aichat-brand-icon {
+    font-size: 18px;
+  }
+
+  .aichat-bubble {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+}
+
+/* ─── Landscape AI Chat ─── */
+@media (max-width: 768px) and (orientation: landscape) {
+  .aichat-navbar {
+    height: 48px;
+  }
+
+  .aichat-conversation-area {
+    /* Account for reduced height in landscape */
+    flex: 1;
+  }
+
+  .aichat-input-area {
+    padding-top: 4px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* ─── Reduced Motion Support ─── */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

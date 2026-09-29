@@ -450,3 +450,92 @@
     justify-content: center;
   }
 }
+
+/* ─── 430px — Large Android ─── */
+@media (max-width: 430px) {
+  .profile-title {
+    font-size: 24px;
+  }
+
+  .profile-avatar-large {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-card {
+    padding: 24px 16px;
+  }
+
+  .bio-card,
+  .social-media-card {
+    padding: 20px 14px;
+  }
+
+  .bio-card-title,
+  .social-media-title {
+    font-size: 17px;
+  }
+}
+
+/* ─── 360px — Small Android ─── */
+@media (max-width: 360px) {
+  .profile-content {
+    padding: 10px 10px calc(36px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .profile-title {
+    font-size: 20px;
+  }
+
+  .profile-avatar-large {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-card-name {
+    font-size: 18px;
+  }
+
+  .profile-card {
+    padding: 20px 12px;
+  }
+
+  .bio-card,
+  .social-media-card {
+    padding: 16px 12px;
+  }
+
+  .bio-value {
+    font-size: 14px;
+  }
+
+  .bio-input {
+    padding: 10px 12px;
+  }
+}
+
+/* ─── 320px — Smallest ─── */
+@media (max-width: 320px) {
+  .profile-avatar-large {
+    width: 88px;
+    height: 88px;
+  }
+
+  .profile-card-name {
+    font-size: 16px;
+  }
+
+  .bio-label {
+    font-size: 11px;
+  }
+
+  .bio-value {
+    font-size: 13px;
+  }
+
+  .social-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+}

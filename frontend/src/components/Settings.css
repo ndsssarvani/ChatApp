@@ -686,3 +686,114 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ─── 430px — Large Android ─── */
+@media (max-width: 430px) {
+  .modern-settings-header {
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 14px 48px;
+  }
+
+  .settings-header-title-wrap h1 {
+    font-size: 19px;
+  }
+
+  .modern-settings-body {
+    padding: 0 12px;
+  }
+
+  .modern-settings-item {
+    padding: 13px 14px;
+    gap: 12px;
+  }
+
+  .user-card-avatar-wrap {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+/* ─── 360px — Small Android ─── */
+@media (max-width: 360px) {
+  .modern-settings-header {
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 44px;
+  }
+
+  .settings-header-title-wrap h1 {
+    font-size: 17px;
+  }
+
+  .settings-header-sub {
+    font-size: 11px;
+  }
+
+  .modern-settings-body {
+    padding: 0 10px;
+    gap: 16px;
+  }
+
+  .modern-settings-item {
+    padding: 12px 12px;
+    gap: 10px;
+  }
+
+  .modern-settings-icon-box {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .item-main-title {
+    font-size: 13.5px;
+  }
+
+  .item-sub-title {
+    font-size: 11.5px;
+  }
+
+  .settings-group-title {
+    font-size: 11px;
+  }
+
+  .user-card-avatar-wrap {
+    width: 48px;
+    height: 48px;
+  }
+
+  .user-card-name-row h3 {
+    font-size: 15px;
+  }
+
+  .palette-swatch {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* ─── 320px — Smallest ─── */
+@media (max-width: 320px) {
+  .modern-settings-item {
+    padding: 10px 10px;
+    gap: 8px;
+  }
+
+  .modern-settings-icon-box {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+
+  .item-main-title {
+    font-size: 13px;
+  }
+
+  .item-sub-title {
+    font-size: 11px;
+  }
+
+  .settings-back-btn {
+    width: 36px;
+    height: 36px;
+  }
+}

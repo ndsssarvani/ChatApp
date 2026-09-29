@@ -753,3 +753,78 @@ body {
     justify-content: center;
   }
 }
+
+/* ─── 430px — Large Android ─── */
+@media (max-width: 430px) {
+  .language-content {
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 14px calc(36px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .language-section {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .section-title {
+    font-size: 17px;
+  }
+
+  .language-options-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+/* ─── 360px — Small Android ─── */
+@media (max-width: 360px) {
+  .language-content {
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(32px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .page-title {
+    font-size: 19px;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+  }
+
+  .language-section {
+    padding: 16px 12px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .language-options-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .lang-back-btn {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ─── 320px — Smallest ─── */
+@media (max-width: 320px) {
+  .page-title {
+    font-size: 17px;
+  }
+
+  .language-section {
+    padding: 12px 10px;
+  }
+
+  .section-title {
+    font-size: 15px;
+  }
+}
