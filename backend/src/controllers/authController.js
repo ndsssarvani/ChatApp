@@ -127,18 +127,32 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
 
-    const emailOrUsername = email.toLowerCase().trim();
+    const inputClean = email.trim();
+    const inputLower = inputClean.toLowerCase();
+
+    // Escape regex special chars
+    const escapedInput = inputClean.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+
+    // Flexible lookup: search email, username, or name case-insensitively
     const user = await User.findOne({
-      $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+      $or: [
+        { email: inputLower },
+        { username: inputLower },
+        { name: { $regex: `^${escapedInput}$`, $options: 'i' } },
+      ],
     });
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials. User not found.' });
+      return res.status(401).json({ success: false, message: 'Account not found with this email or username. Please check your credentials or register.' });
     }
 
-    const isMatch = await user.matchPassword(password);
+    let isMatch = await user.matchPassword(password);
+    if (!isMatch && typeof password === 'string') {
+      isMatch = await user.matchPassword(password.trim());
+    }
+
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials. Incorrect password.' });
+      return res.status(401).json({ success: false, message: 'Incorrect password. Please verify your password and try again.' });
     }
 
     // Set online
@@ -148,30 +162,34 @@ export const login = async (req, res) => {
 
     const token = generateToken(user._id);
 
-    // Track device session
+    // Track device session safely
     const userAgent = req.headers['user-agent'] || 'Unknown Device';
-    await DeviceSession.create({
-      user: user._id,
-      device: userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Browser',
-      browser: userAgent.includes('Chrome')
-        ? 'Chrome'
-        : userAgent.includes('Firefox')
-        ? 'Firefox'
-        : userAgent.includes('Safari')
-        ? 'Safari'
-        : 'Web Browser',
-      os: userAgent.includes('Windows')
-        ? 'Windows'
-        : userAgent.includes('Mac')
-        ? 'macOS'
-        : userAgent.includes('Android')
-        ? 'Android'
-        : userAgent.includes('iPhone')
-        ? 'iOS'
-        : 'Unknown OS',
-      ip: req.ip || req.connection?.remoteAddress || '127.0.0.1',
-      token,
-    });
+    try {
+      await DeviceSession.create({
+        user: user._id,
+        device: userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Browser',
+        browser: userAgent.includes('Chrome')
+          ? 'Chrome'
+          : userAgent.includes('Firefox')
+          ? 'Firefox'
+          : userAgent.includes('Safari')
+          ? 'Safari'
+          : 'Web Browser',
+        os: userAgent.includes('Windows')
+          ? 'Windows'
+          : userAgent.includes('Mac')
+          ? 'macOS'
+          : userAgent.includes('Android')
+          ? 'Android'
+          : userAgent.includes('iPhone')
+          ? 'iOS'
+          : 'Unknown OS',
+        ip: req.ip || req.connection?.remoteAddress || '127.0.0.1',
+        token,
+      });
+    } catch (sessionErr) {
+      console.warn('[DeviceSession Warning]', sessionErr.message);
+    }
 
     res.status(200).json({
       success: true,
