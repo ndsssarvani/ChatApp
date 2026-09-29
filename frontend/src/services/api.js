@@ -2,6 +2,13 @@ import axios from 'axios';
 import { Capacitor } from '@capacitor/core';
 
 const getBaseUrl = () => {
+  const customUrl = localStorage.getItem('chatify_custom_server_url');
+  if (customUrl) {
+    let clean = customUrl.trim().replace(/\/+$/, '');
+    if (!clean.endsWith('/api')) clean = `${clean}/api`;
+    return clean;
+  }
+
   let url = import.meta.env.VITE_API_URL || import.meta.env.VITE_SOCKET_URL;
   // If running inside Capacitor native webview (iOS/Android), localhost refers to the local device loopback.
   // We must target the host Wi-Fi IP of the backend PC.

@@ -11,7 +11,8 @@ export const getMediaUrl = (url) => {
     return url;
   }
 
-  let backendUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
+  const customUrl = localStorage.getItem('chatify_custom_server_url');
+  let backendUrl = customUrl || import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
   if (Capacitor.isNativePlatform()) {
     if (!backendUrl || backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1')) {
       backendUrl = 'http://192.168.29.158:5000';

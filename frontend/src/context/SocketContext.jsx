@@ -14,7 +14,8 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (isAuthenticated && user?._id) {
       // Connect socket to backend
-      let socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
+      const customUrl = localStorage.getItem('chatify_custom_server_url');
+      let socketUrl = customUrl || import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
       if (Capacitor.isNativePlatform()) {
         if (!socketUrl || socketUrl.includes('localhost') || socketUrl.includes('127.0.0.1')) {
           socketUrl = 'http://192.168.29.158:5000';
