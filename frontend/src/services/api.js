@@ -3,11 +3,14 @@ import { Capacitor } from '@capacitor/core';
 
 const getBaseUrl = () => {
   let url = import.meta.env.VITE_API_URL || import.meta.env.VITE_SOCKET_URL;
-  if (!url) {
-    // If running inside Capacitor native webview (iOS/Android), relative URLs will fail against localhost webview
-    if (Capacitor.isNativePlatform()) {
-      return 'http://192.168.29.158:5000/api'; // Local Wi-Fi network IP of backend PC
+  // If running inside Capacitor native webview (iOS/Android), localhost refers to the local device loopback.
+  // We must target the host Wi-Fi IP of the backend PC.
+  if (Capacitor.isNativePlatform()) {
+    if (!url || url.includes('localhost') || url.includes('127.0.0.1')) {
+      return 'http://192.168.29.158:5000/api';
     }
+  }
+  if (!url) {
     return '/api';
   }
   url = url.trim().replace(/\/+$/, '');

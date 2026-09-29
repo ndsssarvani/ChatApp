@@ -1,7 +1,5 @@
-/**
- * Resolves media and upload URLs to always point to the backend server.
- * Handles both relative paths (/uploads/...) and absolute URLs (http://...).
- */
+import { Capacitor } from '@capacitor/core';
+
 export const getMediaUrl = (url) => {
   if (!url) return '';
   if (
@@ -13,11 +11,15 @@ export const getMediaUrl = (url) => {
     return url;
   }
 
-  let defaultHost = typeof window !== 'undefined' && window.Capacitor?.isNative ? 'http://192.168.29.158:5000' : 'http://localhost:5000';
-  let backendUrl =
-    import.meta.env.VITE_SOCKET_URL ||
-    import.meta.env.VITE_API_URL ||
-    defaultHost;
+  let backendUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
+  if (Capacitor.isNativePlatform()) {
+    if (!backendUrl || backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1')) {
+      backendUrl = 'http://192.168.29.158:5000';
+    }
+  }
+  if (!backendUrl) {
+    backendUrl = 'http://localhost:5000';
+  }
 
   backendUrl = backendUrl.trim().replace(/\/+$/, '');
   if (backendUrl.endsWith('/api')) {
