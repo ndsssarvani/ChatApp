@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
@@ -67,6 +67,7 @@ const WALLPAPER_PRESETS = [
 
 const ChatDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, currentLanguage, languages, getCurrentLanguageData } = useLanguage();
   const { user: currentUser, logout } = useAuth();
   const { socket, isUserOnline } = useSocket();
@@ -137,6 +138,7 @@ const ChatDashboard = () => {
   const messageElementsRef = useRef({});
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const handledLocationConvRef = useRef(null);
 
   // Format Last Seen helper
   const formatLastSeen = (date, isOnline) => {
@@ -264,6 +266,25 @@ const ChatDashboard = () => {
       window.removeEventListener('notifications_cleared', handleNotifsCleared);
     };
   }, []);
+
+  // Auto-open conversation passed from Contacts or elsewhere via location state
+  useEffect(() => {
+    const targetId = location.state?.openConversationId;
+    const targetConv = location.state?.openConversation;
+
+    if (targetConv && targetConv._id) {
+      if (handledLocationConvRef.current !== targetConv._id) {
+        handledLocationConvRef.current = targetConv._id;
+        setSelectedChat(targetConv);
+      }
+    } else if (targetId && handledLocationConvRef.current !== targetId) {
+      handledLocationConvRef.current = targetId;
+      const found = conversations.find((c) => c._id === targetId);
+      if (found) {
+        setSelectedChat(found);
+      }
+    }
+  }, [location.state, conversations]);
 
   // Fetch users for group creation or starting direct chats
   useEffect(() => {
@@ -1259,7 +1280,7 @@ const ChatDashboard = () => {
 
           <button
             type="button"
-            className="rail-btn"
+            className="rail-btn mobile-hide"
             onClick={() => setShowCreateGroup(true)}
             title="Create Group"
           >
@@ -1271,7 +1292,7 @@ const ChatDashboard = () => {
 
           <button
             type="button"
-            className="rail-btn"
+            className="rail-btn mobile-hide"
             onClick={() => setShowCallHistory(true)}
             title="Calls History"
           >
@@ -1290,13 +1311,13 @@ const ChatDashboard = () => {
             <span className="rail-icon-wrap">
               <IconNotifications size={20} />
             </span>
-            <span className="rail-btn-text">Notifications</span>
+            <span className="rail-btn-text">Notifs</span>
             {unreadNotifCount > 0 && <span className="rail-badge">{unreadNotifCount}</span>}
           </button>
 
           <button
             type="button"
-            className="rail-btn"
+            className="rail-btn mobile-hide"
             onClick={() => navigate("/starred")}
             title="Starred Messages"
           >
@@ -1321,7 +1342,7 @@ const ChatDashboard = () => {
 
           <button
             type="button"
-            className="rail-btn"
+            className="rail-btn mobile-hide"
             onClick={() => navigate("/analytics")}
             title="Analytics"
           >
@@ -1335,7 +1356,7 @@ const ChatDashboard = () => {
         <div className="rail-bottom">
           <button
             type="button"
-            className="rail-btn"
+            className="rail-btn mobile-hide"
             onClick={toggleTheme}
             title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
@@ -1358,7 +1379,7 @@ const ChatDashboard = () => {
           </button>
 
           <div
-            className="rail-avatar-btn"
+            className="rail-avatar-btn mobile-hide"
             onClick={() => navigate("/profile")}
             title={currentUser?.name}
           >

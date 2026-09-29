@@ -3126,39 +3126,36 @@
   /* ── Mobile Bottom Navigation Bar ── */
   .nav-rail {
     width: 100vw;
-    height: calc(66px + env(safe-area-inset-bottom, 0px));
-    padding: 0 4px calc(env(safe-area-inset-bottom, 0px));
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: space-around;
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding: 2px 6px calc(env(safe-area-inset-bottom, 0px));
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-around !important;
     border-right: none;
-    border-top: 1px solid var(--border-color);
-    background: var(--bg-rail);
+    border-top: 1px solid var(--border-color, rgba(255,255,255,0.1));
+    background: var(--bg-rail, #0f172a);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     z-index: 90;
     flex-shrink: 0;
     overflow: visible;
     gap: 0;
+    box-sizing: border-box;
   }
 
   .nav-rail::-webkit-scrollbar { display: none; }
 
   .nav-rail.expanded {
     width: 100vw;
-    flex-direction: row;
-    padding: 0 4px calc(env(safe-area-inset-bottom, 0px));
+    flex-direction: row !important;
+    padding: 2px 6px calc(env(safe-area-inset-bottom, 0px));
   }
 
-  /* Each section becomes a single equal-width flex row */
+  /* Unroll rail-top and rail-bottom so direct buttons are equal flex children */
   .rail-top,
   .rail-bottom {
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: stretch;
-    width: auto;
-    flex: 1;
-    gap: 0;
+    display: contents !important;
   }
 
   /* Hide desktop-only elements */
@@ -3171,21 +3168,31 @@
     display: none !important;
   }
 
+  /* Hide secondary items on mobile so bottom bar stays clean and spacious */
+  .rail-btn.mobile-hide,
+  .rail-avatar-btn.mobile-hide {
+    display: none !important;
+  }
+
   /* Show labels below icons on mobile */
   .rail-btn-text {
     display: block !important;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 600;
     margin-top: 2px;
-    opacity: 0.6;
-    letter-spacing: 0;
+    opacity: 0.7;
+    letter-spacing: -0.01em;
     line-height: 1;
-    transition: opacity 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.2s, color 0.2s;
   }
 
   .rail-btn.active .rail-btn-text {
     opacity: 1;
     color: var(--accent-primary, #e0521c);
+    font-weight: 700;
   }
 
   /* Each nav button: vertical stack (icon + label) */
@@ -3193,14 +3200,16 @@
     flex: 1;
     min-width: 0;
     height: 100%;
-    padding: 8px 4px 6px !important;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    border-radius: 0;
+    padding: 6px 2px 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px;
+    border-radius: 8px;
     background: transparent !important;
     position: relative;
+    color: var(--text-muted, #94a3b8);
   }
 
   /* Active state: top indicator bar */
@@ -3209,8 +3218,8 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 25%;
-    right: 25%;
+    left: 20%;
+    right: 20%;
     height: 2.5px;
     border-radius: 0 0 3px 3px;
     background: var(--accent-primary, #e0521c);
@@ -3218,33 +3227,31 @@
 
   /* Active icon highlight */
   .rail-btn.active .rail-icon-wrap {
-    background: rgba(224, 82, 28, 0.1);
+    background: rgba(224, 82, 28, 0.15);
     border-radius: 10px;
-    padding: 4px;
+    color: var(--accent-primary, #e0521c);
   }
 
   .rail-icon-wrap {
-    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
     border-radius: 10px;
     padding: 4px;
+    width: 28px;
+    height: 28px;
   }
 
   .rail-icon-wrap svg {
     width: 22px;
     height: 22px;
-  }
-
-  /* Avatar button */
-  .rail-avatar-btn {
-    width: 34px;
-    height: 34px;
-    padding: 0 !important;
-    border-radius: 50%;
+    display: block;
   }
 
   .rail-ai-spark-dot {
     top: 4px;
-    right: 4px;
+    right: 6px;
   }
 
   /* Hide bottom nav rail when an active conversation is open */

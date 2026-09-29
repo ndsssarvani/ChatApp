@@ -262,8 +262,16 @@ const Contacts = () => {
   const handleStartChat = async (userId) => {
     try {
       const res = await conversationService.getOrCreateOneToOne(userId);
-      if (res.success) navigate('/dashboard');
+      const conv = res?.conversation || (res?.success ? res?.data : null);
+      if (conv && conv._id) {
+        navigate('/dashboard', {
+          state: { openConversationId: conv._id, openConversation: conv },
+        });
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
+      console.error('Failed to start chat:', err);
       alert(err.response?.data?.message || 'Failed to start chat');
     }
   };
