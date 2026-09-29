@@ -28,7 +28,7 @@ const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (origin.includes('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      if (origin.includes('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.startsWith('http://192.168.') || origin.startsWith('http://10.')) {
         return callback(null, true);
       }
       const allowed = [
@@ -52,8 +52,8 @@ app.set('io', io);
 
 setupSocketHandlers(io);
 
-server.listen(PORT, () => {
-  console.log(`[Server] ChatApp Backend running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`[Server] ChatApp Backend running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT} (0.0.0.0)`);
 });
 
 // Guard against unexpected crashes

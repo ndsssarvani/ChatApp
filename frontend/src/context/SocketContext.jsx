@@ -12,8 +12,9 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && user?._id) {
-      // Connect socket to backend (using environment URL or fallback to localhost:5000)
-      let socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // Connect socket to backend
+      let defaultHost = typeof window !== 'undefined' && window.Capacitor?.isNative ? 'http://192.168.29.158:5000' : 'http://localhost:5000';
+      let socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || defaultHost;
       socketUrl = socketUrl.trim().replace(/\/+$/, '');
       if (socketUrl.endsWith('/api')) {
         socketUrl = socketUrl.substring(0, socketUrl.length - 4);

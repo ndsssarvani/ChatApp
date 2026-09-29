@@ -13,10 +13,11 @@ export const getMediaUrl = (url) => {
     return url;
   }
 
+  let defaultHost = typeof window !== 'undefined' && window.Capacitor?.isNative ? 'http://192.168.29.158:5000' : 'http://localhost:5000';
   let backendUrl =
     import.meta.env.VITE_SOCKET_URL ||
     import.meta.env.VITE_API_URL ||
-    'http://localhost:5000';
+    defaultHost;
 
   backendUrl = backendUrl.trim().replace(/\/+$/, '');
   if (backendUrl.endsWith('/api')) {

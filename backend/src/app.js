@@ -40,6 +40,8 @@ const isOriginAllowed = (origin) => {
     origin.includes('.vercel.app') ||
     origin.includes('localhost') ||
     origin.includes('127.0.0.1') ||
+    origin.startsWith('http://192.168.') ||
+    origin.startsWith('http://10.') ||
     origin.startsWith('capacitor://') ||
     origin.startsWith('ionic://')
   ) {
