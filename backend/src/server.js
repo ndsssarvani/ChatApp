@@ -28,18 +28,25 @@ const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (origin.includes('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.startsWith('http://192.168.') || origin.startsWith('http://10.')) {
-        return callback(null, true);
-      }
+      // Vercel preview deployments
+      if (origin.includes('.vercel.app')) return callback(null, true);
+      // Capacitor native origins
+      if (
+        origin === 'capacitor://localhost' ||
+        origin === 'ionic://localhost' ||
+        origin === 'https://localhost' ||
+        origin === 'http://localhost'
+      ) return callback(null, true);
+      // Local development
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) return callback(null, true);
+      // Local network IPs (development)
+      if (origin.startsWith('http://192.168.') || origin.startsWith('http://10.')) return callback(null, true);
+      // Explicit production origins
       const allowed = [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:3000',
+        'https://chatapp-production-df23.up.railway.app',
         process.env.CLIENT_URL,
       ].filter(Boolean);
-      if (allowed.some((a) => origin.startsWith(a) || a.startsWith(origin))) {
-        return callback(null, true);
-      }
+      if (allowed.some((a) => origin === a || origin.startsWith(a))) return callback(null, true);
       callback(new Error(`Socket CORS: Origin ${origin} not allowed`));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],

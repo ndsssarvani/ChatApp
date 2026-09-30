@@ -5,6 +5,42 @@ import { useAuth } from './AuthContext';
 
 const SocketContext = createContext();
 
+// Production Railway backend URL — same as api.js
+const PRODUCTION_BACKEND = 'https://chatapp-production-df23.up.railway.app';
+
+const resolveSocketUrl = () => {
+  const customUrl = localStorage.getItem('chatify_custom_server_url');
+  if (customUrl && customUrl.trim()) {
+    let clean = customUrl.trim().replace(/\/+$/, '');
+    // Strip /api suffix for socket — socket.io connects to root
+    if (clean.endsWith('/api')) clean = clean.slice(0, -4);
+    return clean;
+  }
+
+  const envSocketUrl = import.meta.env.VITE_SOCKET_URL;
+  const envApiUrl = import.meta.env.VITE_API_URL;
+  let socketUrl = envSocketUrl || envApiUrl;
+
+  // On native Capacitor: must use absolute URL
+  if (Capacitor.isNativePlatform()) {
+    if (!socketUrl || socketUrl.includes('localhost') || socketUrl.includes('127.0.0.1')) {
+      socketUrl = PRODUCTION_BACKEND;
+    }
+  }
+
+  if (!socketUrl) {
+    socketUrl = 'http://localhost:5000';
+  }
+
+  socketUrl = socketUrl.trim().replace(/\/+$/, '');
+  // Strip /api suffix for socket
+  if (socketUrl.endsWith('/api')) {
+    socketUrl = socketUrl.slice(0, -4);
+  }
+
+  return socketUrl;
+};
+
 export const SocketProvider = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
   const [socket, setSocket] = useState(null);
@@ -13,23 +49,13 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && user?._id) {
-      // Connect socket to backend
-      const customUrl = localStorage.getItem('chatify_custom_server_url');
-      let socketUrl = customUrl || import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
-      if (Capacitor.isNativePlatform()) {
-        if (!socketUrl || socketUrl.includes('localhost') || socketUrl.includes('127.0.0.1')) {
-          socketUrl = 'http://192.168.29.158:5000';
-        }
-      }
-      if (!socketUrl) {
-        socketUrl = 'http://localhost:5000';
-      }
-      socketUrl = socketUrl.trim().replace(/\/+$/, '');
-      if (socketUrl.endsWith('/api')) {
-        socketUrl = socketUrl.substring(0, socketUrl.length - 4);
-      }
+      const socketUrl = resolveSocketUrl();
+
       const newSocket = io(socketUrl, {
         transports: ['websocket', 'polling'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        timeout: 20000,
       });
 
       socketRef.current = newSocket;
@@ -37,6 +63,11 @@ export const SocketProvider = ({ children }) => {
 
       newSocket.on('connect', () => {
         newSocket.emit('setup', user._id);
+      });
+
+      newSocket.on('connect_error', (err) => {
+        // Non-fatal — dashboard will still work, just without real-time updates
+        console.warn('[Socket] Connection error:', err.message);
       });
 
       newSocket.on('connected_users', (userIds) => {
@@ -55,6 +86,7 @@ export const SocketProvider = ({ children }) => {
         });
       });
 
+      // Reconnect on native network change
       const handleNativeNetwork = (event) => {
         if (event.detail?.connected && socketRef.current) {
           if (!socketRef.current.connected) {

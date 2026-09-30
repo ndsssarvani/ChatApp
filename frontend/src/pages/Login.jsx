@@ -173,25 +173,7 @@ const Login = () => {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  // Server settings for Mobile / Custom IP
-  const [showServerSettings, setShowServerSettings] = useState(false);
-  const [customServerIp, setCustomServerIp] = useState(
-    () => localStorage.getItem('chatify_custom_server_url') || 'http://192.168.29.158:5000'
-  );
 
-  const handleSaveServerIp = (urlToSave) => {
-    if (urlToSave && urlToSave.trim()) {
-      let clean = urlToSave.trim().replace(/\/+$/, '');
-      localStorage.setItem('chatify_custom_server_url', clean);
-      setCustomServerIp(clean);
-      setSuccess(`Server URL updated: ${clean}`);
-    } else {
-      localStorage.removeItem('chatify_custom_server_url');
-      setCustomServerIp('http://192.168.29.158:5000');
-      setSuccess('Reset server URL to default IP (http://192.168.29.158:5000).');
-    }
-    setShowServerSettings(false);
-  };
 
   // Handle Standard Password Login
   const handlePasswordSubmit = async (e) => {
@@ -1186,97 +1168,6 @@ const Login = () => {
                 Sign up free
               </span>
             </p>
-
-            {/* Mobile Server Connection Settings Toggle */}
-            <div style={{ marginTop: '1.25rem', textAlign: 'center', fontSize: '0.82rem', color: '#7d7768' }}>
-              <button
-                type="button"
-                onClick={() => setShowServerSettings(!showServerSettings)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#e0521c',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                  textDecoration: 'underline',
-                }}
-              >
-                ⚙️ Mobile Server Connection ({customServerIp.replace('http://', '')})
-              </button>
-            </div>
-
-            {showServerSettings && (
-              <div
-                style={{
-                  marginTop: '0.8rem',
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  background: '#f4f2ec',
-                  border: '1px solid rgba(20, 18, 15, 0.12)',
-                  fontSize: '0.85rem',
-                  animation: 'fadeInUp 0.3s ease',
-                }}
-              >
-                <div style={{ fontWeight: '700', marginBottom: '0.3rem', color: '#14120f' }}>
-                  Target Backend Server Host / IP
-                </div>
-                <p style={{ color: '#55524a', fontSize: '0.78rem', marginBottom: '0.6rem', lineHeight: 1.4 }}>
-                  Ensure your phone and backend PC are on the same Wi-Fi, or enter your backend API host URL.
-                </p>
-                <input
-                  type="text"
-                  value={customServerIp}
-                  onChange={(e) => setCustomServerIp(e.target.value)}
-                  placeholder="http://192.168.29.158:5000"
-                  style={{
-                    width: '100%',
-                    padding: '0.6rem 0.8rem',
-                    borderRadius: '8px',
-                    border: '1px solid #ccc',
-                    marginBottom: '0.6rem',
-                    fontFamily: 'monospace',
-                    fontSize: '0.85rem',
-                    boxSizing: 'border-box',
-                  }}
-                />
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => handleSaveServerIp(customServerIp)}
-                    style={{
-                      flex: 1,
-                      padding: '0.5rem',
-                      borderRadius: '8px',
-                      background: '#14120f',
-                      color: '#fff',
-                      fontWeight: '700',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem',
-                    }}
-                  >
-                    Save Host URL
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSaveServerIp('')}
-                    style={{
-                      padding: '0.5rem 0.8rem',
-                      borderRadius: '8px',
-                      background: '#e0521c',
-                      color: '#fff',
-                      fontWeight: '700',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem',
-                    }}
-                  >
-                    Reset Default
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

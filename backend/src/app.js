@@ -22,34 +22,38 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middlewares
+const PRODUCTION_FRONTEND = process.env.CLIENT_URL || 'https://chatapp-production-df23.up.railway.app';
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
-  'capacitor://localhost',       // Android Capacitor app
-  'https://localhost',           // iOS Capacitor app
-  'http://localhost',            // Capacitor fallback
-  process.env.CLIENT_URL,
+  'capacitor://localhost',          // Android Capacitor
+  'ionic://localhost',              // Ionic Capacitor variant
+  'https://localhost',              // iOS Capacitor (WKWebView)
+  'http://localhost',               // Capacitor HTTP fallback
+  PRODUCTION_FRONTEND,
+  'https://chatapp-production-df23.up.railway.app',
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
 ].filter(Boolean);
 
 const isOriginAllowed = (origin) => {
-  if (!origin) return true;
-  // Allow all Vercel deployments, localhost variants, and Capacitor origins
+  if (!origin) return true; // Same-origin / server-to-server requests
+  // Vercel preview deployments
+  if (origin.includes('.vercel.app')) return true;
+  // Capacitor native origins
   if (
-    origin.includes('.vercel.app') ||
-    origin.includes('localhost') ||
-    origin.includes('127.0.0.1') ||
-    origin.startsWith('http://192.168.') ||
-    origin.startsWith('http://10.') ||
-    origin.startsWith('capacitor://') ||
-    origin.startsWith('ionic://')
-  ) {
-    return true;
-  }
-  if (allowedOrigins.some((allowed) => origin.startsWith(allowed) || allowed.startsWith(origin))) {
-    return true;
-  }
+    origin === 'capacitor://localhost' ||
+    origin === 'ionic://localhost' ||
+    origin === 'https://localhost' ||
+    origin === 'http://localhost'
+  ) return true;
+  // Local development
+  if (origin.includes('localhost') || origin.includes('127.0.0.1')) return true;
+  // Local network IPs (development)
+  if (origin.startsWith('http://192.168.') || origin.startsWith('http://10.')) return true;
+  // Explicit allowed origins
+  if (allowedOrigins.some((allowed) => origin === allowed || origin.startsWith(allowed))) return true;
   return false;
 };
 
